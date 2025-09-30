@@ -15,6 +15,7 @@ Install all required packages using pip:
 
 ```bash
 pip install sqlalchemy pymysql python-dotenv RPi.GPIO
+```
 
 ## Configuration
 
