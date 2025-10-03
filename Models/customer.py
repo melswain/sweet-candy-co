@@ -15,7 +15,7 @@ class Customer(Base):
     def __repr__(self):
         return f"<Customer(name='{self.name}', email='{self.email}', points={self.total_reward_points})>"
     
-    def create_customer(name, email, phone):
+    def create(name, email, phone):
         """Insert a new customer into the customer table."""
         query = """
             INSERT INTO customer (name, email, phone)
