@@ -1,14 +1,37 @@
 # controllers/customer_controller.py
-from Models.database import SessionLocal
+import sqlite3
+import RPi.GPIO as GPIO
+from time import sleep
+from sqlalchemy.orm import sessionmaker
+
 from Models.customer import Customer
 
-def add_customer(name, email):
-    session = SessionLocal()
+GREEN_LED = 18
+RED_LED = 17
+BUZZER = 13
+
+def signal_success():
+    GPIO.output(GREEN_LED, GPIO.HIGH)
+    sleep(2)
+    GPIO.output(GREEN_LED, GPIO.LOW)
+
+def signal_failure():
+    GPIO.output(RED_LED, GPIO.HIGH)
+    GPIO.output(BUZZER, GPIO.HIGH)
+    sleep(2)
+    GPIO.output(RED_LED, GPIO.LOW)
+    GPIO.output(BUZZER, GPIO.LOW)
+
+def addCustomer(name, email, phone):
+    session = Session()
     try:
-        return Customer.create(session, name, email)
+        customer = Customer.create(session, name, email, phone)
+        signal_success()
+        return True, "Customer added successfully!"
     except Exception as e:
         session.rollback()
-        print(f"Error: {e}")
-        return None
+        signal_failure()
+        return False, f"Failed to add customer:\n{e}"
     finally:
         session.close()
+        GPIO.cleanup()
