@@ -27,9 +27,10 @@ def signal_failure():
     GPIO.output(BUZZER, GPIO.LOW)
 
 def addCustomer(name, email, phone):
+    # Plan to use SQLAlchemy in the future, but I couldn't get it to work for now
     session = Session()
     try:
-        customer = Customer.create(session, name, email, phone)
+        customer = Customer.create(name, email, phone)
         signal_success()
         return True, "Customer added successfully!"
     except Exception as e:
