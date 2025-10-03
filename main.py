@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from Controllers.customer_controller import addCustomer
+import greenButton
+import redButton
 
 # GUI setup
 root = tk.Tk()
@@ -27,11 +29,15 @@ def on_submit():
         success, msg = addCustomer(name, email, phone)
         if success:
             messagebox.showinfo("Success", msg)
+            greenButton.valid()
         else:
             messagebox.showerror("Error", msg)
+            redButton.error()
     else:
         messagebox.showwarning("Missing Info", "Name and Email are required.")
+        redButton.error()
 
 tk.Button(root, text="Add Customer", command=on_submit).grid(row=3, column=0, columnspan=2, pady=10)
+root.bing('<Return>',lambda event:on_submit())
 
 root.mainloop()

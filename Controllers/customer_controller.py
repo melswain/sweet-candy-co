@@ -7,6 +7,12 @@ from sqlalchemy.orm import sessionmaker
 
 from Models.customer import Customer
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(GREEN_LED,GPIO.OUT)
+GPIO.setup(RED_LED,GPIO.OUT)
+GPIO.setup(BUZZER,GPIO.OUT) 
+
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13
@@ -15,11 +21,19 @@ engine = create_engine("sqlite:///sweetcandyco.db")
 Session = sessionmaker(bind=engine)
 
 def signal_success():
+    GPIO.setup(GREEN_LED,GPIO.OUT)
+    GPIO.setup(RED_LED,GPIO.OUT)
+    GPIO.setup(BUZZER,GPIO.OUT)
+    
     GPIO.output(GREEN_LED, GPIO.HIGH)
     sleep(2)
     GPIO.output(GREEN_LED, GPIO.LOW)
 
 def signal_failure():
+    GPIO.setup(GREEN_LED,GPIO.OUT)
+    GPIO.setup(RED_LED,GPIO.OUT)
+    GPIO.setup(BUZZER,GPIO.OUT)
+    
     GPIO.output(RED_LED, GPIO.HIGH)
     GPIO.output(BUZZER, GPIO.HIGH)
     sleep(2)
