@@ -2,6 +2,7 @@
 import sqlite3
 import RPi.GPIO as GPIO
 from time import sleep
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Models.customer import Customer
@@ -9,6 +10,9 @@ from Models.customer import Customer
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13
+
+engine = create_engine("sqlite:///sweetcandyco.db")
+Session = sessionmaker(bind=engine)
 
 def signal_success():
     GPIO.output(GREEN_LED, GPIO.HIGH)
