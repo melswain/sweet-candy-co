@@ -1,7 +1,6 @@
 # models/customer.py
 from sqlalchemy import Column, Integer, String
-from .database import Base
-from database import execute
+from .database import Base, execute
 
 class Customer(Base):
     __tablename__ = 'Customer'

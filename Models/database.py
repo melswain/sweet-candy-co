@@ -11,12 +11,6 @@ load_dotenv()
 
 Base = declarative_base()
 
-DB_URL = (
-    f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-    f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-)
-
-
 DB_PATH = "sweetcandyco.db"
 
 def get_connection():
