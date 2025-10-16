@@ -24,3 +24,10 @@ Make sure to create a .env file that contains the necessary information.
 - DB_PORT
 - DB_USER
 - DB_PASSWORD
+
+## Using a Flask Server
+
+1. Make sure Flask in installed: ```bash pip install flask```
+2. Set up the .env file by installing python-dotenv ```bash pip install python-dotenv```
+3. Include the Flask secret key in the .env as FLASK_SECRET_KEY
+4. d
