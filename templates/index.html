@@ -10,48 +10,64 @@
 <body>
   <div class="title-box">
     <h1>Sweet Candy Co.</h1>
-    <h2>Management Dashboard</h2>
   </div>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="notification" id="notification">
+        <button class="close-btn" onclick="closeNotification()">×</button>
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
   <div class="section-1">
     <div class="form-container">
+      <h2>Add Customer Account</h2>
       <form action="/add" method="post">
         <input type="text" name="name" placeholder="Name" required><br>
         <input type="email" name="email" placeholder="Email" required><br>
         <input type="tel" name="phone" placeholder="Phone" required><br>
         <button type="submit">Add</button>
       </form>
-
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="notification">
-            {% for message in messages %}
-              <p>{{ message }}</p>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
     </div>
 
     <div class="fridge-container">
       {% for fridge in fridges %}
         <div class="single-fridge-container">
-          <div>{{ fridge.name }}</div>
-          <div>Humidity: {{ fridge.humidity }}</div>
+          <h2>{{ fridge.name }}</h2>
+          <div>
+            Humidity: {{ fridge.humidity }}
+            <div id="thermometer-wrapper1"> 
+              <meter id="thermometer1" min="-30" max="50" value="0"></meter> 
+              <div id="labels 1"></div> 
+            </div>
+          </div>
           <div>Temperature: {{ fridge.temperature }}</div>
+          <div id="thermometer-wrapper2">
+            <meter id="thermometer2" min="-30" max="50" value="0"></meter> 
+            <div id="labels 2"></div> 
+          </div> 
         </div>
       {% endfor %}
-
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <div class="alert">
-            {% for message in messages %}
-              <p>{{ message }}</p>
-            {% endfor %}
-          </div>
-        {% endif %}
-      {% endwith %}
     </div>
   </div>
+
+  <script>
+    // Calculates the position of the thermometer 
+    thermometer.width(0.9 * wrapper.height()); 
+    thermometer.css('bottom', ((wrapper.height() - thermometer.height()) / 2) + 'px'); 
+    thermometer.css('left', (thermometer.width() - wrapper.width()) / -2);
+
+    // Closes notifications (when add customer)
+    function closeNotification() {
+      const notification = document.getElementById("notification");
+      if (notification) {
+        notification.style.display = "none";
+      }
+    }
+  </script>
 </body>
 </html>

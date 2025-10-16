@@ -11,7 +11,7 @@ app.secret_key = os.getenv('FLASK_SECRET_KEY')
 def index():
     # placeholder data for fridge temperature and humidity values
     fridge_data = [
-        {'name': 'Fridge 1', 'humidity': '45%', 'temperature': '4°C'},
+        {'name': 'Fridge 1', 'humidity': '45%', 'temperature': '25°C'},
         {'name': 'Fridge 2', 'humidity': '50%', 'temperature': '5°C'}
     ]
     return render_template('index.html', fridges=fridge_data)
