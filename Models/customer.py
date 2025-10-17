@@ -1,6 +1,7 @@
 # models/customer.py
 from sqlalchemy import Column, Integer, String
 from .database import Base, execute
+from sqlalchemy.orm import Session
 
 class Customer(Base):
     __tablename__ = 'Customer'
@@ -14,14 +15,14 @@ class Customer(Base):
     def __repr__(self):
         return f"<Customer(name='{self.name}', email='{self.email}', points={self.total_reward_points})>"
     
-    def create(name, email, phone):
-        """Insert a new customer into the customer table."""
-        query = """
-            INSERT INTO customer (name, email, phone)
-            VALUES (?, ?, ?)
-        """
+    @staticmethod
+    def create(session: Session, name: str, email:str , phone: str):
+        """Insert a new customer into the customer table (using SQLALchemy ORM)."""
         try:
-            execute(query, (name, email, phone))
+            new_customer = Customer(name=name, email=email, phone=phone)
+            session.add(new_customer)
+            session.commit()
             return True, "Customer added successfully."
         except Exception as e:
+            session.rollback()
             return False, f"Error adding customer: {e}"

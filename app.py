@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
+from Controllers.customer_controller import addCustomer
 import os
 
 load_dotenv()
@@ -21,8 +22,9 @@ def add():
     name = request.form.get('name')
     email = request.form.get('email')
     phone = request.form.get('phone')
-    flash(f'Added {name} ({email}, {phone}) successfully!')
-    return redirect(url_for('index'))
+
+    success = addCustomer(name, email, phone)
+    return redirect('/') if success else "Error adding customer"
 
 if __name__ == '__main__':
     app.run(debug=True)
