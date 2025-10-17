@@ -7,20 +7,29 @@ from sqlalchemy.orm import sessionmaker
 
 from Models.customer import Customer
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-GPIO.setup(GREEN_LED,GPIO.OUT)
-GPIO.setup(RED_LED,GPIO.OUT)
-GPIO.setup(BUZZER,GPIO.OUT) 
-
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(GREEN_LED,GPIO.OUT)
+GPIO.setup(RED_LED,GPIO.OUT)
+GPIO.setup(BUZZER,GPIO.OUT)
+
 engine = create_engine("sqlite:///sweetcandyco.db")
 Session = sessionmaker(bind=engine)
 
+def setup():
+    print('Setting up...')
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(GREEN_LED,GPIO.OUT)
+    GPIO.setup(RED_LED,GPIO.OUT)
+    GPIO.setup(BUZZER,GPIO.OUT)
+
 def signal_success():
+    print('Success!')
     GPIO.setup(GREEN_LED,GPIO.OUT)
     GPIO.setup(RED_LED,GPIO.OUT)
     GPIO.setup(BUZZER,GPIO.OUT)
@@ -30,6 +39,7 @@ def signal_success():
     GPIO.output(GREEN_LED, GPIO.LOW)
 
 def signal_failure():
+    print('Failure!')
     GPIO.setup(GREEN_LED,GPIO.OUT)
     GPIO.setup(RED_LED,GPIO.OUT)
     GPIO.setup(BUZZER,GPIO.OUT)
@@ -41,16 +51,14 @@ def signal_failure():
     GPIO.output(BUZZER, GPIO.LOW)
 
 def addCustomer(name, email, phone):
-    # Plan to use SQLAlchemy in the future, but I couldn't get it to work for now
-    session = Session()
+    print('Adding customer...')
     try:
         customer = Customer.create(name, email, phone)
         signal_success()
         return True, "Customer added successfully!"
     except Exception as e:
-        session.rollback()
         signal_failure()
         return False, f"Failed to add customer:\n{e}"
     finally:
-        session.close()
+        print('Cleaning up...')
         GPIO.cleanup()

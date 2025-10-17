@@ -1,9 +1,6 @@
 # models/database.py
-
-import os
 import sqlite3
 from dotenv import load_dotenv
-
 from sqlalchemy.orm import declarative_base
 from contextlib import contextmanager
 
@@ -29,13 +26,13 @@ def get_cursor():
         conn.close()
 
 def execute(query, params=None):
-    """Execute a query and return the cursor."""
+  try:
     with get_cursor() as cursor:
-        if params:
-            cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-        return cursor
+      cursor.execute(query, params)
+      return True
+  except Exception as e:
+    print(f"Error: {e}")
+    return False
 
 def fetchall(query, params=None):
     """Fetch all results for a query."""
