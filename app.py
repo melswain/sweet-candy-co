@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect
 from dotenv import load_dotenv
+# Comment out this line when testing
 from Controllers.customer_controller import addCustomer
 import os
 
@@ -23,8 +24,20 @@ def add():
     email = request.form.get('email')
     phone = request.form.get('phone')
 
+    # When not using Pi, use this for testing
+    # flash(f'Added {name} ({email}, {phone}) successfully!')
+    # return redirect(url_for('index'))
+
     success = addCustomer(name, email, phone)
     return redirect('/') if success else "Error adding customer"
+
+@app.route('/fan', methods=['POST'])
+def toggle():
+    data = request.get_json()
+    enabled = data.get('enabled')
+    print(f"Switch is now {'ON' if enabled else 'OFF'}")
+    # KISHAAN: add fan state logic function here
+    return f"Switch state updated to {'ON' if enabled else 'OFF'}"
 
 if __name__ == '__main__':
     app.run(debug=True)

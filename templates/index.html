@@ -56,18 +56,32 @@
     </div>
   </div>
 
-  <script>
-    // Calculates the position of the thermometer 
-    thermometer.width(0.9 * wrapper.height()); 
-    thermometer.css('bottom', ((wrapper.height() - thermometer.height()) / 2) + 'px'); 
-    thermometer.css('left', (thermometer.width() - wrapper.width()) / -2);
+  <div class="fan-container">
+    <h2>Turn on fan</h2>
+    <label class="switch">
+      <input type="checkbox" id="toggleSwitch" onchange="sendToggle(this.checked)">
+      <span class="slider"></span>
+    </label>
+  </div>
 
+  <script>
     // Closes notifications (when add customer)
     function closeNotification() {
       const notification = document.getElementById("notification");
       if (notification) {
         notification.style.display = "none";
       }
+    }
+
+    // Change the state of the toggle to turn on the fan
+    function sendToggle(state) {
+      fetch('/fan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: state })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
     }
   </script>
 </body>

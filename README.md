@@ -20,10 +20,7 @@ pip install sqlalchemy pymysql python-dotenv RPi.GPIO
 ## Configuration
 
 Make sure to create a .env file that contains the necessary information.
-- DB_HOST
-- DB_PORT
-- DB_USER
-- DB_PASSWORD
+
 - FLASK_SECRET_KEY
 
 ## Using a Flask Server
