@@ -38,10 +38,10 @@ CREATE TABLE `cart` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cartitem`
+-- Table structure for table `cart_item`
 --
 
-CREATE TABLE `cartitem` (
+CREATE TABLE `cart_item` (
   `cartItemId` int(11) NOT NULL,
   `cartId` int(11) NOT NULL,
   `productId` int(11) NOT NULL,
@@ -60,9 +60,7 @@ CREATE TABLE `customer` (
   `customerId` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `passwordHash` varchar(255) NOT NULL,
   `phone` varchar(20) NOT NULL,
-  `age` int(11) NOT NULL,
   `totalRewardPoints` int(11) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -70,10 +68,10 @@ CREATE TABLE `customer` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `environmentreading`
+-- Table structure for table `environment_reading`
 --
 
-CREATE TABLE `environmentreading` (
+CREATE TABLE `environment_reading` (
   `readingId` int(11) NOT NULL,
   `locationId` int(11) NOT NULL,
   `temperature` decimal(5,2) NOT NULL,
@@ -98,10 +96,10 @@ CREATE TABLE `inventory` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `maintenancealert`
+-- Table structure for table `maintenance_alert`
 --
 
-CREATE TABLE `maintenancealert` (
+CREATE TABLE `maintenance_alert` (
   `alertId` int(11) NOT NULL,
   `locationId` int(11) NOT NULL,
   `parameterType` enum('temperature','humidity') DEFAULT NULL,
@@ -113,10 +111,10 @@ CREATE TABLE `maintenancealert` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `maintenancethreshold`
+-- Table structure for table `maintenance_threshold`
 --
 
-CREATE TABLE `maintenancethreshold` (
+CREATE TABLE `maintenance_threshold` (
   `thresholdId` int(11) NOT NULL,
   `locationId` int(11) NOT NULL,
   `minTemperature` decimal(5,2) NOT NULL,
@@ -159,10 +157,10 @@ CREATE TABLE `product` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `storelocation`
+-- Table structure for table `store_location`
 --
 
-CREATE TABLE `storelocation` (
+CREATE TABLE `store_location` (
   `locationId` int(11) NOT NULL,
   `locationName` varchar(100) NOT NULL,
   `address` varchar(255) NOT NULL
@@ -180,9 +178,9 @@ ALTER TABLE `cart`
   ADD KEY `customerId` (`customerId`);
 
 --
--- Indexes for table `cartitem`
+-- Indexes for table `cart_item`
 --
-ALTER TABLE `cartitem`
+ALTER TABLE `cart_item`
   ADD PRIMARY KEY (`cartItemId`),
   ADD KEY `cartId` (`cartId`),
   ADD KEY `productId` (`productId`);
@@ -196,9 +194,9 @@ ALTER TABLE `customer`
   ADD UNIQUE KEY `email_2` (`email`);
 
 --
--- Indexes for table `environmentreading`
+-- Indexes for table `environment_reading`
 --
-ALTER TABLE `environmentreading`
+ALTER TABLE `environment_reading`
   ADD PRIMARY KEY (`readingId`),
   ADD KEY `locationId` (`locationId`);
 
@@ -211,16 +209,16 @@ ALTER TABLE `inventory`
   ADD KEY `locationId` (`locationId`);
 
 --
--- Indexes for table `maintenancealert`
+-- Indexes for table `maintenance_alert`
 --
-ALTER TABLE `maintenancealert`
+ALTER TABLE `maintenance_alert`
   ADD PRIMARY KEY (`alertId`),
   ADD KEY `locationId` (`locationId`);
 
 --
--- Indexes for table `maintenancethreshold`
+-- Indexes for table `maintenance_threshold`
 --
-ALTER TABLE `maintenancethreshold`
+ALTER TABLE `maintenance_threshold`
   ADD PRIMARY KEY (`thresholdId`),
   ADD UNIQUE KEY `locationId` (`locationId`);
 
@@ -239,9 +237,9 @@ ALTER TABLE `product`
   ADD UNIQUE KEY `upc` (`upc`);
 
 --
--- Indexes for table `storelocation`
+-- Indexes for table `store_location`
 --
-ALTER TABLE `storelocation`
+ALTER TABLE `store_location`
   ADD PRIMARY KEY (`locationId`);
 
 --
@@ -255,9 +253,9 @@ ALTER TABLE `cart`
   MODIFY `cartId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `cartitem`
+-- AUTO_INCREMENT for table `cart_item`
 --
-ALTER TABLE `cartitem`
+ALTER TABLE `cart_item`
   MODIFY `cartItemId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -267,9 +265,9 @@ ALTER TABLE `customer`
   MODIFY `customerId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `environmentreading`
+-- AUTO_INCREMENT for table `environment_reading`
 --
-ALTER TABLE `environmentreading`
+ALTER TABLE `environment_reading`
   MODIFY `readingId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -279,15 +277,15 @@ ALTER TABLE `inventory`
   MODIFY `inventoryId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `maintenancealert`
+-- AUTO_INCREMENT for table `maintenance_alert`
 --
-ALTER TABLE `maintenancealert`
+ALTER TABLE `maintenance_alert`
   MODIFY `alertId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `maintenancethreshold`
+-- AUTO_INCREMENT for table `maintenance_threshold`
 --
-ALTER TABLE `maintenancethreshold`
+ALTER TABLE `maintenance_threshold`
   MODIFY `thresholdId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -303,9 +301,9 @@ ALTER TABLE `product`
   MODIFY `productId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `storelocation`
+-- AUTO_INCREMENT for table `store_location`
 --
-ALTER TABLE `storelocation`
+ALTER TABLE `store_location`
   MODIFY `locationId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -319,37 +317,37 @@ ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`customerId`) REFERENCES `customer` (`customerId`);
 
 --
--- Constraints for table `cartitem`
+-- Constraints for table `cart_item`
 --
-ALTER TABLE `cartitem`
+ALTER TABLE `cart_item`
   ADD CONSTRAINT `cartitem_ibfk_1` FOREIGN KEY (`cartId`) REFERENCES `cart` (`cartId`),
   ADD CONSTRAINT `cartitem_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `product` (`productId`);
 
 --
--- Constraints for table `environmentreading`
+-- Constraints for table `environment_reading`
 --
-ALTER TABLE `environmentreading`
-  ADD CONSTRAINT `environmentreading_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `storelocation` (`locationId`);
+ALTER TABLE `environment-reading`
+  ADD CONSTRAINT `environmentreading_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`);
 
 --
 -- Constraints for table `inventory`
 --
 ALTER TABLE `inventory`
   ADD CONSTRAINT `inventory_ibfk_1` FOREIGN KEY (`productId`) REFERENCES `product` (`productId`),
-  ADD CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`locationId`) REFERENCES `storelocation` (`locationId`);
+  ADD CONSTRAINT `inventory_ibfk_2` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`);
 
 --
--- Constraints for table `maintenancealert`
+-- Constraints for table `maintenance_alert`
 --
-ALTER TABLE `maintenancealert`
-  ADD CONSTRAINT `maintenancealert_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `storelocation` (`locationId`);
+ALTER TABLE `maintenance_alert`
+  ADD CONSTRAINT `maintenancealert_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`);
 
 --
--- Constraints for table `maintenancethreshold`
+-- Constraints for table `maintenance_threshold`
 --
-ALTER TABLE `maintenancethreshold`
-  ADD CONSTRAINT `maintenancethreshold_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `storelocation` (`locationId`),
-  ADD CONSTRAINT `maintenancethreshold_ibfk_2` FOREIGN KEY (`locationId`) REFERENCES `storelocation` (`locationId`);
+ALTER TABLE `maintenance_threshold`
+  ADD CONSTRAINT `maintenancethreshold_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`),
+  ADD CONSTRAINT `maintenancethreshold_ibfk_2` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`);
 
 --
 -- Constraints for table `payment`
