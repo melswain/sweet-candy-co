@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
-from Controllers.customer_controller import addCustomer
+# from Controllers.customer_controller import addCustomer
 from Services.fan_service import turnOnFan
 import os
 
-load_dotenv()
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
