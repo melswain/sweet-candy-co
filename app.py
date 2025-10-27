@@ -3,20 +3,67 @@ from dotenv import load_dotenv
 # from Controllers.customer_controller import addCustomer
 from Services.fan_service import turnOnFan
 import os
+import paho.mqtt.client as mqtt
 
 
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
+#MQTT setup
+sensor_data = {
+    "Frig1": {"temperature": None, "humidity": None},
+    "Frig2": {"temperature": None, "humidity": None}
+}
+
+MQTT_BROKER = "172.20.10.12"  
+MQTT_PORT = 1883
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected to MQTT broker with result code "+str(rc))
+    client.subscribe("Frig1/#")
+    client.subscribe("Frig2/#")
+
+def on_message(client, userdata, msg):
+    topic = msg.topic
+    payload = msg.payload.decode()
+    if topic.startswith("Frig1"):
+        if "temperature" in topic:
+            sensor_data["Frig1"]["temperature"] = payload
+        elif "humidity" in topic:
+            sensor_data["Frig1"]["humidity"] = payload
+    elif topic.startswith("Frig2"):
+        if "temperature" in topic:
+            sensor_data["Frig2"]["temperature"] = payload
+        elif "humidity" in topic:
+            sensor_data["Frig2"]["humidity"] = payload
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+mqtt_client.loop_start()  # run in background
+
+
 @app.route('/')
 def index():
-    # placeholder data for fridge temperature and humidity values
     fridge_data = [
-        {'name': 'Fridge 1', 'humidity': '45%', 'temperature': '25°C'},
-        {'name': 'Fridge 2', 'humidity': '50%', 'temperature': '5°C'}
+        {
+        'name': 'Fridge 1', 
+        'temperature': sensor_data['Frig1']['temperature'] or 'N/A',
+        'humidity': sensor_data['Frig1']['humidity'] or 'N/A'
+        },
+        {
+        'name' : 'Fridge 2',
+        'temperature': sensor_data['Frig2']['temperature'] or 'N/A',
+        'humidity': sensor_data['Frig2']['humidity'] or 'N/A'
+        }
     ]
     return render_template('index.html', fridges=fridge_data)
+
+    
+        
+        
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -27,6 +74,11 @@ def add():
 
     success = addCustomer(name, email, phone)
     return redirect('/') if success else "Error adding customer"
+
+@app.route('/sensor_data')
+def get_sensor_data():
+    return sensor_data  # Flask will convert your dict to JSON
+
 
 @app.route('/fan', methods=['POST'])
 def toggle():
