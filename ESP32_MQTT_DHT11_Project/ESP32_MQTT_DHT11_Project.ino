@@ -7,11 +7,13 @@ https://www.electronicshub.org/esp32-dht11-tutorial/
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "DHT.h"
-#define DHT11PIN 26
+#define DHT1PIN 26
+#define DHT2PIN 27
 // #include <Wire.h>
 // #include <Adafruit_BME280.h>
 // #include <Adafruit_Sensor.h>
-DHT dht(DHT11PIN, DHT11);
+DHT dht1(DHT1PIN, DHT11);
+DHT dht2(DHT2PIN, DHT11);
 
 // Replace the next variables with your SSID/Password combination
 // const char* ssid = "REPLACE_WITH_YOUR_SSID";
@@ -48,7 +50,8 @@ const int ledPin = 4;
 
 void setup() {
   Serial.begin(115200);
-  dht.begin();
+  dht1.begin();
+  dht2.begin();
   // default settings
   // (you can also pass in a Wire library object like &Wire2)
   //status = bme.begin();  
@@ -135,8 +138,8 @@ void loop() {
     reconnect();
   }
   client.loop();
-  float humi = dht.readHumidity();
-  float temp = dht.readTemperature();
+  float humi = dht1.readHumidity();
+  float temp = dht1.readTemperature();
   char tempString[8];
   dtostrf(temp, 6, 2, tempString);
   Serial.print("Temperature for first fridge: ");
@@ -144,7 +147,9 @@ void loop() {
   client.publish("Frig1/temperature", tempString);
 
   char tempString2[8];
-  dtostrf(temp + 1.5, 6, 2, tempString2); // adding a temp of 1,5 to show the difference because i am onluy using one dht sensor
+  float humi2 = dht2.readHumidity();
+  float temp2 = dht2.readTemperature();
+  dtostrf(humi2, 6, 2, tempString2); 
   Serial.println("Temperature for second fridge: ");
   Serial.println(tempString2);
   client.publish("Frig2/temperature", tempString2);
@@ -159,7 +164,7 @@ void loop() {
   client.publish("Frig1/humidity", humString);
 
   char humString2[8];
-  dtostrf(humi + 2, 6, 2, humString2); // +2 to humidity to see a difference
+  dtostrf(humi2, 6, 2, humString2); 
   Serial.print("Humidity for second fridge: ");
   Serial.println(humString2);
   client.publish("Frig2/humidity", humString2);
