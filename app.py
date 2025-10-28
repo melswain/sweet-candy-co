@@ -1,18 +1,31 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from dotenv import load_dotenv
-from Controllers.customer_controller import addCustomer
-from Services.fan_service import turnOnFan
-import os
-import paho.mqtt.client as mqtt
 
-load_dotenv()
+from time import sleep
+
+from Controllers.customer_controller import addCustomer
+
+from Services.fan_service import turnOnFan
+from Services.fan_service import turnOffFan
+
+from Services.email_service import sendEmail
+from Services.email_service import readEmail
+
+# import paho.mqtt.client as mqtt
+
+# import fanControl
+import os
+
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
+current_fan_state = False
+
 #MQTT setup
 sensor_data = {
-    "Frig1": {"temperature": None, "humidity": None},
+    "Frig1": {"temperature": 50, "humidity": None},
     "Frig2": {"temperature": None, "humidity": None}
 }
 
@@ -38,11 +51,11 @@ def on_message(client, userdata, msg):
         elif "humidity" in topic:
             sensor_data["Frig2"]["humidity"] = payload
 
-mqtt_client = mqtt.Client()
-mqtt_client.on_connect = on_connect
-mqtt_client.on_message = on_message
-mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-mqtt_client.loop_start()  # run in background
+# mqtt_client = mqtt.Client()
+# mqtt_client.on_connect = on_connect
+# mqtt_client.on_message = on_message
+# mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+# mqtt_client.loop_start()  # run in background
 
 
 @app.route('/')
@@ -84,12 +97,42 @@ def get_sensor_data():
 def toggle():
     data = request.get_json()
     enabled = data.get('enabled')
+    if enabled:
+        success, message =turnOnFan()
+    else:
+        success, message =turnOffFan()
     print(f"Switch is now {'ON' if enabled else 'OFF'}")
 
-    success, message = turnOnFan()
+    # success, message =turnOnFan() 
     return redirect('/'), message
     # KISHAAN: add fan state logic function here
     # return f"Switch state updated to {'ON' if enabled else 'OFF'}"
+
+# constantly checks for temperature of fridges
+# temp1 = sensor_data['Frig1'].get('temperature', '0')
+# temp2 = sensor_data['Frig2'].get('temperature', '0')
+
+# if temp1 == None:
+#     temp1 = 0
+# else:
+#     temp1 = int(sensor_data['Frig1'].get('temperature', '0'))
+
+
+# if temp2 == None:
+#     temp2 = 0
+# else:
+#     temp2 = int(sensor_data['Frig2'].get('temperature', '0'))
+
+# if  temp1 >= 40 or  temp2 >= 40 :
+#     sendEmail()
+#     sleep(15)
+#     response = readEmail()
+#     if response:
+#         turnOnFan()
+    
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
