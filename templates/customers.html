@@ -23,8 +23,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>Grape Lollipop</td><td>4</td><td>3.99</td><td>15.96</td></tr>
+          {% for item in items %}
+          <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>{{ item.unit }}</td><td>{{ item.total }}</td></tr>
           <!-- <tr><td>Grape Lollipop</td><td>4</td><td>3.99</td><td>15.96</td></tr> -->
+          {% endfor %}
         </tbody>
       </table>
     </div>

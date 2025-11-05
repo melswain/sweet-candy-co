@@ -81,7 +81,7 @@ button {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     transition: transform 0.2s ease;
 }
-.green { background-color: #2ecc71; color: white; }
+.green { background-color: #5cf99b; color: white; }
 
 .button:hover {
     transform: scale(1.05);
@@ -116,10 +116,9 @@ button {
     transform: scale(1.05);
 }
 
-.red { background-color: #d32f2f; }
-.blue { background-color: #1976d2; }
-.green { background-color: #388e3c; }
-.yellow { background-color: orange}
+.red { background-color: #f86dae; }
+.blue { background-color: #65c3f3; }
+.yellow { background-color: #f9b464}
 
 .jumbo {
     font-weight: bold;

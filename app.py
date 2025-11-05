@@ -41,7 +41,12 @@ def toggle():
 
 @app.route('/customers')
 def customers():
-    return render_template('customers.html')
+    # placeholder data for fridge temperature and humidity values
+    items = [
+        {'name': 'Grape Lollipop', 'quantity': 4, 'unit': 3.99, 'total': 15.96},
+        {'name': '500g Assorted Jolly Ranchers', 'quantity': 1, 'unit': 6.50, 'total': 6.50}
+    ]
+    return render_template('customers.html', items=items)
 
 if __name__ == '__main__':
     app.run(debug=True)
