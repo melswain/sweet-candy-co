@@ -39,5 +39,9 @@ def toggle():
     # KISHAAN: add fan state logic function here
     # return f"Switch state updated to {'ON' if enabled else 'OFF'}"
 
+@app.route('/customers')
+def customers():
+    return render_template('customers.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
