@@ -60,7 +60,8 @@ def setup_database():
       customerId INTEGER,
       totalCartPrice DECIMAL(10,2) NOT NULL,
       totalRewardPoints INTEGER DEFAULT 0,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      checkoutDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (customerId) REFERENCES customer(customerId)
     );
 
     CREATE TABLE IF NOT EXISTS cart_item (
@@ -69,7 +70,8 @@ def setup_database():
       productId INTEGER NOT NULL,
       quantity INTEGER NOT NULL,
       totalProductPrice DECIMAL(10,0) NOT NULL,
-      totalRewardPoints INTEGER NOT NULL DEFAULT 0
+      FOREIGN KEY (cartId) REFERENCES cart(cartId),
+      FOREIGN KEY (productId) REFERENCES product(productId)
     );
 
     CREATE TABLE IF NOT EXISTS customer (
@@ -86,7 +88,8 @@ def setup_database():
       locationId INTEGER NOT NULL,
       temperature DECIMAL(5,2) NOT NULL,
       humidity DECIMAL(5,2) NOT NULL,
-      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
     );
 
     CREATE TABLE IF NOT EXISTS inventory (
@@ -94,16 +97,19 @@ def setup_database():
       productId INTEGER NOT NULL,
       locationId INTEGER NOT NULL,
       quantity INTEGER NOT NULL,
-      lastUpdated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      lastUpdated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (productId) REFERENCES product(productId),
+      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
     );
 
     CREATE TABLE IF NOT EXISTS maintenance_alert (
       alertId INTEGER PRIMARY KEY AUTOINCREMENT,
       locationId INTEGER NOT NULL,
-      parameterType TEXT DEFAULT NULL,
+      parameterType TEXT CHECK(parameterType IN ('temperature', 'humidity')),
       value DECIMAL(5,2) NOT NULL,
-      thresholdBreach TEXT DEFAULT NULL,
-      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      thresholdBreach TEXT CHECK(thresholdBreach IN ('LOW', 'HIGH')),
+      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
     );
 
     CREATE TABLE IF NOT EXISTS maintenance_threshold (
@@ -112,7 +118,8 @@ def setup_database():
       minTemperature DECIMAL(5,2) NOT NULL,
       maxTemperature DECIMAL(5,2) NOT NULL,
       minHumidity DECIMAL(5,2) NOT NULL,
-      maxHumidity DECIMAL(5,2) NOT NULL
+      maxHumidity DECIMAL(5,2) NOT NULL,
+      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
     );
 
     CREATE TABLE IF NOT EXISTS payment (
@@ -120,7 +127,8 @@ def setup_database():
       cartId INTEGER UNIQUE,
       cardNumber VARCHAR(20) NOT NULL,
       expiryDate VARCHAR(7) NOT NULL,
-      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (cartId) REFERENCES cart(cartId)
     );
 
     CREATE TABLE IF NOT EXISTS product (
@@ -130,8 +138,9 @@ def setup_database():
       price DECIMAL(10,0) NOT NULL,
       expirationDate DATE NOT NULL,
       discountPercentage DECIMAL(3,2) DEFAULT 1.00,
-      associatedRewardPoints INTEGER NOT NULL DEFAULT 0,
-      upc VARCHAR(50) NOT NULL UNIQUE
+      manufacturerName VARCHAR(100),
+      upc VARCHAR(50) NOT NULL UNIQUE,
+      epc VARCHAR(50) NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS store_location (
@@ -143,7 +152,7 @@ def setup_database():
     -- Foreign keys (SQLite requires PRAGMA foreign_keys=ON)
     PRAGMA foreign_keys = ON;
 
-    -- Add foreign keys
+    -- Create indexes to match MySQL schema
     CREATE INDEX IF NOT EXISTS idx_cart_customerId ON cart(customerId);
     CREATE INDEX IF NOT EXISTS idx_cartitem_cartId ON cart_item(cartId);
     CREATE INDEX IF NOT EXISTS idx_cartitem_productId ON cart_item(productId);
@@ -152,8 +161,31 @@ def setup_database():
     CREATE INDEX IF NOT EXISTS idx_inventory_locationId ON inventory(locationId);
     CREATE INDEX IF NOT EXISTS idx_alert_locationId ON maintenance_alert(locationId);
 
-    -- Add constraints (SQLite only supports some ALTER TABLE operations)
-    -- Foreign keys are defined inline in CREATE TABLE above where possible.
+    INSERT INTO store_location (locationName, address) VALUES
+    ('Sweet Candy Co. - Laval', '545 Boulevard des Laurentides, Laval, QC H9S4K9'),
+    ('Sweet Candy Co. - West Island', '20 Avenue Cartier, Pointe-Claire, QC H9R2V4');
+
+    INSERT INTO maintenance_threshold (locationId, minTemperature, maxTemperature, minHumidity, maxHumidity) VALUES
+    (1, 5.00, 13.00, 35.00, 45.00),  -- Laval location
+    (2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
+
+    INSERT INTO customer (name, email, phone, totalRewardPoints) VALUES
+    ('Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+    ('Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+    ('Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+    ('David Kim', 'davidk@email.com', '514-555-0104', 0);
+
+    INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
+    ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789001', 'EPC123001'),
+    ('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789002', 'EPC123002'),
+    ('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789003', 'EPC123003'),
+    ('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789004', 'EPC123004'),
+    ('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789005', 'EPC123005'),
+    ('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789006', 'EPC123006'),
+    ('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789007', 'EPC123007'),
+    ('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789008', 'EPC123008'),
+    ('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789009', 'EPC123009'),
+    ('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789010', 'EPC123010');
     """
     with get_connection() as conn:
         conn.executescript(schema)

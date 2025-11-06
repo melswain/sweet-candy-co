@@ -24,19 +24,25 @@
         </thead>
         <tbody>
           {% for item in items %}
-          <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>{{ item.unit }}</td><td>{{ item.total }}</td></tr>
-          <!-- <tr><td>Grape Lollipop</td><td>4</td><td>3.99</td><td>15.96</td></tr> -->
+          <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>${{ item.unit }}</td><td>${{ item.total }}</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    <div class="summary">
-      <p><strong>Subtotal:</strong> $0.00</p>
-      <p><strong>Tax:</strong> $0.00</p>
-      <p><strong>Discounts:</strong> $0.00</p>
-      <p><strong>Total:</strong> $0.00</p>
+    <div class="summary-wrapper">
+      <div class="rewards-box red">
+        <p>Reward Points</p>
+        <p>{{ reward_points }}</p>
+      </div>
+        <div class="summary">
+          <p><strong>Subtotal:</strong> ${{ format_money(subtotal) }}</p>
+          <p><strong>GST:</strong> ${{ format_money(gst) }}</p>
+          <p><strong>QST:</strong> ${{ format_money(qst) }}</p>
+          <p><strong>Total:</strong> ${{ format_money(total) }}</p>
+        </div>
+      </div>
     </div>
-  </div>
+    
 
   <div class="control-panel">
     <div class="button-row">
@@ -53,4 +59,33 @@
   </div>
 
 </body>
+<script>
+function parseMoney(s) {
+  return Number(String(s).replace(/[^0-9.-]+/g,"")) || 0;
+}
+
+function calculateSummary(gstRate,qstRate) {
+  const rows = document.querySelectorAll('tbody tr');
+  let subtotal = 0;
+
+  rows.forEach(r => {
+    const totalCell = r.cells[3];
+    subtotal += parseMoney(totalCell.textContent);
+  });
+
+  const gst = Math.round((subtotal * gstRate) * 100) / 100;
+  const qst = Math.round((subtotal * qstRate) * 100) / 100;
+  const total = Math.round((subtotal + tax) * 100) / 100;
+  const rewardPoints = Math.floor(subtotal / 10);
+
+  document.querySelector('.summary p:nth-child(1)').innerHTML = `<strong>Subtotal:</strong> $${subtotal.toFixed(2)}`;
+  document.querySelector('.summary p:nth-child(2)').innerHTML = `<strong>GST:</strong> $${gst.toFixed(2)}`;
+  document.querySelector('.summary p:nth-child(2)').innerHTML = `<strong>QST:</strong> $${qst.toFixed(2)}`;
+  document.querySelector('.summary p:nth-child(3)').innerHTML = `<strong>Total:</strong> $${total.toFixed(2)}`;
+  document.querySelector('.rewards-box p:nth-child(2)').textContent = rewardPoints;
+}
+
+// call once on load
+calculateSummary(0.05, 0.09975);
+</script>
 </html>

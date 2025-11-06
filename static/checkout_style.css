@@ -53,7 +53,6 @@ th, td {
     height: 300px;
     overflow-y: auto;
     border: 1px solid #ccc;
-    margin-bottom: 20px;
 }
 
 .table-wrapper th,
@@ -67,6 +66,7 @@ th, td {
     font-size: 14px;
     line-height: 1.6;
     text-align: right;
+    align-items: right;
 }
 
 button {
@@ -123,4 +123,25 @@ button {
 .jumbo {
     font-weight: bold;
     font-size: 1.4em;
+}
+
+.rewards-box {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    padding: 10px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.summary-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
 }
