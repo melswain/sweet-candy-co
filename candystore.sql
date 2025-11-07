@@ -32,7 +32,7 @@ CREATE TABLE `cart` (
   `customerId` int(11) DEFAULT NULL,
   `totalCartPrice` decimal(10,2) NOT NULL,
   `totalRewardPoints` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `checkoutDate` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -46,8 +46,7 @@ CREATE TABLE `cart_item` (
   `cartId` int(11) NOT NULL,
   `productId` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
-  `totalProductPrice` decimal(10,0) NOT NULL,
-  `totalRewardPoints` int(11) NOT NULL DEFAULT 0
+  `totalProductPrice` decimal(10,0) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -150,8 +149,9 @@ CREATE TABLE `product` (
   `price` decimal(10,0) NOT NULL,
   `expirationDate` date NOT NULL,
   `discountPercentage` decimal(3,2) DEFAULT 1.00,
-  `associatedRewardPoints` int(11) NOT NULL DEFAULT 0,
-  `upc` varchar(50) NOT NULL
+  `manufacturerName` varchar(100),
+  `upc` varchar(50) NOT NULL,
+  `epc` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -360,3 +360,46 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- Store Locations
+INSERT INTO store_location (locationName, address) VALUES
+('Sweet Candy Co. - Laval', '545 Boulevard des Laurentides, Laval, QC H9S4K9'),
+('Sweet Candy Co. - West Island', '20 Avenue Cartier, Pointe-Claire, QC H9R2V4');
+
+-- Maintenance Thresholds
+INSERT INTO maintenance_threshold (locationId, minTemperature, maxTemperature, minHumidity, maxHumidity) VALUES
+(1, 5.00, 13.00, 35.00, 45.00),  -- Laval location
+(2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
+
+-- Customers (with 0 initial points)
+-- UPDATE ONE CUSTOMER WITH CHECKABLE EMAIL TO USE RECEIPTS
+INSERT INTO customer (name, email, phone, totalRewardPoints) VALUES
+('Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+('Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+('Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+('David Kim', 'davidk@email.com', '514-555-0104', 0);
+
+-- Products
+INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
+('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789001', 'EPC123001'),
+('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789002', 'EPC123002'),
+('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789003', 'EPC123003'),
+('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789004', 'EPC123004'),
+('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789005', 'EPC123005'),
+('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789006', 'EPC123006'),
+('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789007', 'EPC123007'),
+('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789008', 'EPC123008'),
+('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789009', 'EPC123009'),
+('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789010', 'EPC123010');
+
+INSERT INTO inventory (productId, locationId, quantity) VALUES
+(1, 1, 10), (1, 2, 10),
+(2, 1, 10), (2, 2, 10),
+(3, 1, 10), (3, 2, 10),
+(4, 1, 10), (4, 2, 10),
+(5, 1, 10), (5, 2, 10),
+(6, 1, 10), (6, 2, 10),
+(7, 1, 10), (7, 2, 10),
+(8, 1, 10), (8, 2, 10),
+(9, 1, 10), (9, 2, 10),
+(10, 1, 10), (10, 2, 10);

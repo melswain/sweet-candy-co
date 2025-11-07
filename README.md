@@ -14,7 +14,7 @@ This project is a Raspberry Pi-based IoT system for managing customer data in a 
 Install all required packages using pip:
 
 ```bash
-pip install sqlalchemy pymysql python-dotenv RPi.GPIO
+pip install sqlalchemy pymysql python-dotenv RPi.GPIO pyserial requests
 ```
 
 ## Configuration
@@ -30,3 +30,27 @@ Make sure to create a .env file that contains the necessary information.
 3. Include the Flask secret key in the .env as FLASK_SECRET_KEY
 4. Access the local application using ```python app.py``` in the terminal when in sweet-candy-co
 5. Visit http://127.0.0.1:5000 to view the web app
+
+## Configuring MQTT for RFID
+
+### Linux
+
+```
+export RFID_SERIAL_PORT=/dev/ttyUSB0
+export RFID_BAUD=9600
+export RFID_SERVER_URL=http://127.0.0.1:5000/scan
+python rfid_service.py
+```
+
+### PowerShell
+
+set env vars for the current PowerShell session
+$env:RFID_SERIAL_PORT = 'COM3'            # change to your port
+$env:RFID_BAUD = '9600'                  # change if needed
+$env:RFID_SERVER_URL = 'http://127.0.0.1:5000/scan'
+
+optional:
+$env:RFID_DEVICE_TOKEN = 'my-secret-token'  
+
+run bridge
+python .\rfid_service.py

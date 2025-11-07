@@ -28,3 +28,17 @@ class Customer(Base):
         else:
             print('Error adding customer.')
             raise Exception('Error adding customer')
+        
+    @staticmethod
+    def addRewardPoints(customer_id, points_to_add):
+        query = """
+            UPDATE customer
+            SET totalRewardPoints = totalRewardPoints + ?
+            WHERE customerId = ?
+        """
+        result = execute(query, (points_to_add, customer_id))
+
+        if result:
+            return True, f"Added {points_to_add} points to customer {customer_id}."
+        else:
+            raise Exception("Failed to update reward points.")
