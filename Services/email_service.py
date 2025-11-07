@@ -5,10 +5,15 @@ from time import sleep
 import fanControl
 
 # Gmail Info
-sender_email = "kishaan2006@gmail.com"
-sending_app_password = "imntfpdfsbgxacrp"  # App password (no spaces)
-receiver_email = "uselessmayl@gmail.com"
-receiving_app_password = "iagqjihgfsfiwgdo"
+sender_email = "yakin726@gmail.com"
+sending_app_password = "phwskofgaeasirge"  # App password (no spaces)
+receiver_email = "dummyjeff14@gmail.com"
+receiving_app_password = "zlpqxbhrwvkdzoxd"
+
+# sender_email = "kishaan2006@gmail.com"
+# sending_app_password = "imntfpdfsbgxacrp"  # App password (no spaces)
+# receiver_email = "uselessmayl@gmail.com"
+# receiving_app_password = "iagqjihgfsfiwgdo"
 
 # Sending code
 def sendEmail():
