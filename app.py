@@ -12,15 +12,13 @@ from Controllers.inventory_controller import removeInventory
 from Services.fan_service import turnOnFan
 from Services.fan_service import turnOffFan
 
-from Services.email_service import sendEmail
-from Services.email_service import readEmail
+# from Services.email_service import sendEmail
+# from Services.email_service import readEmail
 
 # import paho.mqtt.client as mqtt
 
 # import fanControl
 import os
-
-
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
