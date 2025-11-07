@@ -29,6 +29,7 @@ def execute(query, params=None):
   try:
     with get_cursor() as cursor:
       cursor.execute(query, params)
+      print(cursor.rowcount)
       return True
   except Exception as e:
     print(f"Error: {e}")
@@ -186,6 +187,18 @@ def setup_database():
     ('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789008', 'EPC123008'),
     ('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789009', 'EPC123009'),
     ('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789010', 'EPC123010');
+        
+    INSERT INTO inventory (productId, locationId, quantity) VALUES
+    (1, 1, 10), (1, 2, 10),
+    (2, 1, 10), (2, 2, 10),
+    (3, 1, 10), (3, 2, 10),
+    (4, 1, 10), (4, 2, 10),
+    (5, 1, 10), (5, 2, 10),
+    (6, 1, 10), (6, 2, 10),
+    (7, 1, 10), (7, 2, 10),
+    (8, 1, 10), (8, 2, 10),
+    (9, 1, 10), (9, 2, 10),
+    (10, 1, 10), (10, 2, 10);
     """
     with get_connection() as conn:
         conn.executescript(schema)

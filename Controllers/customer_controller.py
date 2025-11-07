@@ -17,8 +17,8 @@ BUZZER = 13
 # GPIO.setup(RED_LED,GPIO.OUT)
 # GPIO.setup(BUZZER,GPIO.OUT)
 
-engine = create_engine("sqlite:///sweetcandyco.db")
-Session = sessionmaker(bind=engine)
+# engine = create_engine("sqlite:///sweetcandyco.db")
+# Session = sessionmaker(bind=engine)
 
 def setup():
     print('Setting up...')

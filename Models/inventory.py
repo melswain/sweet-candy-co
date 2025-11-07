@@ -31,3 +31,37 @@ class Inventory(Base):
             return True, "Inventory record created successfully."
         else:
             raise Exception('Error creating inventory record')
+        
+    @staticmethod
+    def remove_inventory_item(product_id, location_id):
+        # Get current quantity
+        query = """
+            SELECT quantity FROM inventory
+            WHERE productId = ? AND locationId = ?
+        """
+        result = execute(query, (product_id, location_id))
+
+        if result:
+            quantity = result[0]
+
+            if quantity > 1:
+                query = """
+                    UPDATE inventory
+                    SET quantity = quantity - 1,
+                        lastUpdated = CURRENT_TIMESTAMP
+                    WHERE productId = ? AND locationId = ?
+                """
+            else:
+                query = """
+                    DELETE FROM inventory
+                    WHERE productId = ? AND locationId = ?
+                """
+
+            affected = execute(query, (product_id, location_id))
+            if affected:
+                return True, "Item removed from inventory."
+            else:
+                raise Exception("Error removing item from inventory")
+
+        else:
+            raise Exception("Inventory item not found")

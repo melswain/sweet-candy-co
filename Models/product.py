@@ -1,7 +1,8 @@
 # models/product.py
 from sqlalchemy import Column, Integer, String, Numeric, Date, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, execute
+from .database import Base, execute, fetchone, fetchall
+from types import SimpleNamespace
 from datetime import date
 
 class Product(Base):
@@ -72,21 +73,30 @@ class Product(Base):
         Returns:
             tuple: Row containing product data or None if not found
         """
-        query = "SELECT * FROM product WHERE upc = ?"
-        return execute(query, (upc,))
+        query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE upc = ?"
+        row = fetchone(query, (upc,))
+        if not row:
+            return None
+        # map tuple to SimpleNamespace for attribute access (product.productId etc.)
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
 
     @staticmethod
-    def get_by_type(product_type):
-        """Get all products of a specific type.
+    def get_by_epc(epc):
+        """Find a product by its UPC code.
         
         Args:
-            product_type (str): The type of product to search for (e.g., 'Chocolate')
+            upc (str): Universal Product Code to search for
             
         Returns:
-            list: List of product rows matching the type
+            tuple: Row containing product data or None if not found
         """
-        query = "SELECT * FROM product WHERE type = ?"
-        return execute(query, (product_type,))
+        query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE epc = ?"
+        row = fetchone(query, (epc,))
+        if not row:
+            return None
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
 
     @staticmethod
     def update_price(product_id, new_price):
@@ -116,11 +126,13 @@ class Product(Base):
             list: List of products expiring within the specified timeframe
         """
         query = """
-            SELECT * FROM product 
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product
             WHERE date(expirationDate) <= date('now', '+' || ? || ' days')
             ORDER BY expirationDate
         """
-        return execute(query, (days,))
+        rows = fetchall(query, (days,))
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        return [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
 
     @staticmethod
     def apply_discount(product_id, discount_percentage):

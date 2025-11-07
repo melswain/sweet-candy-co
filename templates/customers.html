@@ -22,7 +22,7 @@
             <th>Total</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="cart-body">
           {% for item in items %}
           <tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>${{ item.unit }}</td><td>${{ item.total }}</td></tr>
           {% endfor %}
@@ -46,46 +46,42 @@
 
   <div class="control-panel">
     <div class="button-row">
-      <button class="btn jumbo red">Call for Assistance</button>
-      <button class="btn jumbo blue">Scan Membership Card</button>
+      <button onclick="" class="btn jumbo red">Call for Assistance</button>
+      <button id="scanMembershipBtn" class="btn jumbo blue">Scan Membership Card</button>
     </div>
     <div class="button-row">
       <button class="btn jumbo blue">Search Item Code</button>
       <button class="btn jumbo yellow">Change Language</button>
     </div>
     <div class="button-row single">
-      <button class="button green">Pay with Card</button>
+      <button onclick="startPayment()" class="button green">Pay with Card</button>
     </div>
   </div>
 
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h3>Simulate a Payment</h3>
+      <button class="modal-button" onclick="makePayment()">Pay</button>
+    </div>
+  </div>
+
+  <!-- Membership Card Modal -->
+  <div id="membershipModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <h3>Scan Membership Card</h3>
+      <p>Can't scan your card? No problem! Insert your number below.</p>
+      <input class="membership-input" type="text" id="membershipInput" placeholder="Membership #">
+      <button class="modal-button" onclick="submitMembership()">Submit</button>
+    </div>
+  </div>
+
+  <!-- Input for barcode scanner -->
+  <input class="scanner-input" id="scanner-input" autocomplete="off"/>
+
+
 </body>
-<script>
-function parseMoney(s) {
-  return Number(String(s).replace(/[^0-9.-]+/g,"")) || 0;
-}
-
-function calculateSummary(gstRate,qstRate) {
-  const rows = document.querySelectorAll('tbody tr');
-  let subtotal = 0;
-
-  rows.forEach(r => {
-    const totalCell = r.cells[3];
-    subtotal += parseMoney(totalCell.textContent);
-  });
-
-  const gst = Math.round((subtotal * gstRate) * 100) / 100;
-  const qst = Math.round((subtotal * qstRate) * 100) / 100;
-  const total = Math.round((subtotal + tax) * 100) / 100;
-  const rewardPoints = Math.floor(subtotal / 10);
-
-  document.querySelector('.summary p:nth-child(1)').innerHTML = `<strong>Subtotal:</strong> $${subtotal.toFixed(2)}`;
-  document.querySelector('.summary p:nth-child(2)').innerHTML = `<strong>GST:</strong> $${gst.toFixed(2)}`;
-  document.querySelector('.summary p:nth-child(2)').innerHTML = `<strong>QST:</strong> $${qst.toFixed(2)}`;
-  document.querySelector('.summary p:nth-child(3)').innerHTML = `<strong>Total:</strong> $${total.toFixed(2)}`;
-  document.querySelector('.rewards-box p:nth-child(2)').textContent = rewardPoints;
-}
-
-// call once on load
-calculateSummary(0.05, 0.09975);
-</script>
+<script src="{{ url_for('static', filename='checkout.js') }}"></script>
 </html>
