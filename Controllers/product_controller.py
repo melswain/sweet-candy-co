@@ -14,8 +14,8 @@ def getProductWithUpc(upc):
         return product
     except Exception as e:
         return f"Failed to get product:\n{e}"
-    finally:
-        print('Cleaning up...')
+    # finally:
+    #     print('Cleaning up...')
         # GPIO.cleanup()
 
 def getProductWithEpc(epc):

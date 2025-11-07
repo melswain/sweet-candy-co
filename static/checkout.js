@@ -24,7 +24,8 @@ function calculateSummary(gstRate,qstRate) {
 }
 
 const membershipModal = document.getElementById("membershipModal");
-const closeBtn = document.querySelectorAll(".close-button");
+const closeBtn = document.querySelector(".close-button");
+const paymentCloseBtn = document.querySelector(".pay-close-button");
 const paymentModal = document.getElementById("paymentModal");
 const input = document.getElementById('scanner-input');
 input.focus();
@@ -33,12 +34,15 @@ document.getElementById("scanMembershipBtn").addEventListener("click", () => {
     membershipModal.style.display = "block";
 });
 
-closeBtn.forEach(btn => {
-    btn.onclick = () => {
-        console.log('x');
-        membershipModal.style.display = "none";
-    }
-});
+closeBtn.onclick = () => {
+    console.log('x');
+    membershipModal.style.display = "none";
+}
+
+paymentCloseBtn.onclick = () => {
+    console.log('x');
+    paymentModal.style.display = "none";
+}
 
 window.onclick = (event) => {
     if (event.target === membershipModal) {
@@ -119,7 +123,7 @@ function scanCode(code) {
     })
     .then(r => r.json())
     .then(resp => {
-        if (resp.success) {
+        if (resp.status === "success") {
             updateCartDisplay();
         } else {
             alert('Scan error: ' + (resp.message || 'Unknown'));

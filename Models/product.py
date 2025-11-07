@@ -65,6 +65,7 @@ class Product(Base):
 
     @staticmethod
     def get_by_upc(upc):
+        print('Product')
         """Find a product by its UPC code.
         
         Args:
@@ -74,6 +75,7 @@ class Product(Base):
             tuple: Row containing product data or None if not found
         """
         query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE upc = ?"
+        print('Getting upc...' + upc)
         row = fetchone(query, (upc,))
         if not row:
             return None

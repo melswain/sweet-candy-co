@@ -170,6 +170,12 @@ button {
   cursor: pointer;
 }
 
+.pay-close-button {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
 .modal-button {
     padding: 12px 50px 12px 50px;
     margin: 20px;
