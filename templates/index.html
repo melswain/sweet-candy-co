@@ -37,20 +37,12 @@
     <div class="fridge-container">
       <h2>Temperature and Humidity Readings</h2>
       {% for fridge in fridges %}
-        <div class="single-fridge-container">
+        <div class="single-fridge-container" id="fridge-{{ loop.index }}">
           <h2>{{ fridge.name }}</h2>
-          <div>
-            Humidity: {{ fridge.humidity }}
-            <div id="thermometer-wrapper1"> 
-              <meter id="thermometer1" min="-30" max="50" value="0"></meter> 
-              <div id="labels 1"></div> 
-            </div>
-          </div>
-          <div>Temperature: {{ fridge.temperature }}</div>
-          <div id="thermometer-wrapper2">
-            <meter id="thermometer2" min="-30" max="50" value="0"></meter> 
-            <div id="labels 2"></div> 
-          </div> 
+          <div>Humidity: <span class="humidity" id="humidity-{{ loop.index }}">{{ fridge.humidity }}</span></div>
+          <meter id="humidity-meter-{{ loop.index }}" min="0" max="100" value="{{ fridge.humidity|replace('%','') }}"></meter>
+          <div>Temperature: <span class="temperature" id="temperature-{{ loop.index }}">{{ fridge.temperature }}</span></div>
+          <meter id="temperature-meter-{{ loop.index }}" min="-30" max="50" value="{{ fridge.temperature|replace('°C','') }}"></meter>
         </div>
       {% endfor %}
     </div>
@@ -65,15 +57,11 @@
   </div>
 
   <script>
-    // Closes notifications (when add customer)
     function closeNotification() {
       const notification = document.getElementById("notification");
-      if (notification) {
-        notification.style.display = "none";
-      }
+      if (notification) notification.style.display = "none";
     }
 
-    // Change the state of the toggle to turn on the fan
     function sendToggle(state) {
       fetch('/fan', {
         method: 'POST',
@@ -83,6 +71,27 @@
       .then(response => response.text())
       .then(data => console.log(data));
     }
+
+    function updateFridgeData() {
+      fetch('/sensor_data')
+        .then(response => response.json())
+        .then(data => {
+          // Fridge 1
+          document.getElementById('humidity-1').textContent = data.Frig1.humidity || 'N/A';
+          document.getElementById('temperature-1').textContent = data.Frig1.temperature || 'N/A';
+          document.getElementById('humidity-meter-1').value = parseFloat(data.Frig1.humidity) || 0;
+          document.getElementById('temperature-meter-1').value = parseFloat(data.Frig1.temperature) || 0;
+
+          // Fridge 2
+          document.getElementById('humidity-2').textContent = data.Frig2.humidity || 'N/A';
+          document.getElementById('temperature-2').textContent = data.Frig2.temperature || 'N/A';
+          document.getElementById('humidity-meter-2').value = parseFloat(data.Frig2.humidity) || 0;
+          document.getElementById('temperature-meter-2').value = parseFloat(data.Frig2.temperature) || 0;
+        })
+        .catch(err => console.error(err));
+    }
+
+    setInterval(updateFridgeData, 2000);
   </script>
 </body>
 </html>
