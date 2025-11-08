@@ -137,7 +137,7 @@ def checkout():
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     # Reward points: 1 point per $10
-    reward_points = int(subtotal // Decimal('10'))
+    reward_points = int(subtotal // Decimal('10') * 100)
 
     return render_template('customers.html',
                            items=items,
@@ -163,51 +163,85 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
-@app.route('/finalize-payment')
-def clear():
-    session.pop('membership_number', None)
-    for item in items:
-        removeInventory(item["id"], 1, item["quantity"])
-    
-    # Use the cart controller to create a cart using the membership number, total price, and reward points
-    # For every removed item, get its ID
-    # For every item id, create a cart item with the cart item controller using the cart id, product id, quantity, and price
-    # Create a payment with the payment controller using the cart id, card number, and card expiry date
+@app.route('/finalize-payment', methods=['POST'])
+def finalize_payment():
+    data = request.get_json() or {}
+    card_number = data.get('cardNumber') or data.get('card')
+    expiry = data.get('expiryDate') or data.get('expiry')
 
+    # membership number (if scanned earlier) is kept in session
+    membership_number = session.get('membership_number')
+
+    # Simulate payment processing (no real gateway here)
+    print('Finalizing payment. Card:', card_number, 'Expiry:', expiry, 'Membership:', membership_number)
+
+    # Remove inventory for each item (existing behavior)
+    for item in items:
+        try:
+            removeInventory(item["id"], 1, item["quantity"])
+        except Exception as e:
+            print('Warning: failed to remove inventory for', item, e)
+
+    # Clear cart and membership
     items.clear()
-    response = make_response(jsonify({"status": "success"}))
-    return response
+    session.pop('membership_number', None)
+
+    return jsonify({"status": "success", "message": "Payment processed (simulated)"})
 
 @app.route('/scan', methods=['POST'])
 def scan_item():
     data = request.get_json() or {}
-    # support different keys from JS bridge or RFID bridge
     code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
 
-    # first try UPC, then EPC
     product = getProductWithUpc(code)
     if not product:
         product = getProductWithEpc(code)
 
     if product and hasattr(product, 'productId'):
         unit_price = float(product.price)
-        item = {
-            'id': product.productId,
+        product_id = product.productId
+
+        # Check if item already exists in the list
+        for item in items:
+            if item['id'] == product_id:
+                item['quantity'] += 1
+                item['total'] = item['quantity'] * unit_price
+                return jsonify({"status": "success", "item": item, "items": items})
+
+        # If not found, add as new item
+        new_item = {
+            'id': product_id,
             'name': product.name,
             'quantity': 1,
             'unit': unit_price,
-            'total': unit_price * 1,
+            'total': unit_price,
         }
-        items.append(item)
-        return jsonify({"status": "success", "item": item, "items": items})
+        items.append(new_item)
+        return jsonify({"status": "success", "item": new_item, "items": items})
     else:
         return jsonify({"status": "error", "message": "Item not found"}), 404
 
 @app.route('/cart-items', methods=['GET'])
 def get_cart_items():
     return jsonify({"items": items})
+
+@app.route('/remove-item', methods=['POST'])
+def remove_item():
+    data = request.get_json() or {}
+    item_id = data.get('id')
+    if not item_id:
+        return jsonify({"status": "error", "message": "No item ID provided"}), 400
+
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        return jsonify({"status": "error", "message": "Invalid item ID"}), 400
+
+    global items
+    items = [item for item in items if item['id'] != item_id]
+    return jsonify({"status": "success", "items": items})
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
@@ -217,7 +251,6 @@ def get_cart_items():
 #     temp1 = 0
 # else:
 #     temp1 = int(sensor_data['Frig1'].get('temperature', '0'))
-
 
 # if temp2 == None:
 #     temp2 = 0
@@ -230,10 +263,6 @@ def get_cart_items():
 #     response = readEmail()
 #     if response:
 #         turnOnFan()
-    
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
