@@ -1,0 +1,248 @@
+body {
+    font-family: 'Barlow', sans-serif;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+/* background: #ffbcd9; */
+}
+
+h1 {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+}
+
+h2 {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+}
+
+.cart-section, .control-panel {
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.cart-section {
+    flex: 2;
+    background-color: #f8f8f8;
+    border-right: 2px solid #ccc;
+}
+
+.control-panel {
+    flex: 1;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.remove-td {
+  width: 1%;
+  white-space: nowrap;
+  padding: 0;
+  text-align: center;
+}
+
+.remove-btn {
+    padding: 4px;
+    font-family: 'Barlow', sans-serif;
+    font-size: .75em;
+    border: none;
+    border-radius: 8px;
+    color: black;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.remove-btn:hover {
+    transform: scale(1.05);
+}
+
+.table-wrapper {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.summary {
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: right;
+    align-items: right;
+}
+
+button {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    padding: 20px 157px 20px 157px;
+    font-size: 16px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+.green { background-color: #5cf99b; color: white; }
+
+.button:hover {
+    transform: scale(1.05);
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.button-row.single {
+    justify-content: center;
+}
+
+.btn {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    padding: 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 8px;
+    width: 200px;
+    height: 200px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+.red { background-color: #f86dae; }
+.blue { background-color: #65c3f3; }
+.yellow { background-color: #f9b464}
+
+.jumbo {
+    font-weight: bold;
+    font-size: 1.4em;
+}
+
+.rewards-box {
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    padding: 10px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.summary-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background-color: #ffbcd9;
+  margin: 15% auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.membership-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.close-button {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.pay-close-button {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modal-button {
+    padding: 12px 20px 12px 20px;
+    margin: 20px;
+}
+
+.payment-buttons {
+    margin-top: 12px;
+    display: block;
+    gap: 8px;
+}
+
+.membership-input {
+    padding: 5px;
+    border-radius: 5px;
+    border-color: #ffbcd9;
+}
+
+.scanner-input {
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  background-color: #ffbcd9;
+  color: black;
+  padding: 15px 25px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 16px;
+  z-index: 9999;
+  transition: right 0.5s ease-in-out;
+}
+
+.notification.show {
+  right: 20px; /* Slide into view */
+}

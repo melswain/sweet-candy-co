@@ -1,18 +1,18 @@
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 from time import sleep
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setwarnings(False)
 
 Motor1 = 22 # Enable Pin
 Motor2 = 27 # Input Pin
-GPIO.setup(Motor1,GPIO.OUT)
-GPIO.setup(Motor2,GPIO.OUT)
+# GPIO.setup(Motor1,GPIO.OUT)
+# GPIO.setup(Motor2,GPIO.OUT)
 
 def turnOnFan():
     try:
-        GPIO.output(Motor1,GPIO.HIGH)
-        GPIO.output(Motor2,GPIO.HIGH)
+        # GPIO.output(Motor1,GPIO.HIGH)
+        # GPIO.output(Motor2,GPIO.HIGH)
         print("Motor is on")
         return True,"Fan is ON"
     except Exception as e:
@@ -22,12 +22,14 @@ def turnOnFan():
 
 def turnOffFan():
     try:
-        GPIO.output(Motor1,GPIO.LOW)
+        # GPIO.output(Motor1,GPIO.LOW)
         print("Motor is off")
-        # GPIO.cleanup()
         return False,"Fan is OFF"
     except Exception as e:
         print (e)
+    finally:
+        print('Cleaning up...')
+        #GPIO.cleanup()
 
 turnOffFan()
 
