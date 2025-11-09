@@ -13,14 +13,6 @@ gpio_mode = "mock"
 engine = create_engine("sqlite:///sweetcandyco.db")
 Session = sessionmaker(bind=engine)
 
-def setup():
-    print("Mock setup: no GPIO available")
-
-def signal_success():
-    print("Mock: success signal")  # instead of turning on LEDs
-
-def signal_failure():
-    print("Mock: failure signal")  # instead of turning on LEDs/buzzer
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13

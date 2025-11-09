@@ -130,6 +130,7 @@ function scanCode(code) {
     .then(resp => {
         if (resp.status === "success") {
             updateCartDisplay();
+            showNotification("Cart item added successfully!", 3000);
         } else {
             alert('Scan error: ' + (resp.message || 'Unknown'));
         }
@@ -179,6 +180,7 @@ document.querySelectorAll('.remove-btn').forEach(button => {
     .then(data => {
       if (data.status === 'success') {
         updateCartDisplay();
+        showNotification("Cart item(s) removed successfully!", 3000);
       } else {
         alert('Failed to remove item');
       }
@@ -201,6 +203,7 @@ function attachRemoveListeners() {
       .then(data => {
         if (data.status === 'success') {
           updateCartDisplay();
+          showNotification("Cart item(s) removed successfully!", 3000);
         } else {
           alert('Failed to remove item');
         }
@@ -248,6 +251,16 @@ function showPaymentConfirmation() {
 
 function closeModal() {
     document.getElementById('payment-modal').style.display = 'none';
+}
+
+function showNotification(message, duration = 3000) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.classList.add('show');
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, duration);
 }
 
 // calculateSummary(0.05, 0.09975);

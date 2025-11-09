@@ -99,13 +99,17 @@
   <!-- Payment Confirmation Modal -->
   <div id="payment-modal" class="modal">
     <div class="modal-content">
-      <p>Payment completed! A receipt has been sent to the email associated with your account.</p>
+      <h3>Payment completed!</h3>
+      <p>A receipt has been sent to the email associated with your account.</p>
       <p>Don't forget your candy!</p>
     </div>
   </div>
 
   <!-- Input for barcode scanner -->
   <input class="scanner-input" id="scanner-input" autocomplete="off"/>
+
+  <!-- Notification popup-->
+  <div id="notification" class="notification"></div>
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
 </html>
