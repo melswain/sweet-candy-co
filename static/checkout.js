@@ -30,16 +30,6 @@ const paymentModal = document.getElementById("paymentModal");
 const input = document.getElementById('scanner-input');
 input.focus();
 
-closeBtn.onclick = () => {
-    console.log('x');
-    membershipModal.style.display = "none";
-}
-
-paymentCloseBtn.onclick = () => {
-    console.log('x');
-    paymentModal.style.display = "none";
-}
-
 window.onclick = (event) => {
     if (event.target === membershipModal) {
         membershipModal.style.display = "none";
@@ -235,6 +225,7 @@ function makePayment() {
                         console.log('Payment processed:', data.message || data);
                         closePaymentModal();
                         updateCartDisplay();
+                        showPaymentConfirmation();
                 } else {
                         alert('Payment failed: ' + (data.message || 'Unknown'));
                 }
@@ -243,6 +234,20 @@ function makePayment() {
                 console.error('Payment error', err);
                 alert('Payment request failed');
         });
+}
+
+function showPaymentConfirmation() {
+    const modal = document.getElementById('payment-modal');
+    modal.style.display = 'block';
+
+    // Auto-close after 3 seconds (3000 milliseconds)
+    setTimeout(() => {
+        closeModal();
+    }, 3000);
+}
+
+function closeModal() {
+    document.getElementById('payment-modal').style.display = 'none';
 }
 
 // calculateSummary(0.05, 0.09975);

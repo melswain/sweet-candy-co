@@ -44,6 +44,8 @@ class Inventory(Base):
         if result:
             quantity = result[0]
 
+            print('Quantity; ', quantity)
+
             if quantity > 1:
                 query = """
                     UPDATE inventory
@@ -57,7 +59,9 @@ class Inventory(Base):
                     WHERE productId = ? AND locationId = ?
                 """
 
+            print(query)
             affected = execute(query, (product_id, location_id))
+            print(affected)
             if affected:
                 return True, "Item removed from inventory."
             else:

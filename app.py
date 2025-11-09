@@ -3,7 +3,10 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer
+from Controllers.customer_controller import addCustomer, addRewardPoints
+from Controllers.cart_controller import addCart
+from Controllers.cart_item_controller import addPayment as addCartItem
+from Controllers.payment_controller import addPayment
 
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -92,10 +95,6 @@ def index():
     ]
     return render_template('index.html', fridges=fridge_data)
 
-    
-        
-        
-
 @app.route('/add', methods=['POST'])
 def add():
     print('Add route')
@@ -109,7 +108,6 @@ def add():
 @app.route('/sensor_data')
 def get_sensor_data():
     return sensor_data  # Flask will convert your dict to JSON
-
 
 @app.route('/fan', methods=['POST'])
 def toggle():
@@ -181,6 +179,43 @@ def finalize_payment():
             removeInventory(item["id"], 1, item["quantity"])
         except Exception as e:
             print('Warning: failed to remove inventory for', item, e)
+
+    # Calculate totals
+    def to_decimal(v):
+        return Decimal(str(v)) if not isinstance(v, Decimal) else v
+    
+    subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
+    gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    reward_points = int(subtotal // Decimal('10') * 100)
+
+    customer_success, customer_result = addRewardPoints(membership_number, reward_points)
+    if not customer_success:
+        return jsonify({"status": "error", "message": customer_result}), 400
+    
+    # Create cart using the cart controller
+    cart_success, cart_result = addCart(membership_number, float(total), reward_points)
+    if not cart_success:
+        return jsonify({"status": "error", "message": cart_result}), 400
+
+    # Get cart ID from the result
+    cart_id = cart_result
+    print('Cart id: ', cart_id)
+    
+    # Create cart items for each product
+    for item in items:
+        cart_item_success, cart_item_message = addCartItem(
+            cart_id=cart_id,
+            product_id=item['id'],
+            quantity=item['quantity'],
+            total_price=float(item['total'])
+        )
+        if not cart_item_success:
+            return jsonify({"status": "error", "message": cart_item_message}), 400
+    
+    # Create payment record
+    payment_success, payment_message = addPayment(cart_id, card_number, expiry)
 
     # Clear cart and membership
     items.clear()
