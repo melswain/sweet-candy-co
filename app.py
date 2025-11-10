@@ -12,8 +12,8 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from Controllers.product_controller import getProductWithUpc, getProductWithEpc
 from Controllers.inventory_controller import removeInventory
-from Services.fan_service import turnOnFan
-from Services.fan_service import turnOffFan
+# from Services.fan_service import turnOnFan
+# from Services.fan_service import turnOffFan
 
 # from Services.email_service import sendEmail
 # from Services.email_service import readEmail
