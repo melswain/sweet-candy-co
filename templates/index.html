@@ -12,6 +12,7 @@
     <h1>Sweet Candy Co.</h1>
   </div>
 
+
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       <div class="notification" id="notification">
@@ -22,7 +23,7 @@
       </div>
     {% endif %}
   {% endwith %}
-
+ 
   <div class="section-1">
     <div class="form-container">
       <h2>Add Customer Account</h2>
@@ -55,6 +56,50 @@
       <span class="slider"></span>
     </label>
   </div>
+
+   <div class="productManagement-container">
+    <table>
+      <thead>
+        <tr>
+          <button class="add-btn">+</button>
+          <h2>
+            Product Management
+          </h2>
+        </tr>
+        <tr>
+          <th>Product ID</th>
+          <th>Product Name</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Expiration Date</th>
+          <th>Manufacturer Name</th>
+          <th>UPC</th>
+          <th>EPC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{product.productId}}</td>
+          <td>{{product.name}}</td>
+          <td>{{product.type}}</td>
+          <td>{{product.price}}</td>
+          <td>{{product.expirationDate}}</td>
+          <td>{{product.manufacturerName}}</td>
+          <td>{{product.upc}}</td>
+          <td>{{product.epc}}</td>
+          <td><button class="update-btn">Update</button></td>
+          <td><button class="delete-btn">Delete</button></td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" style="text-align:center;">No bookings found</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 
   <script>
     function closeNotification() {

@@ -15,6 +15,8 @@ from Controllers.inventory_controller import removeInventory
 from Services.fan_service import turnOnFan
 from Services.fan_service import turnOffFan
 
+from Models.product import Product
+
 # from Services.email_service import sendEmail
 # from Services.email_service import readEmail
 
@@ -93,7 +95,11 @@ def index():
         'humidity': sensor_data['Frig2']['humidity'] or 'N/A'
         }
     ]
-    return render_template('index.html', fridges=fridge_data)
+
+    products = Product.get_allProducts()
+    print(products)
+    
+    return render_template('index.html', fridges=fridge_data,products=products)
 
 @app.route('/add', methods=['POST'])
 def add():

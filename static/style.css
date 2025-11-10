@@ -218,3 +218,117 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(26px);
 }
+
+/* -------------------------------------- */
+/* Product Management Table Styles        */
+/* -------------------------------------- */
+
+/* Container styling to match the fridge and form containers */
+.productManagement-container {
+    background: aliceblue;
+    padding: 20px;
+    width: 100%;
+    /* Use a larger max-width to accommodate more table columns */
+    max-width: 1200px; 
+    margin-top: 20px;
+    border-radius: 10px;
+    /* Uses the pink glow for consistency */
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+    font-family: 'Barlow', sans-serif;
+    
+    /** to Center  */
+    /* width: 50%;
+    margin: 0 auto; */
+    
+}
+
+/* Style for the table title */
+.productManagement-container h2 {
+    /* Uses the theme color for h2 */
+    color: #ff69b4; 
+    text-align: center;
+    margin-bottom: 20px;
+    /* Padding to separate the title from the table */
+    padding-bottom: 10px; 
+}
+
+/* Base table styling */
+.productManagement-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    /* Use the purple for a subtle border around the entire table */
+    border: 2px solid #E4C1F9; 
+    border-radius: 8px;
+    overflow: hidden; /* Ensures rounded corners apply to content */
+}
+
+/* Header (th) styling */
+.productManagement-container th {
+    /* Light blue background */
+    background-color: #A9DEF9; 
+    /* Darker blue text for contrast */
+    color: #0688c9; 
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: bold;
+    /* Use the pink color for header/cell dividers */
+    border: 1px solid #F694C1; 
+}
+
+/* Data cell (td) styling */
+.productManagement-container td {
+    padding: 10px 8px;
+    color: #333;
+    /* Pink color for cell dividers */
+    border: 1px solid #F694C1; 
+    align-items: center;
+}
+
+/* Zebra striping for better readability: even rows get a light yellow tint */
+.productManagement-container tbody tr:nth-child(even) {
+    background-color: #EDE7B155; /* Light yellow with transparency */
+}
+
+/* Hover effect for a playful interaction */
+.productManagement-container tbody tr:hover {
+    background-color: #E4C1F955; /* Light purple tint on hover */
+    cursor: default;
+    transition: background-color 0.3s;
+}
+
+/* Style for the 'No products found' row */
+.productManagement-container tbody tr td[colspan] {
+    text-align: center;
+    font-style: italic;
+    padding: 20px;
+    background-color: #ffffff;
+}
+
+/* Style for the '+' add button */
+.add-btn {
+    font-weight: bold; 
+    font-size: 1.5rem; 
+    line-height: 1;
+    padding: 5px 12px;
+    background: #D3F8E2; /* Green for creation/success */
+    color: #155724; 
+    border-color: #D3F8E2;
+}
+
+/* Specific style for the delete button */
+.delete-btn {
+    background: #F694C1; /* Pink for deletion/warning */
+    color: #bc1361;
+}
+
+.update-btn{
+  padding: 10px 15px;
+    background: #A9DEF9; /* Light Blue */
+    color: #0688c9; /* Darker Blue */
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+}
+

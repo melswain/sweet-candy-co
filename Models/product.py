@@ -5,6 +5,7 @@ from .database import Base, execute, fetchone, fetchall
 from types import SimpleNamespace
 from datetime import date
 
+
 class Product(Base):
     __tablename__ = 'product'
 
@@ -152,3 +153,14 @@ class Product(Base):
         if result is True:
             return True, "Discount applied successfully."
         return False, "Failed to apply discount."
+    
+    @staticmethod
+    def get_allProducts():
+        query = "SELECT * FROM product WHERE 1;"
+        rows = fetchall(query)
+        if rows is False or rows is None:
+            return False, "Failed retrieve Products"
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
+        return product_list
+        
