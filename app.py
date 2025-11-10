@@ -134,6 +134,11 @@ def toggle():
     # success, message =turnOnFan() 
     return redirect('/'), message
 
+@app.route('/set-dummy-membership')
+def set_dummy_membership():
+    session['membership_number'] = 'DUMMY12345'
+    return jsonify({"status": "success", "message": "Dummy membership set", "membership_number": "DUMMY12345"})
+
 @app.route('/checkout')
 def checkout():
     if 'membership_number' not in session:
