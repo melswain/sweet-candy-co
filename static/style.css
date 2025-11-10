@@ -317,12 +317,12 @@ input:checked + .slider:before {
 }
 
 /* Specific style for the delete button */
-.delete-btn {
+.open-delete-modal{
     background: #F694C1; /* Pink for deletion/warning */
     color: #bc1361;
 }
 
-.update-btn{
+.open-update-modal{
   padding: 10px 15px;
     background: #A9DEF9; /* Light Blue */
     color: #0688c9; /* Darker Blue */
@@ -332,3 +332,99 @@ input:checked + .slider:before {
     transition: background-color 0.2s, transform 0.1s;
 }
 
+/* -------------------------------------- */
+/* Product Management Update Styles        */
+/* -------------------------------------- */
+.update-modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.update-modal-content {
+  background: aliceblue;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 25px rgba(255, 105, 180, 0.4);
+  width: 100%;
+  max-width: 400px; /* Smaller modal */
+  font-family: 'Barlow', sans-serif;
+  animation: popIn 0.3s ease;
+}
+
+.update-modal-content h2 {
+  font-family: 'Barriecito', 'Barlow', sans-serif;
+  text-align: center;
+  color: #F694C1;
+  margin-bottom: 15px;
+}
+
+.update-modal form {
+  background: #ffe3f1;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.update-modal-content label {
+  font-weight: bold;
+  color: #0688c9;
+  margin-bottom: 5px;
+}
+
+.update-modal-content input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #F47D2F;
+  color: #F47D2F;
+  background-color: #ffc8695a;
+  font-family: 'Barlow', sans-serif;
+}
+
+.update-modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.update-confirm-btn {
+  background: #A9DEF9;
+  color: #0688c9;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.update-cancel-btn {
+  background: #F694C1;
+  color: #bc1361;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.update-confirm-btn:hover,
+.update-cancel-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Animation */
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
