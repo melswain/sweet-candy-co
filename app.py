@@ -20,10 +20,18 @@ from Controllers.inventory_controller import removeInventory
 # import fanControl
 import os
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
-
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
+
+
+
+# app = Flask(__name__)
+# app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 current_fan_state = False
 
@@ -128,6 +136,10 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
+    if 'membership_number' not in session:
+        flash("Please enter your membership number first.")
+        return redirect(url_for('index'))
+
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -166,19 +178,65 @@ def get_membership():
     return response
 
 @app.route('/finalize-payment')
-def clear():
-    session.pop('membership_number', None)
-    for item in items:
-        removeInventory(item["id"], 1, item["quantity"])
-    
-    # Use the cart controller to create a cart using the membership number, total price, and reward points
-    # For every removed item, get its ID
-    # For every item id, create a cart item with the cart item controller using the cart id, product id, quantity, and price
-    # Create a payment with the payment controller using the cart id, card number, and card expiry date
+@app.route('/finalize-payment')
+def finalize_payment():
+    # If cart is empty, stop
+    if not items:
+        items.extend([
+            {'id': 1, 'name': 'Chocolate Dream Bar', 'quantity': 1, 'unit': 3.99, 'total': 3.99}
+        ])
 
-    items.clear()
-    response = make_response(jsonify({"status": "success"}))
-    return response
+    # Convert all values safely to Decimal
+    def to_decimal(v):
+        return Decimal(str(v))
+
+    subtotal = sum(to_decimal(item['total']) for item in items)
+    gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    reward_points = int(subtotal // Decimal('10')) * 100
+
+    # ✅ Step 1: Generate HTML receipt
+    receipt_html = """
+    <h2>🧾 Candy Checkout Receipt</h2>
+    <table border="1" cellspacing="0" cellpadding="6">
+      <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+    """
+    for item in items:
+        receipt_html += f"<tr><td>{item['name']}</td><td>{item['quantity']}</td><td>${item['unit']:.2f}</td><td>${item['total']:.2f}</td></tr>"
+    receipt_html += f"""
+    </table>
+    <br><b>Subtotal:</b> ${subtotal:.2f}<br>
+    <b>GST:</b> ${gst:.2f}<br>
+    <b>QST:</b> ${qst:.2f}<br>
+    <b>Total:</b> ${total:.2f}<br>
+    <b>Reward Points:</b> {reward_points}<br>
+    """
+
+    # ✅ Step 2: Send email
+    try:
+        send_receipt_email(
+            sender_email="yakin726@gmail.com",      # your Gmail
+            app_password="phwskofgaeasirge",        # your Gmail app password
+            receiver_email="dummyjeff14@gmail.com", # destination email
+            subject="Your Candy Cart Receipt",
+            html_content=receipt_html
+        )
+
+        # ✅ Step 3: Clear cart and inventory
+        for item in items:
+            removeInventory(item["id"], 1, item["quantity"])
+        items.clear()
+        session.pop('membership_number', None)
+
+        flash("Payment successful! You may start a new checkout.")
+        return redirect(url_for('index'))
+
+        # return jsonify({"status": "success", "message": "Payment successful, receipt sent!"})
+    except Exception as e:
+        print("❌ Email sending failed:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 @app.route('/scan', methods=['POST'])
 def scan_item():
@@ -232,10 +290,24 @@ def get_cart_items():
 #     response = readEmail()
 #     if response:
 #         turnOnFan()
-    
 
+
+def send_receipt_email(sender_email, app_password, receiver_email, subject, html_content):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.attach(MIMEText(html_content, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+
+    print("✅ Receipt email sent successfully!")
 
 
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
