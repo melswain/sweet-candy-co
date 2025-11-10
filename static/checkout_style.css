@@ -49,6 +49,30 @@ th, td {
     text-align: left;
 }
 
+.remove-td {
+  width: 1%;
+  white-space: nowrap;
+  padding: 0;
+  text-align: center;
+}
+
+.remove-btn {
+    padding: 4px;
+    font-family: 'Barlow', sans-serif;
+    font-size: .75em;
+    border: none;
+    border-radius: 8px;
+    color: black;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.remove-btn:hover {
+    transform: scale(1.05);
+}
+
 .table-wrapper {
     height: 300px;
     overflow-y: auto;
@@ -164,15 +188,33 @@ button {
   text-align: center;
 }
 
+.membership-buttons {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
 .close-button {
   float: right;
   font-size: 24px;
   cursor: pointer;
 }
 
+.pay-close-button {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
 .modal-button {
-    padding: 12px 50px 12px 50px;
+    padding: 12px 20px 12px 20px;
     margin: 20px;
+}
+
+.payment-buttons {
+    margin-top: 12px;
+    display: block;
+    gap: 8px;
 }
 
 .membership-input {
@@ -185,4 +227,22 @@ button {
     opacity: 0;
     position: absolute;
     left: -9999px;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  background-color: #ffbcd9;
+  color: black;
+  padding: 15px 25px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 16px;
+  z-index: 9999;
+  transition: right 0.5s ease-in-out;
+}
+
+.notification.show {
+  right: 20px; /* Slide into view */
 }

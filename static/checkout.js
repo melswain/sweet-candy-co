@@ -24,21 +24,11 @@ function calculateSummary(gstRate,qstRate) {
 }
 
 const membershipModal = document.getElementById("membershipModal");
-const closeBtn = document.querySelectorAll(".close-button");
+const closeBtn = document.querySelector(".close-button");
+const paymentCloseBtn = document.querySelector(".pay-close-button");
 const paymentModal = document.getElementById("paymentModal");
 const input = document.getElementById('scanner-input');
 input.focus();
-
-document.getElementById("scanMembershipBtn").addEventListener("click", () => {
-    membershipModal.style.display = "block";
-});
-
-closeBtn.forEach(btn => {
-    btn.onclick = () => {
-        console.log('x');
-        membershipModal.style.display = "none";
-    }
-});
 
 window.onclick = (event) => {
     if (event.target === membershipModal) {
@@ -60,8 +50,27 @@ function submitMembership() {
     .then(response => response.json())
     .then(data => {
         console.log("Server response:", data);
+        // After membership is accepted, continue to payment
+        continueToPayment();
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        // still continue to payment if server not reachable
+        continueToPayment();
+    });
+}
+
+function continueToPayment() {
+    membershipModal.style.display = 'none';
+    // Show payment modal so user can enter/scan card
+    paymentModal.style.display = 'block';
+    // focus card input for easy scanning
+    const cardInput = document.getElementById('cardNumberInput');
+    if (cardInput) cardInput.focus();
+}
+
+function closePaymentModal() {
+    paymentModal.style.display = 'none';
 }
 
 function startPayment() {
@@ -119,8 +128,9 @@ function scanCode(code) {
     })
     .then(r => r.json())
     .then(resp => {
-        if (resp.success) {
+        if (resp.status === "success") {
             updateCartDisplay();
+            showNotification("Cart item added successfully!", 3000);
         } else {
             alert('Scan error: ' + (resp.message || 'Unknown'));
         }
@@ -133,20 +143,124 @@ function updateCartDisplay() {
     .then(response => response.json())
     .then(data => {
         const tbody = document.getElementById('cart-body');
-        tbody.innerHTML = ''; // Clear existing rows
+        tbody.innerHTML = '';
 
         data.items.forEach(item => {
             const row = document.createElement('tr');
+            row.setAttribute('data-id', item.id);
             row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.quantity}</td>
             <td>$${item.unit.toFixed(2)}</td>
             <td>$${item.total.toFixed(2)}</td>
+            <td class="remove-td">
+                <button class="remove-btn">x</button>
+            </td>
             `;
             tbody.appendChild(row);
         });
+
+        calculateSummary(0.05, 0.09975);
+        attachRemoveListeners();
     });
 }
 
-// call once on load
+document.querySelectorAll('.remove-btn').forEach(button => {
+  button.addEventListener('click', function () {
+    console.log('Removing...')
+    const itemRow = this.closest('tr');
+    const itemId = itemRow.getAttribute('data-id');
+
+    fetch('/remove-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        updateCartDisplay();
+        showNotification("Cart item(s) removed successfully!", 3000);
+      } else {
+        alert('Failed to remove item');
+      }
+    });
+  });
+});
+
+function attachRemoveListeners() {
+  document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const itemRow = this.closest('tr');
+      const itemId = itemRow.getAttribute('data-id');
+
+      fetch('/remove-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: itemId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updateCartDisplay();
+          showNotification("Cart item(s) removed successfully!", 3000);
+        } else {
+          alert('Failed to remove item');
+        }
+      });
+    });
+  });
+}
+
+// Payment submit: collect card info and POST to server
+function makePayment() {
+        const cardNumber = document.getElementById('cardNumberInput').value;
+        const expiry = document.getElementById('expiryInput').value;
+
+        fetch('/finalize-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cardNumber, expiryDate: expiry })
+        })
+        .then(response => response.json())
+        .then(data => {
+                if (data.status === 'success') {
+                        console.log('Payment processed:', data.message || data);
+                        closePaymentModal();
+                        updateCartDisplay();
+                        showPaymentConfirmation();
+                } else {
+                        alert('Payment failed: ' + (data.message || 'Unknown'));
+                }
+        })
+        .catch(err => {
+                console.error('Payment error', err);
+                alert('Payment request failed');
+        });
+}
+
+function showPaymentConfirmation() {
+    const modal = document.getElementById('payment-modal');
+    modal.style.display = 'block';
+
+    // Auto-close after 3 seconds (3000 milliseconds)
+    setTimeout(() => {
+        closeModal();
+    }, 3000);
+}
+
+function closeModal() {
+    document.getElementById('payment-modal').style.display = 'none';
+}
+
+function showNotification(message, duration = 3000) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.classList.add('show');
+
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, duration);
+}
+
 // calculateSummary(0.05, 0.09975);

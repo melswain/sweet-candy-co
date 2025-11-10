@@ -13,14 +13,6 @@ gpio_mode = "mock"
 engine = create_engine("sqlite:///sweetcandyco.db")
 Session = sessionmaker(bind=engine)
 
-def setup():
-    print("Mock setup: no GPIO available")
-
-def signal_success():
-    print("Mock: success signal")  # instead of turning on LEDs
-
-def signal_failure():
-    print("Mock: failure signal")  # instead of turning on LEDs/buzzer
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13
@@ -73,3 +65,11 @@ def addCustomer(name, email, phone):
     except Exception as e:
         signal_failure()
         return False, f"Failed to add customer:\n{e}"
+
+def addRewardPoints(customer_id, reward_points):
+    print('Adding reward points...')
+    try:
+        customer = Customer.addRewardPoints(customer_id, reward_points)
+        return True, "Successfully added reward points!"
+    except Exception as e:
+        return False, "Failed to add reward points: {e}"
