@@ -392,6 +392,7 @@ margin-bottom: 5px;
  display: flex;
  justify-content: flex-end; 
  margin-top: 0; 
+ padding-right: 20px;
 }
 
 @keyframes popIn {
@@ -399,5 +400,97 @@ margin-bottom: 5px;
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Product Management Add Styles  */
+.add-modal {
+display: none; 
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.4);
+justify-content: center;
+align-items: center;
+z-index: 1000;
+transition: opacity 0.3s ease-out;
+}
+
+
+.add-modal.active {
+    opacity: 1;
+}
+
+.add-modal form {
+background: #fefaff; 
+border-radius: 20px;
+padding: 30px 40px;
+width: 650px; 
+box-shadow: 0 5px 20px rgba(255, 105, 180, 0.3);
+font-family: 'Barlow', sans-serif;
+border: 2px solid #ffb8d1; 
+display: block;  
+
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+
+.add-modal.active form {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.form-grid {
+display: grid;
+grid-template-columns: 1fr 1fr; 
+gap: 20px 30px; 
+margin-bottom: 25px; 
+}
+
+
+.form-field-group {
+display: flex;
+flex-direction: column;
+padding-right: 50px;
+}
+
+
+.add-modal label {
+font-weight: 600;
+ color: #a04b6a;
+margin-bottom: 5px; 
+}
+
+
+.add-modal input {
+
+ width: 100%; 
+ padding: 10px 15px;
+ border-radius: 10px;
+ background-color: #ffe3ca;
+ font-size: 1rem;
+ color: #a04b6a;
+ outline: none;
+ transition: 0.2s;
+ margin-bottom: 0; 
+}
+
+.add-modal input:focus {
+ border-color: #f47d2f;
+ background-color: #fff7f0;
+}
+
+.add-modal-buttons {
+ display: flex;
+ justify-content: flex-end; 
+ margin-top: 0; 
+ padding-right: 20px;
+}
+
+/* @keyframes popIn {
+ from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+} */
 
 

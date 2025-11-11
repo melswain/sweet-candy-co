@@ -58,14 +58,12 @@
   </div>
 
    <div class="productManagement-container">
+    <div class="productManagement-header">
+      <button class="add-btn">+</button>
+      <h2>Product Management</h2>
+    </div>
     <table>
       <thead>
-        <tr>
-          <button class="add-btn">+</button>
-          <h2>
-            Product Management
-          </h2>
-        </tr>
         <tr>
           <th>Product ID</th>
           <th>Product Name</th>
@@ -99,6 +97,7 @@
       </tbody>
     </table>
     
+    <!--* Update Modal  -->
       <div class="update-modal">
         <form method="POST" class="update-form-content" action="/update_product" >
             <div class="form-grid">
@@ -145,6 +144,52 @@
       </div>
   </div>
 
+  <!--* Add Modal  -->
+   <div class="add-modal">
+        <form method="POST" class="add-form-content" action="/add_product" >
+            <div class="form-grid">
+                <div class="form-field-group">
+                    <label for="modal-productId">Product ID</label>
+                    <input name="productId" type="text" placeholder="Automatically Given" disabled>
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-name">Product Name</label>
+                    <input name="name" type="text">
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-type">Product Type</label>
+                    <input name="type" type="text" >
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-price">Product Price</label>
+                    <input name="price" type="text" >
+                </div>
+                
+                <div class="form-field-group">
+                    <label for="modal-expirationDate">Product Exp-Date</label>
+                    <input name="expirationDate" type="text">
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-manufacturerName">Product Manufacturer Name</label>
+                    <input name="manufacturerName" type="text">
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-upc">Product UPC</label>
+                    <input name="upc" type="text">
+                </div>
+                <div class="form-field-group">
+                    <label for="modal-epc">Product EPC</label>
+                    <input name="epc" type="text">
+                </div>
+            </div>
+            
+            <div class="add-modal-buttons">
+                <button type="submit" class="add-confirm-btn">Add</button>
+                <button type="button" class="add-cancel-btn">Cancel</button>
+            </div>
+        </form>
+      </div>
+
 
   <script>
     function closeNotification() {
@@ -188,11 +233,9 @@
         btn.addEventListener('click', (event) => {
             const modal = document.querySelector('.update-modal');
             
-            // Immediately display flex to make it visible
+
             modal.style.display = 'flex'; 
             
-            // Use setTimeout to allow the browser to render 'display: flex'
-            // before applying the 'active' class for the transition.
             setTimeout(() => {
                 modal.classList.add('active'); // Add 'active' class to trigger fade-in
             }, 10); // A small delay is usually sufficient
@@ -216,19 +259,17 @@
     // Close modal when clicking Cancel
     document.querySelector('.update-cancel-btn').addEventListener('click', () => {
         const modal = document.querySelector('.update-modal');
-        modal.classList.remove('active'); // Remove 'active' class for fade-out
-        // Wait for the fade-out transition to complete before setting display to 'none'
+        modal.classList.remove('active'); 
         modal.addEventListener('transitionend', function handler() {
             modal.style.display = 'none';
-            modal.removeEventListener('transitionend', handler); // Remove listener to prevent multiple calls
+            modal.removeEventListener('transitionend', handler); 
         });
     });
 
-    // Close modal when clicking outside the modal content
     document.querySelector('.update-modal').addEventListener('click', (event) => {
         if (event.target.classList.contains('update-modal')) {
             const modal = document.querySelector('.update-modal');
-            modal.classList.remove('active'); // Remove 'active' class for fade-out
+            modal.classList.remove('active'); 
             modal.addEventListener('transitionend', function handler() {
                 modal.style.display = 'none';
                 modal.removeEventListener('transitionend', handler);
@@ -236,6 +277,51 @@
         }
     });
 
+
+    // Add modal animation
+
+      // Open modal when clicking "+"
+    const addModalBtn = document.querySelector('.add-btn');
+
+    addModalBtn.addEventListener('click', () =>{
+        const addModal = document.querySelector('.add-modal');
+
+        // to reset the input fields when you open again
+        addModal.querySelectorAll('input').forEach(input =>input.value = '');
+
+        addModal.style.display= "flex";
+        setTimeout(() =>{
+          addModal.classList.add('active');
+        },10);
+    });
+
+    // Close modal when clicking Cancel button
+    const add_cancelBtn = document.querySelector('.add-cancel-btn');
+
+    add_cancelBtn.addEventListener('click', () =>{
+      const addModal = document.querySelector('.add-modal');
+
+      addModal.classList.remove('active');
+      addModal.addEventListener('transitionend', function handler() {
+        addModal.style.display = "none";
+        addModal.removeEventListener('transitionend',handler);
+      });
+    });
+
+     // Close modal when clicking outside of the modal
+    const clickOutside= document.querySelector('.add-modal');
+
+    clickOutside.addEventListener('click', (event) =>{
+      if(event.target.classList.contains('add-modal'))
+      {
+        const addModal = document.querySelector('.add-modal');
+        addModal.classList.remove('active');
+        addModal.addEventListener('transitionend', function handler() {
+          addModal.style.display = "none";
+          addModal.removeEventListener('transitionend',handler);
+        });
+      }
+    });
 
   </script>
 </body>

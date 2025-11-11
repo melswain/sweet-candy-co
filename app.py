@@ -296,9 +296,27 @@ def update_product():
     new_epc = request.form.get('epc')
 
     result, message = Product.update_product(productId=productId, new_name=new_name, new_type=new_type,new_price=new_price,
-                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,new_upc=new_upc,new_epc=new_epc )
+                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,new_upc=new_upc,new_epc=new_epc
+                                            )
     print(message);
     return redirect(url_for('index'))
+
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    name = request.form.get('name')
+    type_ = request.form.get('type')
+    price = request.form.get('price')
+    expirationDate = request.form.get('expirationDate')
+    manufacturerName = request.form.get('manufacturerName')
+    upc = request.form.get('upc')
+    epc = request.form.get('epc')
+
+    result, message = Product.create(name=name, type_=type_,price=price,
+                                            expiration_date=expirationDate,manufacturer_name=manufacturerName,upc=upc,epc=epc
+                                            )
+    print(message);
+    return redirect(url_for('index'))
+
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
