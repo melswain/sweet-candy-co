@@ -117,6 +117,9 @@ class Product(Base):
         if result is True:
             return True, "Price updated successfully."
         return False, "Failed to update price."
+    
+     
+
 
     @staticmethod
     def get_expiring_soon(days=30):
@@ -163,4 +166,17 @@ class Product(Base):
         keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
         product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
         return product_list
+    
+    @staticmethod
+    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc):
+        query = """
+                UPDATE product 
+                SET name = ?, type = ?
+                    , price = ?, expirationDate = ?, manufacturerName = ?
+                    , upc = ?, epc = ?
+                 WHERE productId = ? """
+        result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
+        if result is True:
+            return True, "Price updated successfully."
+        return False, "Failed to update price."
         

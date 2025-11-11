@@ -284,6 +284,22 @@ def remove_item():
     items = [item for item in items if item['id'] != item_id]
     return jsonify({"status": "success", "items": items})
 
+@app.route('/update_product', methods=['POST'])
+def update_product():
+    productId = request.form.get('productId')
+    new_name = request.form.get('name')
+    new_type = request.form.get('type')
+    new_price = request.form.get('price')
+    new_expirationDate = request.form.get('expirationDate')
+    new_manufacturerName = request.form.get('manufacturerName')
+    new_upc = request.form.get('upc')
+    new_epc = request.form.get('epc')
+
+    result, message = Product.update_product(productId=productId, new_name=new_name, new_type=new_type,new_price=new_price,
+                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,new_upc=new_upc,new_epc=new_epc )
+    print(message);
+    return redirect(url_for('index'))
+
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
 # temp2 = sensor_data['Frig2'].get('temperature', '0')
