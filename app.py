@@ -15,6 +15,8 @@ from decimal import Decimal, ROUND_HALF_UP
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
 
+from Models.product import Product
+
 # from Services.email_service import sendEmail
 # from Services.email_service import readEmail
 
@@ -93,7 +95,11 @@ def index():
         'humidity': sensor_data['Frig2']['humidity'] or 'N/A'
         }
     ]
-    return render_template('index.html', fridges=fridge_data)
+
+    products = Product.get_allProducts()
+    print(products)
+    
+    return render_template('index.html', fridges=fridge_data,products=products)
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -277,6 +283,42 @@ def remove_item():
     global items
     items = [item for item in items if item['id'] != item_id]
     return jsonify({"status": "success", "items": items})
+
+@app.route('/update_product', methods=['POST'])
+def update_product():
+    productId = request.form.get('productId')
+    new_name = request.form.get('name')
+    new_type = request.form.get('type')
+    new_price = request.form.get('price')
+    new_expirationDate = request.form.get('expirationDate')
+    new_manufacturerName = request.form.get('manufacturerName')
+    new_upc = request.form.get('upc')
+    new_epc = request.form.get('epc')
+
+    result, message = Product.update_product(productId=productId, new_name=new_name,
+                                            new_type=new_type,new_price=new_price,
+                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,
+                                            new_upc=new_upc,new_epc=new_epc
+                                            )
+    print(message);
+    return redirect(url_for('index'))
+
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    name = request.form.get('name')
+    type_ = request.form.get('type')
+    price = request.form.get('price')
+    expirationDate = request.form.get('expirationDate')
+    manufacturerName = request.form.get('manufacturerName')
+    upc = request.form.get('upc')
+    epc = request.form.get('epc')
+
+    result, message = Product.create(name=name, type_=type_,price=price,
+                                    expiration_date=expirationDate,manufacturer_name=manufacturerName,
+                                    upc=upc,epc=epc
+                                    )
+    print(message);
+    return redirect(url_for('index'))
 
 @app.route('/clear-cart', methods=['GET'])
 def clear_cart():
