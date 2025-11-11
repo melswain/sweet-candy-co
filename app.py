@@ -86,11 +86,6 @@ items = [
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"
 
-def process_membership(membership_number):
-    # Your logic here
-    print(f"Processing membership: {membership_number}")
-    return {"status": "success", "points": 26}
-
 @app.route('/')
 def index():
     fridge_data = [
@@ -138,16 +133,11 @@ def toggle():
     # success, message =turnOnFan() 
     return redirect('/'), message
 
-@app.route('/set-dummy-membership')
-def set_dummy_membership():
-    session['membership_number'] = 'DUMMY12345'
-    return jsonify({"status": "success", "message": "Dummy membership set", "membership_number": "DUMMY12345"})
-
 @app.route('/checkout')
 def checkout():
-    if 'membership_number' not in session:
-        flash("Please enter your membership number first.")
-        return redirect(url_for('index'))
+    # if 'membership_number' not in session:
+    #     flash("Please enter your membership number first.")
+    #     return redirect(url_for('index'))
 
     def to_decimal(v):
         if isinstance(v, Decimal):
@@ -187,64 +177,66 @@ def get_membership():
     return response
 
 @app.route('/finalize-payment')
-@app.route('/finalize-payment')
 def finalize_payment():
-    # If cart is empty, stop
-    if not items:
-        items.extend([
-            {'id': 1, 'name': 'Chocolate Dream Bar', 'quantity': 1, 'unit': 3.99, 'total': 3.99}
-        ])
+    data = request.get_json() or {}
+    card_number = data.get('cardNumber') or data.get('card')
+    expiry = data.get('expiryDate') or data.get('expiry')
 
-    # Convert all values safely to Decimal
+    # membership number (if scanned earlier) is kept in session
+    membership_number = session.get('membership_number')
+
+    # Simulate payment processing (no real gateway here)
+    print('Finalizing payment. Card:', card_number, 'Expiry:', expiry, 'Membership:', membership_number)
+
+    # Remove inventory for each item (existing behavior)
+    for item in items:
+        try:
+            removeInventory(item["id"], 1, item["quantity"])
+        except Exception as e:
+            print('Warning: failed to remove inventory for', item, e)
+
+    # Calculate totals
     def to_decimal(v):
-        return Decimal(str(v))
+        return Decimal(str(v)) if not isinstance(v, Decimal) else v
 
-    subtotal = sum(to_decimal(item['total']) for item in items)
+    subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
     gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    reward_points = int(subtotal // Decimal('10')) * 100
+    reward_points = int(subtotal // Decimal('10') * 100)
 
-    # ✅ Step 1: Generate HTML receipt
-    receipt_html = """
-    <h2>🧾 Candy Checkout Receipt</h2>
-    <table border="1" cellspacing="0" cellpadding="6">
-      <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
-    """
+    customer_success, customer_result = addRewardPoints(membership_number, reward_points)
+    if not customer_success:
+        return jsonify({"status": "error", "message": customer_result}), 400
+
+    # Create cart using the cart controller
+    cart_success, cart_result = addCart(membership_number, float(total), reward_points)
+    if not cart_success:
+        return jsonify({"status": "error", "message": cart_result}), 400
+
+    # Get cart ID from the result
+    cart_id = cart_result
+    print('Cart id: ', cart_id)
+
+    # Create cart items for each product
     for item in items:
-        receipt_html += f"<tr><td>{item['name']}</td><td>{item['quantity']}</td><td>${item['unit']:.2f}</td><td>${item['total']:.2f}</td></tr>"
-    receipt_html += f"""
-    </table>
-    <br><b>Subtotal:</b> ${subtotal:.2f}<br>
-    <b>GST:</b> ${gst:.2f}<br>
-    <b>QST:</b> ${qst:.2f}<br>
-    <b>Total:</b> ${total:.2f}<br>
-    <b>Reward Points:</b> {reward_points}<br>
-    """
-
-    # ✅ Step 2: Send email
-    try:
-        send_receipt_email(
-            sender_email="yakin726@gmail.com",      # your Gmail
-            app_password="phwskofgaeasirge",        # your Gmail app password
-            receiver_email="dummyjeff14@gmail.com", # destination email
-            subject="Your Candy Cart Receipt",
-            html_content=receipt_html
+        cart_item_success, cart_item_message = addCartItem(
+            cart_id=cart_id,
+            product_id=item['id'],
+            quantity=item['quantity'],
+            total_price=float(item['total'])
         )
+        if not cart_item_success:
+            return jsonify({"status": "error", "message": cart_item_message}), 400
 
-        # ✅ Step 3: Clear cart and inventory
-        for item in items:
-            removeInventory(item["id"], 1, item["quantity"])
-        items.clear()
-        session.pop('membership_number', None)
+    # Create payment record
+    payment_success, payment_message = addPayment(cart_id, card_number, expiry)
 
-        flash("Payment successful! You may start a new checkout.")
-        return redirect(url_for('index'))
+    # Clear cart and membership
+    items.clear()
+    session.pop('membership_number', None)
 
-        # return jsonify({"status": "success", "message": "Payment successful, receipt sent!"})
-    except Exception as e:
-        print("❌ Email sending failed:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
+    return jsonify({"status": "success", "message": "Payment processed (simulated)"})
 
 
 @app.route('/scan', methods=['POST'])
