@@ -326,7 +326,7 @@ ALTER TABLE `cart_item`
 --
 -- Constraints for table `environment_reading`
 --
-ALTER TABLE `environment-reading`
+ALTER TABLE `environment_reading`
   ADD CONSTRAINT `environmentreading_ibfk_1` FOREIGN KEY (`locationId`) REFERENCES `store_location` (`locationId`);
 
 --

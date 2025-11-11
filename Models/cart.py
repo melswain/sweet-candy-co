@@ -1,7 +1,7 @@
 # models/cart.py
 from sqlalchemy import Column, Integer, Numeric, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, execute
+from .database import Base, get_connection
 from datetime import datetime
 
 class Cart(Base):
@@ -22,12 +22,20 @@ class Cart(Base):
 
     @staticmethod
     def create(customer_id, total_price, reward_points=0):
+        print('Creating cart...')
         query = """
             INSERT INTO cart (customerId, totalCartPrice, totalRewardPoints)
             VALUES (?, ?, ?)
         """
-        result = execute(query, (customer_id, total_price, reward_points))
-        if result is True:
-            return True, "Cart created successfully."
-        else:
-            raise Exception('Error creating cart')
+        try:
+            with get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (customer_id, total_price, reward_points))
+                cart_id = cursor.lastrowid
+                conn.commit()
+                print('LAST INSERTED ID: ', cart_id)
+                if cart_id:
+                    return True, cart_id
+                raise Exception('Failed to obtain last insert id')
+        except Exception as e:
+            raise

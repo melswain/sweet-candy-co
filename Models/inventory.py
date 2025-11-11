@@ -1,7 +1,7 @@
 # models/inventory.py
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, execute
+from .database import Base, execute, fetchone
 from datetime import datetime
 
 class Inventory(Base):
@@ -39,7 +39,7 @@ class Inventory(Base):
             SELECT quantity FROM inventory
             WHERE productId = ? AND locationId = ?
         """
-        result = execute(query, (product_id, location_id))
+        result = fetchone(query, (product_id, location_id))
 
         if result:
             quantity = result[0]
@@ -57,7 +57,9 @@ class Inventory(Base):
                     WHERE productId = ? AND locationId = ?
                 """
 
+            print(query)
             affected = execute(query, (product_id, location_id))
+            print(affected)
             if affected:
                 return True, "Item removed from inventory."
             else:
@@ -65,3 +67,15 @@ class Inventory(Base):
 
         else:
             raise Exception("Inventory item not found")
+        
+    @staticmethod
+    def search_item(product_id, location_id):
+        query = """
+            SELECT productId FROM inventory
+            WHERE productId = ? AND locationId = ?
+        """
+        try:
+            result = fetchone(query, (product_id, location_id))
+            return True, result[0]
+        except Exception as e:
+            return f"Failed to find inventory record:\n{e}"
