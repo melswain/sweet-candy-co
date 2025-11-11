@@ -4,6 +4,12 @@
 # from time import sleep
 # import fanControl
 
+# Gmail Info
+sender_email = "yakin726@gmail.com"
+sending_app_password = "phwskofgaeasirge"  # App password (no spaces)
+receiver_email = "dummyjeff14@gmail.com"
+receiving_app_password = "zlpqxbhrwvkdzoxd"
+
 # # Gmail Info
 # sender_email = "kishaan2006@gmail.com"
 # sending_app_password = "imntfpdfsbgxacrp"  # App password (no spaces)

@@ -100,6 +100,18 @@ class Product(Base):
             return None
         keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
         return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
+    
+    @staticmethod
+    def get_by_id(id):
+        query = """
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc
+            FROM product WHERE productId = ?
+        """
+        row = fetchone(query, (id,))
+        if not row:
+            return None
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
 
     @staticmethod
     def update_price(product_id, new_price):

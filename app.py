@@ -7,13 +7,13 @@ from Controllers.customer_controller import addCustomer, addRewardPoints
 from Controllers.cart_controller import addCart
 from Controllers.cart_item_controller import addPayment as addCartItem
 from Controllers.payment_controller import addPayment
+from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
+from Controllers.inventory_controller import removeInventory, searchInventory
 
 from decimal import Decimal, ROUND_HALF_UP
 
-from Controllers.product_controller import getProductWithUpc, getProductWithEpc
-from Controllers.inventory_controller import removeInventory
-from Services.fan_service import turnOnFan
-from Services.fan_service import turnOffFan
+# from Services.fan_service import turnOnFan
+# from Services.fan_service import turnOffFan
 
 from Models.product import Product
 
@@ -320,6 +320,49 @@ def add_product():
     print(message);
     return redirect(url_for('index'))
 
+@app.route('/clear-cart', methods=['GET'])
+def clear_cart():
+    items.clear()
+    return jsonify({"status": "success"})
+
+@app.route('/search-item', methods=['POST'])
+def search_item():
+    data = request.get_json()
+    code = data.get("code")
+
+    if not code:
+        return jsonify({"status": "error", "message": "No code provided"}), 400
+
+    result, inventory_item_id = searchInventory(code, 1) # 1 is the location id
+
+    if inventory_item_id:
+        product = getProductWithId(inventory_item_id)
+
+        if product and hasattr(product, 'productId'):
+            unit_price = float(product.price)
+            product_id = product.productId
+            
+            # Check if item already exists in the list
+            for item in items:
+                if item['id'] == product_id:
+                    item['quantity'] += 1
+                    item['total'] = item['quantity'] * unit_price
+                    return jsonify({"status": "success", "item": item, "items": items})
+
+            # If not found, add as new item
+            new_item = {
+                'id': product_id,
+                'name': product.name,
+                'quantity': 1,
+                'unit': unit_price,
+                'total': unit_price,
+            }
+            items.append(new_item)
+            return jsonify({"status": "success", "item": new_item, "items": items})
+        else:
+            return jsonify({"status": "error", "message": "Item not found"}), 404
+    else:
+        return jsonify({"status": "error", "message": "Item not found"}), 404
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')

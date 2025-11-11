@@ -51,19 +51,34 @@
         </div>
       </div>
     </div>
-    
 
   <div class="control-panel">
     <div class="button-row">
-      <button onclick="" class="btn jumbo red">Call for Assistance</button>
-      <button class="btn jumbo blue">Clear Cart</button>
+      <button onclick="callForAssistance()" class="btn jumbo red">Call for Assistance</button>
+      <button onclick="clearCart()" class="btn jumbo blue">Clear Cart</button>
     </div>
     <div class="button-row">
-      <button class="btn jumbo blue">Search Item Code</button>
+      <button onclick="openSearchModal()" class="btn jumbo blue">Search Item Code</button>
       <button class="btn jumbo yellow">Change Language</button>
     </div>
     <div class="button-row single">
       <button onclick="startPayment()" class="button green">Pay with Card</button>
+    </div>
+  </div>
+
+  <!-- Search Item Modal -->
+  <div id="searchModal" class="modal">
+    <div class="modal-content">
+      <h3>Search Item by Code</h3>
+      <input class="membership-input" type="text" id="searchCodeInput" placeholder="Enter item code">
+      <button class="search-buttons" onclick="searchItem()">Search</button>
+
+      <div id="searchResult"></div>
+
+      <div class="modal-buttons">
+        <button class="search-buttons" id="addItemBtn" onclick="addItem()">Add</button>
+        <button class="search-buttons" onclick="closeSearchModal()">Close</button>
+      </div>
     </div>
   </div>
 

@@ -246,3 +246,13 @@ button {
 .notification.show {
   right: 20px; /* Slide into view */
 }
+
+
+.searchResult {
+  margin-top: 1em;
+}
+
+.search-buttons {
+  padding: 20px;
+  margin: 0.5em 4em 0.5em 4em;
+}
