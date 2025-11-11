@@ -33,6 +33,8 @@ input.focus();
 window.onclick = (event) => {
     if (event.target === membershipModal) {
         membershipModal.style.display = "none";
+        document.getElementById("scanner-input").disabled = false;
+        document.getElementById("scanner-input").focus();
     }
 };
 
@@ -41,6 +43,8 @@ function submitMembership() {
     const membershipNumber = document.getElementById("membershipInput").value;
     console.log("Membership number submitted:", membershipNumber);
     membershipModal.style.display = "none";
+    document.getElementById("scanner-input").disabled = false;
+    document.getElementById("scanner-input").focus();
 
     fetch('/submit-membership', {
         method: 'POST',
@@ -84,6 +88,8 @@ function startPayment() {
             console.log("No membership number found in session.");
             paymentModal.style.display = "block";
             membershipModal.style.display = "block";
+            document.getElementById("scanner-input").disabled = true;
+            document.getElementById("membershipInput").focus();
         }
     });
 }
@@ -214,29 +220,29 @@ function attachRemoveListeners() {
 
 // Payment submit: collect card info and POST to server
 function makePayment() {
-        const cardNumber = document.getElementById('cardNumberInput').value;
-        const expiry = document.getElementById('expiryInput').value;
+    const cardNumber = document.getElementById('cardNumberInput').value;
+    const expiry = document.getElementById('expiryInput').value;
 
-        fetch('/finalize-payment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cardNumber, expiryDate: expiry })
-        })
-        .then(response => response.json())
-        .then(data => {
-                if (data.status === 'success') {
-                        console.log('Payment processed:', data.message || data);
-                        closePaymentModal();
-                        updateCartDisplay();
-                        showPaymentConfirmation();
-                } else {
-                        alert('Payment failed: ' + (data.message || 'Unknown'));
-                }
-        })
-        .catch(err => {
-                console.error('Payment error', err);
-                alert('Payment request failed');
-        });
+    fetch('/finalize-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardNumber, expiryDate: expiry })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Payment processed:', data.message || data);
+            closePaymentModal();
+            updateCartDisplay();
+            showPaymentConfirmation();
+        } else {
+            alert('Payment failed: ' + (data.message || 'Unknown'));
+        }
+    })
+    .catch(err => {
+        console.error('Payment error', err);
+        alert('Payment request failed');
+    });
 }
 
 function showPaymentConfirmation() {
@@ -263,4 +269,72 @@ function showNotification(message, duration = 3000) {
   }, duration);
 }
 
-// calculateSummary(0.05, 0.09975);
+function callForAssistance() {
+    console.log("Calling for assistance...");
+}
+
+function clearCart() {
+    fetch('/clear-cart', {})
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateCartDisplay();
+            calculateSummary();
+        } else {
+            alert(':Cart clearing failed. ' + (data.message || 'Unknown'));
+        }
+    })
+    .catch(err => {
+            console.error('Cart clearing error', err);
+            alert('Cart clearing request failed');
+    });
+}
+
+let currentItem = null;
+
+function openSearchModal() {
+    console.log('Opening search modal...')
+    document.getElementById("searchModal").style.display = "block";
+    document.getElementById("searchCodeInput").focus();
+    document.getElementById("searchResult").innerHTML = "";
+    document.getElementById("addItemBtn").style.display = "none";
+    currentItem = null;
+}
+
+function closeSearchModal() {
+    document.getElementById("searchModal").style.display = "none";
+}
+
+function searchItem() {
+    console.log('Searching for item...')
+    const code = document.getElementById("searchCodeInput").value;
+    fetch('/search-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Item not found");
+        return res.json();
+    })
+    .then(data => {
+        currentItem = data.item;
+        document.getElementById("searchResult").innerHTML = `
+        <p><strong>Added ${data.item.name}</strong></p>
+        `;
+        updateCartDisplay();
+        calculateSummary();
+    })
+    .catch(err => {
+        document.getElementById("searchResult").innerHTML = `<p style="color:red;">${err.message}</p>`;
+        document.getElementById("addItemBtn").style.display = "none";
+        currentItem = null;
+    });
+}
+
+function addItem() {
+    if (!currentItem) return;
+    // Add to cart logic here
+    console.log("Added to cart:", currentItem);
+    closeSearchModal();
+}

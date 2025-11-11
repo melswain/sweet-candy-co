@@ -67,3 +67,15 @@ class Inventory(Base):
 
         else:
             raise Exception("Inventory item not found")
+        
+    @staticmethod
+    def search_item(product_id, location_id):
+        query = """
+            SELECT productId FROM inventory
+            WHERE productId = ? AND locationId = ?
+        """
+        try:
+            result = fetchone(query, (product_id, location_id))
+            return True, result[0]
+        except Exception as e:
+            return f"Failed to find inventory record:\n{e}"
