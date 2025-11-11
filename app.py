@@ -295,8 +295,10 @@ def update_product():
     new_upc = request.form.get('upc')
     new_epc = request.form.get('epc')
 
-    result, message = Product.update_product(productId=productId, new_name=new_name, new_type=new_type,new_price=new_price,
-                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,new_upc=new_upc,new_epc=new_epc
+    result, message = Product.update_product(productId=productId, new_name=new_name,
+                                            new_type=new_type,new_price=new_price,
+                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,
+                                            new_upc=new_upc,new_epc=new_epc
                                             )
     print(message);
     return redirect(url_for('index'))
@@ -312,8 +314,9 @@ def add_product():
     epc = request.form.get('epc')
 
     result, message = Product.create(name=name, type_=type_,price=price,
-                                            expiration_date=expirationDate,manufacturer_name=manufacturerName,upc=upc,epc=epc
-                                            )
+                                    expiration_date=expirationDate,manufacturer_name=manufacturerName,
+                                    upc=upc,epc=epc
+                                    )
     print(message);
     return redirect(url_for('index'))
 

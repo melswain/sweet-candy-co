@@ -87,7 +87,7 @@
           <td>{{product.upc}}</td>
           <td>{{product.epc}}</td>
           <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
-          <td><button class="open-delete-modal">Delete</button></td>
+          <td><button class="open-delete-modal" data-index="{{ loop.index }}">Delete</button></td>
         </tr>
         {% else %}
         <tr>
@@ -322,6 +322,13 @@
         });
       }
     });
+
+    // Delete Product Interaction
+
+    const deleteBtn = document.querySelector('.open-delete-modal');
+
+    deleteBtn.addEventListener()
+
 
   </script>
 </body>
