@@ -260,13 +260,13 @@ function closeModal() {
 }
 
 function showNotification(message, duration = 3000) {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.classList.add('show');
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
 
-  setTimeout(() => {
-    notification.classList.remove('show');
-  }, duration);
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, duration);
 }
 
 function callForAssistance() {
@@ -324,6 +324,7 @@ function searchItem() {
         `;
         updateCartDisplay();
         calculateSummary();
+        showNotification("Cart item added successfully!", 3000);
     })
     .catch(err => {
         document.getElementById("searchResult").innerHTML = `<p style="color:red;">${err.message}</p>`;

@@ -227,6 +227,9 @@ def finalize_payment():
 def scan_item():
     data = request.get_json() or {}
     code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
+    if isinstance(code, str) and len(code) == 13 and code.startswith("0"):
+        code = code[1:]
+
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
 
