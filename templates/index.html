@@ -190,6 +190,21 @@
         </form>
       </div>
 
+      <!--* Delete Modal -->
+      <div class="delete-modal">
+        <form method="POST" class="delete-form-content" action="/delete_product" >
+          <h2 class="delete-warning-header"> Are you sure you want to delete product
+            <span id="delete-product-id-display">?</span>
+          </h2>  
+          <input type="hidden" name="productId" id="delete-product-id-input">
+            
+            <div class="delete-modal-buttons">
+                <button type="submit" class="delete-confirm-btn">Delete</button>
+                <button type="button" class="delete-cancel-btn">Cancel</button>
+            </div>
+        </form>
+      </div>
+
 
   <script>
     function closeNotification() {
@@ -323,11 +338,57 @@
       }
     });
 
+
     // Delete Product Interaction
+    document.querySelectorAll('.open-update-modal').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            const modal = document.querySelector('.update-modal');
+            
 
-    const deleteBtn = document.querySelector('.open-delete-modal');
+            modal.style.display = 'flex'; 
+            
+            setTimeout(() => {
+                modal.classList.add('active'); // Add 'active' class to trigger fade-in
+            }, 10); // A small delay is usually sufficient
 
-    deleteBtn.addEventListener()
+            modal.querySelectorAll('input').forEach(input => input.value = '');
+
+            const row = event.target.closest('tr');
+            if (row) {
+                modal.querySelector('input[name="productId"]').value = row.cells[0].textContent.trim();
+                modal.querySelector('input[name="name"]').value = row.cells[1].textContent.trim();
+                modal.querySelector('input[name="type"]').value = row.cells[2].textContent.trim();
+                modal.querySelector('input[name="price"]').value = row.cells[3].textContent.trim();
+                modal.querySelector('input[name="expirationDate"]').value = row.cells[4].textContent.trim();
+                modal.querySelector('input[name="manufacturerName"]').value = row.cells[5].textContent.trim();
+                modal.querySelector('input[name="upc"]').value = row.cells[6].textContent.trim();
+                modal.querySelector('input[name="epc"]').value = row.cells[7].textContent.trim();
+            }
+        });
+    });
+
+    // Close modal when clicking Cancel
+    document.querySelector('.update-cancel-btn').addEventListener('click', () => {
+        const modal = document.querySelector('.update-modal');
+        modal.classList.remove('active'); 
+        modal.addEventListener('transitionend', function handler() {
+            modal.style.display = 'none';
+            modal.removeEventListener('transitionend', handler); 
+        });
+    });
+
+    document.querySelector('.update-modal').addEventListener('click', (event) => {
+        if (event.target.classList.contains('update-modal')) {
+            const modal = document.querySelector('.update-modal');
+            modal.classList.remove('active'); 
+            modal.addEventListener('transitionend', function handler() {
+                modal.style.display = 'none';
+                modal.removeEventListener('transitionend', handler);
+            });
+        }
+    });
+
+    
 
 
   </script>
