@@ -25,8 +25,18 @@ from Models.product import Product
 # import fanControl
 import os
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
+
+
+
+# app = Flask(__name__)
+# app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 current_fan_state = False
 
@@ -75,11 +85,6 @@ items = [
 
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"
-
-def process_membership(membership_number):
-    # Your logic here
-    print(f"Processing membership: {membership_number}")
-    return {"status": "success", "points": 26}
 
 @app.route('/')
 def index():
@@ -130,6 +135,10 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
+    # if 'membership_number' not in session:
+    #     flash("Please enter your membership number first.")
+    #     return redirect(url_for('index'))
+
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -167,7 +176,7 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
-@app.route('/finalize-payment', methods=['POST'])
+@app.route('/finalize-payment')
 def finalize_payment():
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
@@ -189,7 +198,7 @@ def finalize_payment():
     # Calculate totals
     def to_decimal(v):
         return Decimal(str(v)) if not isinstance(v, Decimal) else v
-    
+
     subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
     gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
@@ -199,7 +208,7 @@ def finalize_payment():
     customer_success, customer_result = addRewardPoints(membership_number, reward_points)
     if not customer_success:
         return jsonify({"status": "error", "message": customer_result}), 400
-    
+
     # Create cart using the cart controller
     cart_success, cart_result = addCart(membership_number, float(total), reward_points)
     if not cart_success:
@@ -208,7 +217,7 @@ def finalize_payment():
     # Get cart ID from the result
     cart_id = cart_result
     print('Cart id: ', cart_id)
-    
+
     # Create cart items for each product
     for item in items:
         cart_item_success, cart_item_message = addCartItem(
@@ -219,7 +228,7 @@ def finalize_payment():
         )
         if not cart_item_success:
             return jsonify({"status": "error", "message": cart_item_message}), 400
-    
+
     # Create payment record
     payment_success, payment_message = addPayment(cart_id, card_number, expiry)
 
@@ -228,6 +237,7 @@ def finalize_payment():
     session.pop('membership_number', None)
 
     return jsonify({"status": "success", "message": "Payment processed (simulated)"})
+
 
 @app.route('/scan', methods=['POST'])
 def scan_item():
@@ -388,5 +398,23 @@ def search_item():
 #     if response:
 #         turnOnFan()
 
+
+def send_receipt_email(sender_email, app_password, receiver_email, subject, html_content):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.attach(MIMEText(html_content, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+
+    print("✅ Receipt email sent successfully!")
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
+
