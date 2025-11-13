@@ -218,8 +218,9 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(26px);
 }
-
-/* Product Management Table Styles */
+/*!--------------------------------- */
+/*!  Product Management Table Styles */
+/*!--------------------------------- */
 .productManagement-container {
     background: aliceblue;
     padding: 20px;
@@ -307,7 +308,9 @@ input:checked + .slider:before {
     transition: background-color 0.2s, transform 0.1s;
 }
 
-/* Product Management Update Styles        */
+/*!--------------------------------- */
+/*! Product Management Update Styles*/
+/*!--------------------------------- */
 .update-modal {
 display: none; 
 position: fixed;
@@ -400,7 +403,9 @@ margin-bottom: 5px;
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Product Management Add Styles  */
+/*!--------------------------------- */
+/*!   Product Management Add Styles    */
+/*!--------------------------------- */
 .add-modal {
 display: none; 
 position: fixed;
@@ -492,5 +497,126 @@ margin-bottom: 5px;
  from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 } */
+
+/*!--------------------------------- */
+/*!   Product Management Delete Styles    */
+/*!--------------------------------- */
+
+.delete-modal {
+    /* Initially hidden by display: none. JS sets to flex to show overlay. */
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Start with low opacity for the overlay background fade-in */
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.4); 
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease-out;
+}
+
+/* State when JS adds the 'active' class: fades in the background */
+.delete-modal.active {
+    opacity: 1;
+    /* Keeps display: flex after transition ends */
+    display: flex; 
+}
+
+/* --- DELETE MODAL FORM CONTENT STYLES (The white box) --- */
+.delete-modal form {
+    background: #fefaff; 
+    border-radius: 20px;
+    padding: 30px 40px;
+    width: 450px; /* Smaller width for a confirmation box */
+    max-width: 90%; /* Ensures responsiveness on small screens */
+    box-shadow: 0 5px 20px rgba(255, 105, 180, 0.3);
+    font-family: 'Barlow', sans-serif;
+    border: 2px solid #ffb8d1; 
+    
+    /* Center text and vertically stack elements */
+    display: hidden;
+    flex-direction: column;
+    align-items: center;
+
+    /* Initial state for the content box fade-in/scale transition */
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* .delete-form-content{
+  text-align: center;
+} */
+
+/* State when JS adds the 'active' class: fades in and scales up the content */
+.delete-modal.active form {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* --- DELETE MODAL SPECIFIC STYLES --- */
+
+.delete-warning-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ff3838; /* Red color to emphasize the warning */
+    text-align: center;
+    margin-bottom: 30px;
+    line-height: 1.4;
+}
+
+#delete-product-id-display {
+    color: #a04b6a; /* Use the brand color for the Product ID */
+    font-weight: 800;
+}
+
+.delete-modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.delete-modal-buttons button {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    text-transform: uppercase;
+}
+
+/* Style for the destructive action button */
+.delete-confirm-btn {
+    background-color: #ff3838; /* Prominent red */
+    color: white;
+}
+
+.delete-confirm-btn:hover {
+    background-color: #cc0000;
+    transform: translateY(-1px);
+}
+
+/* Style for the neutral cancel button */
+.delete-cancel-btn {
+    background-color: #ffe3ca; /* Matches input background */
+    color: #a04b6a;
+}
+
+.delete-cancel-btn:hover {
+    background-color: #ffd8a8;
+    transform: translateY(-1px);
+}
+
+
+
 
 

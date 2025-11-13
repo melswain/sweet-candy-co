@@ -316,10 +316,18 @@ def add_product():
     upc = request.form.get('upc')
     epc = request.form.get('epc')
 
-    result, message = Product.create(name=name, type_=type_,price=price,
-                                    expiration_date=expirationDate,manufacturer_name=manufacturerName,
-                                    upc=upc,epc=epc
-                                    )
+    message = Product.create(name=name, type_=type_,price=price,
+                            expiration_date=expirationDate,manufacturer_name=manufacturerName,
+                            upc=upc,epc=epc
+                            )
+    print(message);
+    return redirect(url_for('index'))
+
+@app.route('/delete_product', methods=['POST'])
+def delete_product():
+    productId = request.form.get('productId')
+    print("productID is :" + productId)
+    message = Product.delete_product(productId=productId)
     print(message);
     return redirect(url_for('index'))
 

@@ -27,7 +27,7 @@ class Product(Base):
         return f"<Product(name='{self.name}', type='{self.type}', price=${self.price})>"
 
     @staticmethod
-    def create(name, type, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
+    def create(name, type_, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
         """Create a new product in the database.
         
         Args:
@@ -50,7 +50,7 @@ class Product(Base):
         try:
             result = execute(query, (
                 name, 
-                type, 
+                type_, 
                 price, 
                 expiration_date,
                 manufacturer_name,
@@ -59,7 +59,7 @@ class Product(Base):
                 discount
             ))
             if result is True:
-                return True, "Product created successfully."
+                return True,"Product created successfully."
             return False, "Failed to create product."
         except Exception as e:
             return False, f"Error creating product: {str(e)}"
@@ -189,6 +189,18 @@ class Product(Base):
                  WHERE productId = ? """
         result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
         if result is True:
-            return True, "Price updated successfully."
-        return False, "Failed to update price."
+            return True, "Product updated successfully."
+        return False, "Failed to update Product."
+    
+    @staticmethod
+    def delete_product(productId):
+        query = """
+                DELETE FROM product WHERE productId = ? """
+        result = execute(query,(productId,))
+        try:
+            if result is True:
+                return True, "Product deleted successfully."
+            return False, "Failed to deleted Product."
+        except Exception as e:
+                 return False, f"Database error during deletion: {e}"
         
