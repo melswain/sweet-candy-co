@@ -33,8 +33,8 @@ input.focus();
 window.onclick = (event) => {
     if (event.target === membershipModal) {
         membershipModal.style.display = "none";
-        document.getElementById("scanner-input").disabled = false;
-        document.getElementById("scanner-input").focus();
+        input.disabled = false;
+        input.focus();
     }
 };
 
@@ -43,8 +43,8 @@ function submitMembership() {
     const membershipNumber = document.getElementById("membershipInput").value;
     console.log("Membership number submitted:", membershipNumber);
     membershipModal.style.display = "none";
-    document.getElementById("scanner-input").disabled = false;
-    document.getElementById("scanner-input").focus();
+    input.disabled = false;
+    input.focus();
 
     fetch('/submit-membership', {
         method: 'POST',
@@ -69,6 +69,7 @@ function continueToPayment() {
     // Show payment modal so user can enter/scan card
     paymentModal.style.display = 'block';
     // focus card input for easy scanning
+    
     const cardInput = document.getElementById('cardNumberInput');
     if (cardInput) cardInput.focus();
 }
@@ -85,10 +86,11 @@ function startPayment() {
             console.log("Membership is set:", data.membership_number);
             paymentModal.style.display = "block";
         } else {
-            console.log("No membership number found in session.");
             paymentModal.style.display = "block";
             membershipModal.style.display = "block";
-            document.getElementById("scanner-input").disabled = true;
+            input.disabled = true;
+            input.blur();
+            console.log(input.offsetParent !== null);
             document.getElementById("membershipInput").focus();
         }
     });
@@ -260,13 +262,13 @@ function closeModal() {
 }
 
 function showNotification(message, duration = 3000) {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.classList.add('show');
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
 
-  setTimeout(() => {
-    notification.classList.remove('show');
-  }, duration);
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, duration);
 }
 
 function callForAssistance() {
@@ -324,6 +326,7 @@ function searchItem() {
         `;
         updateCartDisplay();
         calculateSummary();
+        showNotification("Cart item added successfully!", 3000);
     })
     .catch(err => {
         document.getElementById("searchResult").innerHTML = `<p style="color:red;">${err.message}</p>`;
