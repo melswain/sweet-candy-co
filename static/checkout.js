@@ -53,15 +53,46 @@ function submitMembership() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Server response:", data);
-        // After membership is accepted, continue to payment
-        continueToPayment();
+    console.log("Server response:", data);
+    fetch('/get-reward-points')
+        .then(res => res.json())
+        .then(pointsData => {
+            if (pointsData.status === "success") {
+                const points = pointsData.points;
+                const discount = Math.floor(points / 100);
+                if (discount > 0) {
+                    showPointsModal(points, discount);
+                } else {
+                    continueToPayment();
+                }
+            } else {
+                continueToPayment();
+            }
+        });
     })
     .catch(error => {
         console.error("Error:", error);
         // still continue to payment if server not reachable
         continueToPayment();
     });
+}
+
+function showPointsModal(points, discount) {
+    document.getElementById("pointsValue").textContent = points;
+    document.getElementById("discountValue").textContent = discount;
+    document.getElementById("pointsModal").style.display = "block";
+}
+
+function applyPointsDiscount() {
+    sessionStorage.setItem("usePoints", "true");
+    document.getElementById("pointsModal").style.display = "none";
+    continueToPayment();
+}
+
+function skipPointsDiscount() {
+    sessionStorage.setItem("usePoints", "false");
+    document.getElementById("pointsModal").style.display = "none";
+    continueToPayment();
 }
 
 function continueToPayment() {

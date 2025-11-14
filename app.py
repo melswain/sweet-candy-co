@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer, addRewardPoints
+from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints
 from Controllers.cart_controller import addCart
 from Controllers.cart_item_controller import addPayment as addCartItem
 from Controllers.payment_controller import addPayment
@@ -167,11 +167,39 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
+@app.route('/get-reward-points')
+def get_reward_points():
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 400
+
+    success, customer = getCustomerById(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": "Customer not found"}), 404
+
+    return jsonify({
+        "status": "success",
+        "points": customer.total_reward_points
+    })
+
 @app.route('/finalize-payment', methods=['POST'])
 def finalize_payment():
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
     expiry = data.get('expiryDate') or data.get('expiry')
+
+    use_points = request.get_json().get('usePoints') == True
+
+    # Apply discount
+    if use_points and membership_number:
+        success, customer = getCustomerById(membership_number)
+        if success:
+            points = customer.total_reward_points
+            discount = Decimal(points // 100)
+            total = max(total - discount, Decimal('0.00'))
+            points_used = int(discount * 100)
+            subtractRewardPoints(membership_number, points_used)
+
 
     # membership number (if scanned earlier) is kept in session
     membership_number = session.get('membership_number')
@@ -326,6 +354,7 @@ def add_product():
 @app.route('/clear-cart', methods=['GET'])
 def clear_cart():
     items.clear()
+    session.pop('membership_number', None)
     return jsonify({"status": "success"})
 
 @app.route('/search-item', methods=['POST'])

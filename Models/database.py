@@ -58,7 +58,7 @@ def setup_database():
     schema = """
     CREATE TABLE IF NOT EXISTS cart (
       cartId INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId INTEGER,
+      customerId VARCHAR(12),
       totalCartPrice DECIMAL(10,2) NOT NULL,
       totalRewardPoints INTEGER DEFAULT 0,
       checkoutDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,7 +76,7 @@ def setup_database():
     );
 
     CREATE TABLE IF NOT EXISTS customer (
-      customerId INTEGER PRIMARY KEY AUTOINCREMENT,
+      customerId VARCHAR(12) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
       email VARCHAR(100) UNIQUE,
       phone VARCHAR(20) NOT NULL,
@@ -140,7 +140,7 @@ def setup_database():
       expirationDate DATE NOT NULL,
       discountPercentage DECIMAL(3,2) DEFAULT 1.00,
       manufacturerName VARCHAR(100),
-      upc VARCHAR(50) NOT NULL UNIQUE,
+      upc VARCHAR(12) NOT NULL UNIQUE,
       epc VARCHAR(50) NOT NULL
     );
 
@@ -170,11 +170,11 @@ def setup_database():
     (1, 5.00, 13.00, 35.00, 45.00),  -- Laval location
     (2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
 
-    INSERT INTO customer (name, email, phone, totalRewardPoints) VALUES
-    ('Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
-    ('Michael Chen', 'mchen@email.com', '514-555-0102', 0),
-    ('Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
-    ('David Kim', 'davidk@email.com', '514-555-0104', 0);
+    INSERT INTO customer (customerId, name, email, phone, totalRewardPoints) VALUES
+    ('987654321012', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+    ('987654321029', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+    ('987654321036', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+    ('987654321043', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
 
     INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
     ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'EPC123001'),
