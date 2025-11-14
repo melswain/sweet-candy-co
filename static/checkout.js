@@ -103,6 +103,7 @@ function makePayment() {
             console.log("Payment made:", data.status);
             updateCartDisplay();
         } else {
+            showNotification('payment wrong')
             console.log("Issues were encountered when trying to make a payment.");
         }
     });

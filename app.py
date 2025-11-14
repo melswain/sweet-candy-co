@@ -176,26 +176,23 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
-@app.route('/finalize-payment')
+@app.route('/finalize-payment',methods=['POST'])
 def finalize_payment():
+    # ! "Yakins" code
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
     expiry = data.get('expiryDate') or data.get('expiry')
 
-    # membership number (if scanned earlier) is kept in session
     membership_number = session.get('membership_number')
 
-    # Simulate payment processing (no real gateway here)
-    print('Finalizing payment. Card:', card_number, 'Expiry:', expiry, 'Membership:', membership_number)
+    print("Finalizing payment. Card:", card_number, "Expiry:", expiry, "Membership:", membership_number)
 
-    # Remove inventory for each item (existing behavior)
     for item in items:
         try:
             removeInventory(item["id"], 1, item["quantity"])
         except Exception as e:
-            print('Warning: failed to remove inventory for', item, e)
+            print("Warning: failed to remove inventory:", e)
 
-    # Calculate totals
     def to_decimal(v):
         return Decimal(str(v)) if not isinstance(v, Decimal) else v
 
@@ -203,79 +200,79 @@ def finalize_payment():
     gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
     reward_points = int(subtotal // Decimal('10') * 100)
 
     customer_success, customer_result = addRewardPoints(membership_number, reward_points)
     if not customer_success:
         return jsonify({"status": "error", "message": customer_result}), 400
 
-    # Create cart using the cart controller
+
     cart_success, cart_result = addCart(membership_number, float(total), reward_points)
     if not cart_success:
         return jsonify({"status": "error", "message": cart_result}), 400
 
-    # Get cart ID from the result
     cart_id = cart_result
-    print('Cart id: ', cart_id)
+    print("Cart ID:", cart_id)
 
-    # Create cart items for each product
+
     for item in items:
-        cart_item_success, cart_item_message = addCartItem(
+        ok, msg = addCartItem(
             cart_id=cart_id,
-            product_id=item['id'],
-            quantity=item['quantity'],
-            total_price=float(item['total'])
+            product_id=item["id"],
+            quantity=item["quantity"],
+            total_price=float(item["total"])
         )
-        if not cart_item_success:
-            return jsonify({"status": "error", "message": cart_item_message}), 400
+        if not ok:
+            return jsonify({"status": "error", "message": msg}), 400
 
-    # Create payment record
     payment_success, payment_message = addPayment(cart_id, card_number, expiry)
+    if not payment_success:
+        return jsonify({"status": "error", "message": payment_message}), 400
 
-    # Clear cart and membership
+
+    receipt_html = """
+        <h2>🧾 Receipt</h2>
+        <table border="1" cellspacing="0" cellpadding="6">
+        <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+    """
+
+    for item in items:
+        receipt_html += f"""
+            <tr>
+                <td>{item['name']}</td>
+                <td>{item['quantity']}</td>
+                <td>${item['unit']:.2f}</td>
+                <td>${item['total']:.2f}</td>
+            </tr>
+        """
+
+    receipt_html += f"""
+        </table><br>
+        <b>Subtotal:</b> ${subtotal:.2f}<br>
+        <b>GST:</b> ${gst:.2f}<br>
+        <b>QST:</b> ${qst:.2f}<br>
+        <b>Total:</b> ${total:.2f}<br>
+        <b>Reward Points Earned:</b> {reward_points}<br>
+    """
+
+    try:
+        send_receipt_email(
+            sender_email="yakin726@gmail.com",
+            app_password="phwskofgaeasirge",
+            receiver_email="dummyjeff14@gmail.com",
+            subject="Your Purchase Receipt",
+            html_content=receipt_html
+        )
+    except Exception as e:
+        print("❌ Email failed:", e)
+        # Email failure should NOT stop checkout — but return warning
+        return jsonify({"status": "warning", "message": "Payment processed but email failed", "error": str(e)}), 500
+
     items.clear()
     session.pop('membership_number', None)
 
-    return jsonify({"status": "success", "message": "Payment processed (simulated)"})
-
-
-@app.route('/scan', methods=['POST'])
-def scan_item():
-    data = request.get_json() or {}
-    code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
-    if isinstance(code, str) and len(code) == 13 and code.startswith("0"):
-        code = code[1:]
-
-    if not code:
-        return jsonify({"status": "error", "message": "No code provided"}), 400
-
-    product = getProductWithUpc(code)
-    if not product:
-        product = getProductWithEpc(code)
-
-    if product and hasattr(product, 'productId'):
-        unit_price = float(product.price)
-        product_id = product.productId
-
-        # Check if item already exists in the list
-        for item in items:
-            if item['id'] == product_id:
-                item['quantity'] += 1
-                item['total'] = item['quantity'] * unit_price
-                return jsonify({"status": "success", "item": item, "items": items})
-
-        # If not found, add as new item
-        new_item = {
-            'id': product_id,
-            'name': product.name,
-            'quantity': 1,
-            'unit': unit_price,
-            'total': unit_price,
-        }
-        items.append(new_item)
-        return jsonify({"status": "success", "item": new_item, "items": items})
-    else:
-        return jsonify({"status": "error", "message": "Item not found"}), 404
+    return jsonify({"status": "success", "message": "Payment processed & receipt emailed!"})
 
 @app.route('/cart-items', methods=['GET'])
 def get_cart_items():
@@ -296,6 +293,7 @@ def remove_item():
     global items
     items = [item for item in items if item['id'] != item_id]
     return jsonify({"status": "success", "items": items})
+
 
 @app.route('/update_product', methods=['POST'])
 def update_product():
@@ -416,5 +414,4 @@ def send_receipt_email(sender_email, app_password, receiver_email, subject, html
 
 if __name__ == '__main__':
     app.run(debug=True)
-
 
