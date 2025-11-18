@@ -398,6 +398,19 @@ margin-bottom: 5px;
  padding-right: 20px;
 }
 
+.update-confirm-btn {
+    background-color: #0066a1; /* Prominent red */
+    color: white;
+    padding-right: 50spx;
+}
+
+.update-confirm-btn:hover {
+    background-color: #A9DEF9;
+    transform: translateY(-1px);
+}
+
+
+
 @keyframes popIn {
  from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }

@@ -297,11 +297,13 @@ def update_product():
     new_manufacturerName = request.form.get('manufacturerName')
     new_upc = request.form.get('upc')
     new_epc = request.form.get('epc')
+    new_quantity = request.form.get('quantity');
 
     result, message = Product.update_product(productId=productId, new_name=new_name,
                                             new_type=new_type,new_price=new_price,
                                             new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,
-                                            new_upc=new_upc,new_epc=new_epc
+                                            new_upc=new_upc,new_epc=new_epc,
+                                            new_quantity=new_quantity
                                             )
     print(message);
     return redirect(url_for('index'))

@@ -73,6 +73,7 @@
           <th>Manufacturer Name</th>
           <th>UPC</th>
           <th>EPC</th>
+          <th>QUANTITY</th>
         </tr>
       </thead>
       <tbody>
@@ -86,6 +87,7 @@
           <td>{{product.manufacturerName}}</td>
           <td>{{product.upc}}</td>
           <td>{{product.epc}}</td>
+          <td>{{product.quantity}}</td>
           <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
           <td><button class="open-delete-modal" data-index="{{ loop.index }}">Delete</button></td>
         </tr>
@@ -134,12 +136,19 @@
                     <label for="modal-epc">Product EPC</label>
                     <input name="epc" type="text" id="modal-epc">
                 </div>
+
+                <div class="form-field-group">
+                    <label for="modal-quantity">Quantity</label>
+                    <input name="quantity" type="number" id="modal-quantity">
+                </div>
             </div>
             
             <div class="update-modal-buttons">
                 <button type="submit" class="update-confirm-btn">Update</button>
                 <button type="button" class="update-cancel-btn">Cancel</button>
             </div>
+
+            
         </form>
       </div>
   </div>
@@ -268,6 +277,7 @@
                 modal.querySelector('input[name="manufacturerName"]').value = row.cells[5].textContent.trim();
                 modal.querySelector('input[name="upc"]').value = row.cells[6].textContent.trim();
                 modal.querySelector('input[name="epc"]').value = row.cells[7].textContent.trim();
+                modal.querySelector('input[name="quantity"]').value = row.cell[8].textContent.trim();
             }
         });
     });

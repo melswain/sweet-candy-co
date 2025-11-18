@@ -171,23 +171,35 @@ class Product(Base):
     
     @staticmethod
     def get_allProducts():
-        query = "SELECT * FROM product WHERE 1;"
+        query = """SELECT p.*, i.quantity 
+                   FROM product as p 
+                   JOIN inventory as i 
+                   ON p.productId = i.productId
+                   WHERE locationId = 1;
+                """
         rows = fetchall(query)
         if rows is False or rows is None:
             return False, "Failed retrieve Products"
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc','quantity']
         product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
         return product_list
     
     @staticmethod
-    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc):
+    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,new_quantity):
         query = """
                 UPDATE product 
                 SET name = ?, type = ?
                     , price = ?, expirationDate = ?, manufacturerName = ?
                     , upc = ?, epc = ?
                  WHERE productId = ? """
+        query2 = """
+                UPDATE inventory
+                SET quantity = ?
+                WHERE productId = ?
+                    AND locationId = 1;
+                 """
         result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
+        result2 = execute(query2,(new_quantity,productId,))
         if result is True:
             return True, "Product updated successfully."
         return False, "Failed to update Product."
