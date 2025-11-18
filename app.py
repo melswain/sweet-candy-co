@@ -25,8 +25,18 @@ from Models.product import Product
 # import fanControl
 import os
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
+
+
+
+# app = Flask(__name__)
+# app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 current_fan_state = False
 
@@ -130,6 +140,10 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
+    if 'membership_number' not in session:
+        flash("Please enter your membership number first.")
+        return redirect(url_for('index'))
+
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -419,3 +433,5 @@ def search_item():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
