@@ -5,6 +5,7 @@ from .database import Base, execute, fetchone, fetchall
 from types import SimpleNamespace
 from datetime import date
 
+
 class Product(Base):
     __tablename__ = 'product'
 
@@ -65,6 +66,7 @@ class Product(Base):
 
     @staticmethod
     def get_by_upc(upc):
+        print('Product')
         """Find a product by its UPC code.
         
         Args:
@@ -74,6 +76,7 @@ class Product(Base):
             tuple: Row containing product data or None if not found
         """
         query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE upc = ?"
+        print('Getting upc...' + upc)
         row = fetchone(query, (upc,))
         if not row:
             return None
@@ -97,6 +100,18 @@ class Product(Base):
             return None
         keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
         return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
+    
+    @staticmethod
+    def get_by_id(id):
+        query = """
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc
+            FROM product WHERE productId = ?
+        """
+        row = fetchone(query, (id,))
+        if not row:
+            return None
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
 
     @staticmethod
     def update_price(product_id, new_price):
@@ -114,6 +129,9 @@ class Product(Base):
         if result is True:
             return True, "Price updated successfully."
         return False, "Failed to update price."
+    
+     
+
 
     @staticmethod
     def get_expiring_soon(days=30):
@@ -150,3 +168,27 @@ class Product(Base):
         if result is True:
             return True, "Discount applied successfully."
         return False, "Failed to apply discount."
+    
+    @staticmethod
+    def get_allProducts():
+        query = "SELECT * FROM product WHERE 1;"
+        rows = fetchall(query)
+        if rows is False or rows is None:
+            return False, "Failed retrieve Products"
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
+        return product_list
+    
+    @staticmethod
+    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc):
+        query = """
+                UPDATE product 
+                SET name = ?, type = ?
+                    , price = ?, expirationDate = ?, manufacturerName = ?
+                    , upc = ?, epc = ?
+                 WHERE productId = ? """
+        result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
+        if result is True:
+            return True, "Price updated successfully."
+        return False, "Failed to update price."
+        

@@ -13,14 +13,6 @@ gpio_mode = "mock"
 engine = create_engine("sqlite:///sweetcandyco.db")
 Session = sessionmaker(bind=engine)
 
-def setup():
-    print("Mock setup: no GPIO available")
-
-def signal_success():
-    print("Mock: success signal")  # instead of turning on LEDs
-
-def signal_failure():
-    print("Mock: failure signal")  # instead of turning on LEDs/buzzer
 GREEN_LED = 18
 RED_LED = 17
 BUZZER = 13
@@ -73,3 +65,42 @@ def addCustomer(name, email, phone):
     except Exception as e:
         signal_failure()
         return False, f"Failed to add customer:\n{e}"
+
+def addRewardPoints(customer_id, reward_points):
+    print('Adding reward points...')
+    try:
+        customer = Customer.addRewardPoints(customer_id, reward_points)
+        return True, "Successfully added reward points!"
+    except Exception as e:
+        return False, "Failed to add reward points: {e}"
+    
+# def verifyMembershipNumber(customer_id):
+#     print('Verifying membership...')
+#     try:
+#         customer = Customer.getCustomer(customer_id).first()
+#         if customer:
+#             return True, "Customer exists."
+#         else:
+#             return False, "Customer not found."
+#     except Exception as e:
+#         return False, f"Error verifying membership: {e}"
+    
+def getCustomerById(customer_id):
+    try:
+        customer = Customer.getCustomerById(customer_id)
+        if customer:
+            return True, customer
+        else:
+            return False, "Customer not found."
+    except Exception as e:
+        return False, f"Error getting customer: {e}"
+    
+def subtractRewardPoints(customer_id, points):
+    try:
+        customer = Customer.subtractRewardPoints(customer_id, points)
+        if customer:
+            return True
+        else:
+            return False, "Could not subtract points from customer."
+    except Exception as e:
+        return False, f"Error subtracting poitns: {e}"
