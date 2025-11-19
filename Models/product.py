@@ -200,7 +200,7 @@ class Product(Base):
                  """
         result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
         result2 = execute(query2,(new_quantity,productId,))
-        if result is True:
+        if result is True and result2 is True:
             return True, "Product updated successfully."
         return False, "Failed to update Product."
     

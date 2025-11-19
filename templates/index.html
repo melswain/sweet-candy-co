@@ -139,7 +139,7 @@
 
                 <div class="form-field-group">
                     <label for="modal-quantity">Quantity</label>
-                    <input name="quantity" type="number" id="modal-quantity">
+                    <input name="quantity" type="text" id="modal-quantity">
                 </div>
             </div>
             
@@ -147,7 +147,6 @@
                 <button type="submit" class="update-confirm-btn">Update</button>
                 <button type="button" class="update-cancel-btn">Cancel</button>
             </div>
-
             
         </form>
       </div>
@@ -189,6 +188,11 @@
                 <div class="form-field-group">
                     <label for="modal-epc">Product EPC</label>
                     <input name="epc" type="text">
+                </div>
+
+                <div class="form-field-group">
+                    <label for="modal-quantity">Quantity</label>
+                    <input name="quantity" type="text">
                 </div>
             </div>
             
@@ -277,7 +281,7 @@
                 modal.querySelector('input[name="manufacturerName"]').value = row.cells[5].textContent.trim();
                 modal.querySelector('input[name="upc"]').value = row.cells[6].textContent.trim();
                 modal.querySelector('input[name="epc"]').value = row.cells[7].textContent.trim();
-                modal.querySelector('input[name="quantity"]').value = row.cell[8].textContent.trim();
+                modal.querySelector('input[name="quantity"]').value = row.cells[8].textContent.trim();
             }
         });
     });

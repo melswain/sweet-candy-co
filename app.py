@@ -317,10 +317,12 @@ def add_product():
     manufacturerName = request.form.get('manufacturerName')
     upc = request.form.get('upc')
     epc = request.form.get('epc')
+    quantity = request.form.get('quantity');
+    quantity = 0 if quantity is None else request.form.get('quantity');
 
     message = Product.create(name=name, type_=type_,price=price,
                             expiration_date=expirationDate,manufacturer_name=manufacturerName,
-                            upc=upc,epc=epc
+                            upc=upc,epc=epc,quantity = quantity
                             )
     print(message);
     return redirect(url_for('index'))
@@ -376,6 +378,10 @@ def search_item():
             return jsonify({"status": "error", "message": "Item not found"}), 404
     else:
         return jsonify({"status": "error", "message": "Item not found"}), 404
+    
+@app.route('/customer_page')
+def customerPage():
+    return render_template('customerPage.html')
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
