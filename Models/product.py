@@ -27,7 +27,7 @@ class Product(Base):
         return f"<Product(name='{self.name}', type='{self.type}', price=${self.price})>"
 
     @staticmethod
-    def create(name, type, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
+    def create(name, type_, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
         """Create a new product in the database.
         
         Args:
@@ -50,7 +50,7 @@ class Product(Base):
         try:
             result = execute(query, (
                 name, 
-                type, 
+                type_, 
                 price, 
                 expiration_date,
                 manufacturer_name,
@@ -59,7 +59,7 @@ class Product(Base):
                 discount
             ))
             if result is True:
-                return True, "Product created successfully."
+                return True,"Product created successfully."
             return False, "Failed to create product."
         except Exception as e:
             return False, f"Error creating product: {str(e)}"
@@ -171,24 +171,48 @@ class Product(Base):
     
     @staticmethod
     def get_allProducts():
-        query = "SELECT * FROM product WHERE 1;"
+        query = """SELECT p.*, i.quantity 
+                   FROM product as p 
+                   JOIN inventory as i 
+                   ON p.productId = i.productId
+                   WHERE locationId = 1;
+                """
         rows = fetchall(query)
         if rows is False or rows is None:
             return False, "Failed retrieve Products"
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc','quantity']
         product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
         return product_list
     
     @staticmethod
-    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc):
+    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,new_quantity):
         query = """
                 UPDATE product 
                 SET name = ?, type = ?
                     , price = ?, expirationDate = ?, manufacturerName = ?
                     , upc = ?, epc = ?
                  WHERE productId = ? """
+        query2 = """
+                UPDATE inventory
+                SET quantity = ?
+                WHERE productId = ?
+                    AND locationId = 1;
+                 """
         result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
-        if result is True:
-            return True, "Price updated successfully."
-        return False, "Failed to update price."
+        result2 = execute(query2,(new_quantity,productId,))
+        if result is True and result2 is True:
+            return True, "Product updated successfully."
+        return False, "Failed to update Product."
+    
+    @staticmethod
+    def delete_product(productId):
+        query = """
+                DELETE FROM product WHERE productId = ? """
+        result = execute(query,(productId,))
+        try:
+            if result is True:
+                return True, "Product deleted successfully."
+            return False, "Failed to deleted Product."
+        except Exception as e:
+                 return False, f"Database error during deletion: {e}"
         

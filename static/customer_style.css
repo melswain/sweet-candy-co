@@ -1,0 +1,255 @@
+/* * Candy-Cane User Profile Styling
+ * Color Palette:
+ * --green: #D3F8E2 
+ * --purple: #E4C1F9 
+ * --pink: #F694C1 (Main Accent)
+ * --yellow: #EDE7B1 
+ * --blue: #A9DEF9 (Button/Primary)
+ * --rose-bg: #ffbcd9 (Page Background)
+ * --orange-text: #F47D2F (Input Text/Border)
+ * --card-bg: aliceblue 
+ */
+
+
+body {
+    font-family: 'Barlow', sans-serif;
+    background-color: #ffbcd9;
+    padding: 30px;
+    margin: 0;
+}
+
+h1{
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    color: #F694C1;
+}
+h2 {
+   font-family: 'Barriecito', 'Barlow', sans-serif;
+  color: #ff69b46d;
+}
+header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+header h1 {
+    display: inline-block;
+    color: #F694C1; 
+    padding: 10px 30px;
+    background-color: aliceblue;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+    font-size: 2.5rem;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 10px;
+}
+
+.info-card {
+    background-color: aliceblue;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+}
+
+.info-card h2 {
+    color: #ff69b4; 
+    border-bottom: 3px dashed #E4C1F9; 
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+
+.field-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    gap: 5px; 
+}
+
+.field-row label {
+    font-weight: 600;
+    color: #333;
+    flex-basis: auto; 
+}
+
+.field-row input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #F47D2F;
+    color: #F47D2F;
+    background-color: #ffc8695a; 
+    font-family: 'Barlow', sans-serif;
+    transition: all 0.2s ease-in-out;
+}
+
+.field-row input::placeholder {
+    color: #F47D2F;
+}
+
+
+.field-row input:not([disabled]) {
+    background-color: #ffffff;
+    border-color: #A9DEF9; 
+    color: #333; 
+}
+
+
+@media (min-width: 640px) {
+    .field-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 0;
+    }
+    .field-row label {
+        flex-basis: 40%;
+    }
+    .field-row input {
+        flex-basis: 55%;
+        width: auto;
+    }
+}
+
+
+.actions {
+    text-align: right;
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#edit-btn {
+    background-color: #A9DEF9; 
+    color: #0688c9; 
+}
+
+#edit-btn:hover {
+    background-color: #8ac0e8;
+    transform: translateY(-2px);
+}
+
+#save-btn {
+    background-color: #F694C1; 
+    color: white;
+}
+
+#save-btn:hover:not([disabled]) {
+    background-color: #e37da9;
+    transform: translateY(-2px);
+}
+
+#save-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+hr {
+    border: none;
+    height: 12px;
+    background-color: #E4C1F9; 
+    margin: 40px auto;
+    border-radius: 6px;
+}
+
+
+.history-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+    margin-bottom: 15px;
+}
+
+.history-controls input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #F47D2F;
+    background-color: #ffc8695a;
+    color: #F47D2F;
+    font-family: 'Barlow', sans-serif;
+    outline: none;
+}
+
+#view-history-btn {
+    padding: 15px 20px;
+    margin-top: 10px;
+    align-self: flex-start; 
+}
+
+@media (min-width: 640px) {
+    .history-controls {
+        flex-direction: row;
+        align-items: flex-end;
+    }
+    #view-history-btn {
+        margin-top: 0;
+        align-self: center;
+    }
+}
+
+
+.history-tip {
+    font-style: italic;
+    color: #a04b6a; 
+    margin-top: 5px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 2px solid #E4C1F9; 
+    border-radius: 10px;
+    overflow: hidden; /
+}
+
+#history-table thead tr {
+    background-color: #A9DEF9;
+    color: #0688c9; 
+}
+
+#history-table th, #history-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #E4C1F9; 
+}
+
+#history-table tbody tr:nth-child(even) {
+    background-color: rgba(237, 231, 177, 0.3); 
+}
+
+#history-table tbody tr:hover {
+    background-color: rgba(228, 193, 249, 0.5); 
+    transition: background-color 0.3s;
+}
+
+#history-table .no-data {
+    text-align: center;
+    font-style: italic;
+    color: #999;
+    padding: 20px;
+    background-color: white !important;
+}
