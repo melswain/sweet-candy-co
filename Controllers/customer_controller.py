@@ -103,4 +103,16 @@ def subtractRewardPoints(customer_id, points):
         else:
             return False, "Could not subtract points from customer."
     except Exception as e:
-        return False, f"Error subtracting poitns: {e}"
+        return False, f"Error subtracting points: {e}"
+    
+def customer_login(customer_id, password):
+    try:
+        print('made it here.')
+        customer = Customer.login_customer(customer_id, password)
+        if customer:
+            return True, None
+        else:
+            print('Error logging in. Username and/or password could be incorrect.')
+            return False, f"Error logging in. Username and/or password could be incorrect."
+    except Exception as e:
+        return False, f"Error logging in: {e}"

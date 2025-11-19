@@ -78,6 +78,7 @@ def setup_database():
     CREATE TABLE IF NOT EXISTS customer (
       customerId VARCHAR(12) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
+      password VARCHAR(100),
       email VARCHAR(100) UNIQUE,
       phone VARCHAR(20) NOT NULL,
       totalRewardPoints INTEGER DEFAULT 0,
@@ -170,11 +171,11 @@ def setup_database():
     (1, 5.00, 13.00, 35.00, 45.00),  -- Laval location
     (2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
 
-    INSERT INTO customer (customerId, name, email, phone, totalRewardPoints) VALUES
-    ('987654321012', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
-    ('987654321029', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
-    ('987654321036', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
-    ('987654321043', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
+    INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
+    ('987654321012', 'Dog1', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+    ('987654321029', 'Cat2', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+    ('987654321036', 'Bird3', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+    ('987654321043', 'Bunny4', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
 
     INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
     ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004917'),

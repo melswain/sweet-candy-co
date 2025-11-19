@@ -11,3 +11,10 @@ def addCart(customer_id, total_price, total_reward_points):
         return False, "Failed to create cart"
     except Exception as e:
         return False, f"Failed to add cart:\n{e}"
+
+def getCartsByCustomer(customer_id):
+    try:
+        carts = Cart.get_by_customer(customer_id)
+        return True, carts
+    except Exception as e:
+        return False, f"Failed to get carts: {e}"

@@ -39,3 +39,30 @@ class Cart(Base):
                 raise Exception('Failed to obtain last insert id')
         except Exception as e:
             raise
+
+    @staticmethod
+    def get_by_customer(customer_id):
+        """Return list of carts for a given customer_id as dicts."""
+        query = """
+            SELECT cartId, customerId, totalCartPrice, totalRewardPoints, checkoutDate
+            FROM cart
+            WHERE customerId = ?
+            ORDER BY checkoutDate DESC
+        """
+        try:
+            with get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (customer_id,))
+                rows = cursor.fetchall()
+                carts = []
+                for r in rows:
+                    carts.append({
+                        'cartId': r[0],
+                        'customerId': r[1],
+                        'totalCartPrice': float(r[2]) if r[2] is not None else 0.0,
+                        'totalRewardPoints': int(r[3]) if r[3] is not None else 0,
+                        'checkoutDate': r[4]
+                    })
+                return carts
+        except Exception as e:
+            raise

@@ -1,6 +1,6 @@
 # models/customer.py
 from sqlalchemy import Column, Integer, String
-from .database import Base, execute
+from .database import Base, execute, fetchone
 
 class Customer(Base):
     __tablename__ = 'customer'
@@ -80,3 +80,23 @@ class Customer(Base):
     def subtractRewardPoints(customer_id, points):
         query = "UPDATE customer SET totalRewardPoints = totalRewardPoints - ? WHERE customerId = ?"
         return execute(query, (points, customer_id)) is True
+    
+    @staticmethod
+    def login_customer(customer_id, password):
+        print("we're at model now.")
+        query = "SELECT * FROM customer WHERE customerId = ?"
+        
+        try:
+            customer = fetchone(query, (customer_id,))
+            if not customer:
+                print("No customer found for ID:", customer_id)
+                return False
+
+            print(customer)
+
+            if customer[2] == password:
+                return True
+        except Exception as e:
+            print("Error during login_customer:", e)
+
+        return False
