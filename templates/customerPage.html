@@ -19,37 +19,48 @@
         
         <section class="info-card" id="account-info">
             <h2>Your Account Information</h2>
+            {% for customer_data in customer_data %}
             <form id="account-form">
+
+                <div class="field-row">
+                    <label for="customerId">Customer ID</label>
+                    <input type="text" id="customerId"  value="{{customer_data.customerId}}" disabled>
+                </div>
                 <div class="field-row">
                     <label for="name">Name</label>
-                    <input type="text" id="name" value="Sarah Johnson" disabled>
+                    <input type="text" id="name"  value="{{customer_data.name}}" disabled>
                 </div>
-                <div class="field-row">
+                <!-- <div class="field-row">
                     <label for="customer-world">Customer World</label>
                     <input type="text" id="customer-world" value="sarahworld" disabled>
-                </div>
+                </div> -->
                 <div class="field-row">
                     <label for="email">Email</label>
-                    <input type="email" id="email" value="sarahj@email.com" disabled>
+                    <input type="email" id="email"  value="{{customer_data.email}}" disabled>
                 </div>
                 <div class="field-row">
                     <label for="phone">Phone</label>
-                    <input type="tel" id="phone" value="848-555-0101" disabled>
+                    <input type="tel" id="phone"  value="{{customer_data.phone}}" disabled>
                 </div>
                 <div class="field-row">
                     <label for="total-rewards">Total Reward Points</label>
-                    <input type="text" id="total-rewards" value="350" disabled>
-                </div>
-                <div class="field-row">
-                    <label for="created-at">Created At</label>
-                    <input type="text" id="created-at" value="01/15/2022" disabled>
+                    <input type="text" id="total-rewards"  value="{{customer_data.totalRewardPoints}}" disabled>
                 </div>
 
-                <div class="actions">
+                <!-- <div class="field-row">
+                    <label for="created-at">Created At</label>
+                    <input type="text" id="created-at"  disabled>
+                </div> -->
+               
+
+                <!-- <div class="actions">
                     <button type="button" id="edit-btn">Edit Information</button>
                     <button type="submit" id="save-btn" disabled>Save Changes</button>
-                </div>
+                </div> -->
             </form>
+             {% else %}
+                <p>No Customer data found</p>
+            {% endfor %}
         </section>
 
         <hr>

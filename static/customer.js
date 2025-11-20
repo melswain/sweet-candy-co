@@ -64,3 +64,31 @@ function loadMyCarts() {
 document.addEventListener('DOMContentLoaded', () => {
     loadMyCarts();
 });
+
+document.querySelectorAll('.open-update-modal').forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+            const modal = document.querySelector('.update-modal');
+            
+
+            modal.style.display = 'flex'; 
+            
+            setTimeout(() => {
+                modal.classList.add('active'); // Add 'active' class to trigger fade-in
+            }, 10); // A small delay is usually sufficient
+
+            modal.querySelectorAll('input').forEach(input => input.value = '');
+
+            const row = event.target.closest('tr');
+            if (row) {
+                modal.querySelector('input[name="productId"]').value = row.cells[0].textContent.trim();
+                modal.querySelector('input[name="name"]').value = row.cells[1].textContent.trim();
+                modal.querySelector('input[name="type"]').value = row.cells[2].textContent.trim();
+                modal.querySelector('input[name="price"]').value = row.cells[3].textContent.trim();
+                modal.querySelector('input[name="expirationDate"]').value = row.cells[4].textContent.trim();
+                modal.querySelector('input[name="manufacturerName"]').value = row.cells[5].textContent.trim();
+                modal.querySelector('input[name="upc"]').value = row.cells[6].textContent.trim();
+                modal.querySelector('input[name="epc"]').value = row.cells[7].textContent.trim();
+                modal.querySelector('input[name="quantity"]').value = row.cells[8].textContent.trim();
+            }
+        });
+    });

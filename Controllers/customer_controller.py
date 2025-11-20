@@ -95,6 +95,16 @@ def getCustomerById(customer_id):
     except Exception as e:
         return False, f"Error getting customer: {e}"
     
+def getCustomerData(customer_id):
+    try:
+        success,customer = Customer.getCustomerData(customer_id)
+        if success:
+            return True, customer
+        else:
+            return False, "Customer not found."
+    except Exception as e:
+        return False, f"Error getting customer: {e}"
+    
 def subtractRewardPoints(customer_id, points):
     try:
         customer = Customer.subtractRewardPoints(customer_id, points)

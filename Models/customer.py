@@ -1,6 +1,8 @@
 # models/customer.py
+from types import SimpleNamespace
 from sqlalchemy import Column, Integer, String
-from .database import Base, execute, fetchone
+from .database import Base, execute, fetchone, fetchall
+
 
 class Customer(Base):
     __tablename__ = 'customer'
@@ -74,6 +76,29 @@ class Customer(Base):
         if result and len(result) > 0:
             row = result[0]
             return True, Customer(customer_id=row[0], total_reward_points=row[1])
+        return False, None
+    @staticmethod
+    def getCustomerData(customer_id):
+        # query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
+        query = """
+                SELECT customerId, name, email, phone, totalRewardPoints
+                FROM customer WHERE customerId = ?
+                """
+        result = fetchall(query, (customer_id,))
+        if result and len(result) > 0:
+            row = result[0]
+            keys = ['customerId','name','email','phone','totalRewardPoints',];
+            customer_data = [
+                            SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
+                            for r in result
+                            ]
+            # return True, Customer(customer_id=row[0],
+            #                       name=row[1],
+            #                       email=row[2],
+            #                       phone=row[3],
+            #                       totalRewardPoints=row[4],
+            #                       created_at=row[5],)
+            return True, customer_data
         return False, None
     
     @staticmethod

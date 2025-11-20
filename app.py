@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login
+from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login, getCustomerData
 from Controllers.cart_controller import addCart, getCartsByCustomer
 from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
 from Controllers.payment_controller import addPayment
@@ -427,7 +427,21 @@ def search_item():
     
 @app.route('/customer_page')
 def customerPage():
-    return render_template('customerPage.html')
+    # if 'user_id' not in session:
+    #     return redirect('/login')
+
+    # Use membership_number stored in session to identify customer
+    membership_number = session.get('membership_number')
+    membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+    success,customer_data = getCustomerData(987654321012)
+    if success:
+        return render_template('customerPage.html',customer_data = customer_data)
+    else:
+        return print(customer_data),404
+    
+    
 
 
 @app.route('/customers')
