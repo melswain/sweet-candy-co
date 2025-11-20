@@ -24,25 +24,17 @@ function calculateSummary(gstRate,qstRate) {
 }
 
 const membershipModal = document.getElementById("membershipModal");
-const closeBtn = document.querySelectorAll(".close-button");
+const closeBtn = document.querySelector(".close-button");
+const paymentCloseBtn = document.querySelector(".pay-close-button");
 const paymentModal = document.getElementById("paymentModal");
 const input = document.getElementById('scanner-input');
 input.focus();
 
-document.getElementById("scanMembershipBtn").addEventListener("click", () => {
-    membershipModal.style.display = "block";
-});
-
-closeBtn.forEach(btn => {
-    btn.onclick = () => {
-        console.log('x');
-        membershipModal.style.display = "none";
-    }
-});
-
 window.onclick = (event) => {
     if (event.target === membershipModal) {
         membershipModal.style.display = "none";
+        input.disabled = false;
+        input.focus();
     }
 };
 
@@ -51,6 +43,8 @@ function submitMembership() {
     const membershipNumber = document.getElementById("membershipInput").value;
     console.log("Membership number submitted:", membershipNumber);
     membershipModal.style.display = "none";
+    input.disabled = false;
+    input.focus();
 
     fetch('/submit-membership', {
         method: 'POST',
@@ -59,9 +53,60 @@ function submitMembership() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Server response:", data);
+    console.log("Server response:", data);
+    fetch('/get-reward-points')
+        .then(res => res.json())
+        .then(pointsData => {
+            if (pointsData.status === "success") {
+                const points = pointsData.points;
+                const discount = Math.floor(points / 100);
+                if (discount > 0) {
+                    showPointsModal(points, discount);
+                } else {
+                    continueToPayment();
+                }
+            } else {
+                continueToPayment();
+            }
+        });
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        // still continue to payment if server not reachable
+        continueToPayment();
+    });
+}
+
+function showPointsModal(points, discount) {
+    document.getElementById("pointsValue").textContent = points;
+    document.getElementById("discountValue").textContent = discount;
+    document.getElementById("pointsModal").style.display = "block";
+}
+
+function applyPointsDiscount() {
+    sessionStorage.setItem("usePoints", "true");
+    document.getElementById("pointsModal").style.display = "none";
+    continueToPayment();
+}
+
+function skipPointsDiscount() {
+    sessionStorage.setItem("usePoints", "false");
+    document.getElementById("pointsModal").style.display = "none";
+    continueToPayment();
+}
+
+function continueToPayment() {
+    membershipModal.style.display = 'none';
+    // Show payment modal so user can enter/scan card
+    paymentModal.style.display = 'block';
+    // focus card input for easy scanning
+    
+    const cardInput = document.getElementById('cardNumberInput');
+    if (cardInput) cardInput.focus();
+}
+
+function closePaymentModal() {
+    paymentModal.style.display = 'none';
 }
 
 function startPayment() {
@@ -72,9 +117,12 @@ function startPayment() {
             console.log("Membership is set:", data.membership_number);
             paymentModal.style.display = "block";
         } else {
-            console.log("No membership number found in session.");
             paymentModal.style.display = "block";
             membershipModal.style.display = "block";
+            input.disabled = true;
+            input.blur();
+            console.log(input.offsetParent !== null);
+            document.getElementById("membershipInput").focus();
         }
     });
 }
@@ -119,8 +167,9 @@ function scanCode(code) {
     })
     .then(r => r.json())
     .then(resp => {
-        if (resp.success) {
+        if (resp.status === "success") {
             updateCartDisplay();
+            showNotification("Cart item added successfully!", 3000);
         } else {
             alert('Scan error: ' + (resp.message || 'Unknown'));
         }
@@ -133,20 +182,193 @@ function updateCartDisplay() {
     .then(response => response.json())
     .then(data => {
         const tbody = document.getElementById('cart-body');
-        tbody.innerHTML = ''; // Clear existing rows
+        tbody.innerHTML = '';
 
         data.items.forEach(item => {
             const row = document.createElement('tr');
+            row.setAttribute('data-id', item.id);
             row.innerHTML = `
             <td>${item.name}</td>
             <td>${item.quantity}</td>
             <td>$${item.unit.toFixed(2)}</td>
             <td>$${item.total.toFixed(2)}</td>
+            <td class="remove-td">
+                <button class="remove-btn">x</button>
+            </td>
             `;
             tbody.appendChild(row);
         });
+
+        calculateSummary(0.05, 0.09975);
+        attachRemoveListeners();
     });
 }
 
-// call once on load
-// calculateSummary(0.05, 0.09975);
+document.querySelectorAll('.remove-btn').forEach(button => {
+  button.addEventListener('click', function () {
+    console.log('Removing...')
+    const itemRow = this.closest('tr');
+    const itemId = itemRow.getAttribute('data-id');
+
+    fetch('/remove-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        updateCartDisplay();
+        showNotification("Cart item(s) removed successfully!", 3000);
+      } else {
+        alert('Failed to remove item');
+      }
+    });
+  });
+});
+
+function attachRemoveListeners() {
+  document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const itemRow = this.closest('tr');
+      const itemId = itemRow.getAttribute('data-id');
+
+      fetch('/remove-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: itemId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          updateCartDisplay();
+          showNotification("Cart item(s) removed successfully!", 3000);
+        } else {
+          alert('Failed to remove item');
+        }
+      });
+    });
+  });
+}
+
+// Payment submit: collect card info and POST to server
+function makePayment() {
+    const cardNumber = document.getElementById('cardNumberInput').value;
+    const expiry = document.getElementById('expiryInput').value;
+
+    fetch('/finalize-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardNumber, expiryDate: expiry })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            console.log('Payment processed:', data.message || data);
+            closePaymentModal();
+            updateCartDisplay();
+            showPaymentConfirmation();
+        } else {
+            alert('Payment failed: ' + (data.message || 'Unknown'));
+        }
+    })
+    .catch(err => {
+        console.error('Payment error', err);
+        alert('Payment request failed');
+    });
+}
+
+function showPaymentConfirmation() {
+    const modal = document.getElementById('payment-modal');
+    modal.style.display = 'block';
+
+    // Auto-close after 3 seconds (3000 milliseconds)
+    setTimeout(() => {
+        closeModal();
+    }, 3000);
+}
+
+function closeModal() {
+    document.getElementById('payment-modal').style.display = 'none';
+}
+
+function showNotification(message, duration = 3000) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, duration);
+}
+
+function callForAssistance() {
+    console.log("Calling for assistance...");
+}
+
+function clearCart() {
+    fetch('/clear-cart', {})
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateCartDisplay();
+            calculateSummary();
+        } else {
+            alert(':Cart clearing failed. ' + (data.message || 'Unknown'));
+        }
+    })
+    .catch(err => {
+            console.error('Cart clearing error', err);
+            alert('Cart clearing request failed');
+    });
+}
+
+let currentItem = null;
+
+function openSearchModal() {
+    console.log('Opening search modal...')
+    document.getElementById("searchModal").style.display = "block";
+    document.getElementById("searchCodeInput").focus();
+    document.getElementById("searchResult").innerHTML = "";
+    document.getElementById("addItemBtn").style.display = "none";
+    currentItem = null;
+}
+
+function closeSearchModal() {
+    document.getElementById("searchModal").style.display = "none";
+}
+
+function searchItem() {
+    console.log('Searching for item...')
+    const code = document.getElementById("searchCodeInput").value;
+    fetch('/search-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Item not found");
+        return res.json();
+    })
+    .then(data => {
+        currentItem = data.item;
+        document.getElementById("searchResult").innerHTML = `
+        <p><strong>Added ${data.item.name}</strong></p>
+        `;
+        updateCartDisplay();
+        calculateSummary();
+        showNotification("Cart item added successfully!", 3000);
+    })
+    .catch(err => {
+        document.getElementById("searchResult").innerHTML = `<p style="color:red;">${err.message}</p>`;
+        document.getElementById("addItemBtn").style.display = "none";
+        currentItem = null;
+    });
+}
+
+function addItem() {
+    if (!currentItem) return;
+    // Add to cart logic here
+    console.log("Added to cart:", currentItem);
+    closeSearchModal();
+}

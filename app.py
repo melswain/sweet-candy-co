@@ -3,27 +3,40 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer
+from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login
+from Controllers.cart_controller import addCart, getCartsByCustomer
+from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
+from Controllers.payment_controller import addPayment
+from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
+from Controllers.inventory_controller import removeInventory, searchInventory
 
 from decimal import Decimal, ROUND_HALF_UP
 
-from Controllers.product_controller import getProductWithUpc, getProductWithEpc
-from Controllers.inventory_controller import removeInventory
-from Services.fan_service import turnOnFan
-from Services.fan_service import turnOffFan
+# from Services.fan_service import turnOnFan
+# from Services.fan_service import turnOffFan
 
-from Services.email_service import sendEmail
-from Services.email_service import readEmail
+from Models.product import Product
+
+# from Services.email_service import sendEmail
+# from Services.email_service import readEmail
 
 # import paho.mqtt.client as mqtt
 
 # import fanControl
 import os
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
-
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
+
+
+
+# app = Flask(__name__)
+# app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 current_fan_state = False
 
@@ -92,11 +105,11 @@ def index():
         'humidity': sensor_data['Frig2']['humidity'] or 'N/A'
         }
     ]
-    return render_template('index.html', fridges=fridge_data)
 
+    products = Product.get_allProducts()
+    print(products)
     
-        
-        
+    return render_template('index.html', fridges=fridge_data,products=products)
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -111,7 +124,6 @@ def add():
 @app.route('/sensor_data')
 def get_sensor_data():
     return sensor_data  # Flask will convert your dict to JSON
-
 
 @app.route('/fan', methods=['POST'])
 def toggle():
@@ -128,6 +140,10 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
+    if 'membership_number' not in session:
+        flash("Please enter your membership number first.")
+        return redirect(url_for('index'))
+
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -139,7 +155,7 @@ def checkout():
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     # Reward points: 1 point per $10
-    reward_points = int(subtotal // Decimal('10'))
+    reward_points = int(subtotal // Decimal('10') * 100)
 
     return render_template('customers.html',
                            items=items,
@@ -165,51 +181,298 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
-@app.route('/finalize-payment')
-def clear():
-    session.pop('membership_number', None)
-    for item in items:
-        removeInventory(item["id"], 1, item["quantity"])
-    
-    # Use the cart controller to create a cart using the membership number, total price, and reward points
-    # For every removed item, get its ID
-    # For every item id, create a cart item with the cart item controller using the cart id, product id, quantity, and price
-    # Create a payment with the payment controller using the cart id, card number, and card expiry date
+@app.route('/get-reward-points')
+def get_reward_points():
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 400
 
+    success, customer = getCustomerById(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": "Customer not found"}), 404
+
+    return jsonify({
+        "status": "success",
+        "points": customer.total_reward_points
+    })
+
+@app.route('/finalize-payment', methods=['POST'])
+def finalize_payment():
+    data = request.get_json() or {}
+    card_number = data.get('cardNumber') or data.get('card')
+    expiry = data.get('expiryDate') or data.get('expiry')
+    use_points = data.get('usePoints') in (True, 'true', 'True')
+
+    # membership number (if scanned earlier) is kept in session
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 400
+
+    # Calculate totals
+    def to_decimal(v):
+        return Decimal(str(v)) if not isinstance(v, Decimal) else v
+
+    subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
+    gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    reward_points = int(subtotal // Decimal('10') * 100)
+
+    # If user chooses to apply reward points, compute discount and subtract points
+    if use_points:
+        success, customer = getCustomerById(membership_number)
+        if success:
+            points = getattr(customer, 'total_reward_points', 0)
+            # 100 points = $1 discount (this is consistent with earlier logic)
+            discount_dollars = Decimal(points // 100)
+            if discount_dollars > 0:
+                total = (total - discount_dollars).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                points_used = int(discount_dollars * 100)
+                subtractRewardPoints(membership_number, points_used)
+
+    # Simulate payment processing (no real gateway here)
+    print('Finalizing payment. Card:', card_number, 'Expiry:', expiry, 'Membership:', membership_number)
+
+    # Remove inventory for each item (existing behavior)
+    for item in items:
+        try:
+            removeInventory(item["id"], 1, item["quantity"])
+        except Exception as e:
+            print('Warning: failed to remove inventory for', item, e)
+
+    # Add reward points to customer balance
+    customer_success, customer_result = addRewardPoints(membership_number, reward_points)
+    if not customer_success:
+        return jsonify({"status": "error", "message": customer_result}), 400
+
+    # Create cart using the cart controller
+    cart_success, cart_result = addCart(membership_number, float(total), reward_points)
+    if not cart_success:
+        return jsonify({"status": "error", "message": cart_result}), 400
+
+    # Get cart ID from the result
+    cart_id = cart_result
+    print('Cart id: ', cart_id)
+
+    # Create cart items for each product
+    for item in items:
+        cart_item_success, cart_item_message = addCartItem(
+            cart_id=cart_id,
+            product_id=item['id'],
+            quantity=item['quantity'],
+            total_price=float(item['total'])
+        )
+        if not cart_item_success:
+            return jsonify({"status": "error", "message": cart_item_message}), 400
+
+    # Create payment record
+    payment_success, payment_message = addPayment(cart_id, card_number, expiry)
+
+    # Clear cart and membership
     items.clear()
-    response = make_response(jsonify({"status": "success"}))
-    return response
+    session.pop('membership_number', None)
+
+    return jsonify({"status": "success", "message": "Payment processed (simulated)"})
 
 @app.route('/scan', methods=['POST'])
 def scan_item():
     data = request.get_json() or {}
-    # support different keys from JS bridge or RFID bridge
     code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
+    if isinstance(code, str) and len(code) == 13 and code.startswith("0"):
+        code = code[1:]
+
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
 
-    # first try UPC, then EPC
     product = getProductWithUpc(code)
     if not product:
         product = getProductWithEpc(code)
 
     if product and hasattr(product, 'productId'):
         unit_price = float(product.price)
-        item = {
-            'id': product.productId,
+        product_id = product.productId
+
+        # Check if item already exists in the list
+        for item in items:
+            if item['id'] == product_id:
+                item['quantity'] += 1
+                item['total'] = item['quantity'] * unit_price
+                return jsonify({"status": "success", "item": item, "items": items})
+
+        # If not found, add as new item
+        new_item = {
+            'id': product_id,
             'name': product.name,
             'quantity': 1,
             'unit': unit_price,
-            'total': unit_price * 1,
+            'total': unit_price,
         }
-        items.append(item)
-        return jsonify({"status": "success", "item": item, "items": items})
+        items.append(new_item)
+        return jsonify({"status": "success", "item": new_item, "items": items})
     else:
         return jsonify({"status": "error", "message": "Item not found"}), 404
 
 @app.route('/cart-items', methods=['GET'])
 def get_cart_items():
     return jsonify({"items": items})
+
+@app.route('/remove-item', methods=['POST'])
+def remove_item():
+    data = request.get_json() or {}
+    item_id = data.get('id')
+    if not item_id:
+        return jsonify({"status": "error", "message": "No item ID provided"}), 400
+
+    try:
+        item_id = int(item_id)
+    except ValueError:
+        return jsonify({"status": "error", "message": "Invalid item ID"}), 400
+
+    global items
+    items = [item for item in items if item['id'] != item_id]
+    return jsonify({"status": "success", "items": items})
+
+@app.route('/update_product', methods=['POST'])
+def update_product():
+    productId = request.form.get('productId')
+    new_name = request.form.get('name')
+    new_type = request.form.get('type')
+    new_price = request.form.get('price')
+    new_expirationDate = request.form.get('expirationDate')
+    new_manufacturerName = request.form.get('manufacturerName')
+    new_upc = request.form.get('upc')
+    new_epc = request.form.get('epc')
+    new_quantity = request.form.get('quantity');
+
+    result, message = Product.update_product(productId=productId, new_name=new_name,
+                                            new_type=new_type,new_price=new_price,
+                                            new_expirationDate=new_expirationDate,new_manufacturerName=new_manufacturerName,
+                                            new_upc=new_upc,new_epc=new_epc,
+                                            new_quantity=new_quantity
+                                            )
+    print(message);
+    return redirect(url_for('index'))
+
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    name = request.form.get('name')
+    type_ = request.form.get('type')
+    price = request.form.get('price')
+    expirationDate = request.form.get('expirationDate')
+    manufacturerName = request.form.get('manufacturerName')
+    upc = request.form.get('upc')
+    epc = request.form.get('epc')
+    quantity = request.form.get('quantity');
+    quantity = 0 if quantity is None else request.form.get('quantity');
+
+    message = Product.create(name=name, type_=type_,price=price,
+                            expiration_date=expirationDate,manufacturer_name=manufacturerName,
+                            upc=upc,epc=epc,quantity = quantity
+                            )
+    print(message);
+    return redirect(url_for('index'))
+
+@app.route('/delete_product', methods=['POST'])
+def delete_product():
+    productId = request.form.get('productId')
+    print("productID is :" + productId)
+    message = Product.delete_product(productId=productId)
+    print(message);
+    return redirect(url_for('index'))
+
+@app.route('/clear-cart', methods=['GET'])
+def clear_cart():
+    items.clear()
+    session.pop('membership_number', None)
+    return jsonify({"status": "success"})
+
+@app.route('/search-item', methods=['POST'])
+def search_item():
+    data = request.get_json()
+    code = data.get("code")
+
+    if not code:
+        return jsonify({"status": "error", "message": "No code provided"}), 400
+
+    result, inventory_item_id = searchInventory(code, 1) # 1 is the location id
+
+    if inventory_item_id:
+        product = getProductWithId(inventory_item_id)
+
+        if product and hasattr(product, 'productId'):
+            unit_price = float(product.price)
+            product_id = product.productId
+            
+            # Check if item already exists in the list
+            for item in items:
+                if item['id'] == product_id:
+                    item['quantity'] += 1
+                    item['total'] = item['quantity'] * unit_price
+                    return jsonify({"status": "success", "item": item, "items": items})
+
+            # If not found, add as new item
+            new_item = {
+                'id': product_id,
+                'name': product.name,
+                'quantity': 1,
+                'unit': unit_price,
+                'total': unit_price,
+            }
+            items.append(new_item)
+            return jsonify({"status": "success", "item": new_item, "items": items})
+        else:
+            return jsonify({"status": "error", "message": "Item not found"}), 404
+    else:
+        return jsonify({"status": "error", "message": "Item not found"}), 404
+    
+@app.route('/customer_page')
+def customerPage():
+    return render_template('customerPage.html')
+
+
+@app.route('/customers')
+def my_carts():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    # Use membership_number stored in session to identify customer
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+
+    success, carts_or_msg = getCartsByCustomer(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": carts_or_msg}), 500
+
+    carts = carts_or_msg
+    # Attach items to each cart
+    for cart in carts:
+        try:
+            ok, items_or_msg = getItemsByCart(cart['cartId'])
+            if ok:
+                cart['items'] = items_or_msg
+            else:
+                cart['items'] = []
+        except Exception:
+            cart['items'] = []
+
+    return jsonify({"status": "success", "carts": carts})
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        print(username, password)
+        login_result = customer_login(username, password)
+
+        print(login_result)
+
+        if (login_result):
+            session['customer_id'] = username
+            return redirect(url_for('customerPage'))
+        return 'Invalid credentials'
+    return render_template('login.html')
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
@@ -219,7 +482,6 @@ def get_cart_items():
 #     temp1 = 0
 # else:
 #     temp1 = int(sensor_data['Frig1'].get('temperature', '0'))
-
 
 # if temp2 == None:
 #     temp2 = 0
@@ -232,10 +494,8 @@ def get_cart_items():
 #     response = readEmail()
 #     if response:
 #         turnOnFan()
-    
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+

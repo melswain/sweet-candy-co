@@ -58,7 +58,7 @@ def setup_database():
     schema = """
     CREATE TABLE IF NOT EXISTS cart (
       cartId INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId INTEGER,
+      customerId VARCHAR(12),
       totalCartPrice DECIMAL(10,2) NOT NULL,
       totalRewardPoints INTEGER DEFAULT 0,
       checkoutDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,8 +76,9 @@ def setup_database():
     );
 
     CREATE TABLE IF NOT EXISTS customer (
-      customerId INTEGER PRIMARY KEY AUTOINCREMENT,
+      customerId VARCHAR(12) PRIMARY KEY,
       name VARCHAR(100) NOT NULL,
+      password VARCHAR(100),
       email VARCHAR(100) UNIQUE,
       phone VARCHAR(20) NOT NULL,
       totalRewardPoints INTEGER DEFAULT 0,
@@ -140,7 +141,7 @@ def setup_database():
       expirationDate DATE NOT NULL,
       discountPercentage DECIMAL(3,2) DEFAULT 1.00,
       manufacturerName VARCHAR(100),
-      upc VARCHAR(50) NOT NULL UNIQUE,
+      upc VARCHAR(12) NOT NULL UNIQUE,
       epc VARCHAR(50) NOT NULL
     );
 
@@ -170,23 +171,23 @@ def setup_database():
     (1, 5.00, 13.00, 35.00, 45.00),  -- Laval location
     (2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
 
-    INSERT INTO customer (name, email, phone, totalRewardPoints) VALUES
-    ('Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
-    ('Michael Chen', 'mchen@email.com', '514-555-0102', 0),
-    ('Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
-    ('David Kim', 'davidk@email.com', '514-555-0104', 0);
+    INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
+    ('987654321012', 'Dog1', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+    ('987654321029', 'Cat2', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+    ('987654321036', 'Bird3', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+    ('987654321043', 'Bunny4', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
 
     INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
-    ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789001', 'EPC123001'),
-    ('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789002', 'EPC123002'),
-    ('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789003', 'EPC123003'),
-    ('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789004', 'EPC123004'),
-    ('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789005', 'EPC123005'),
-    ('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789006', 'EPC123006'),
-    ('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789007', 'EPC123007'),
-    ('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789008', 'EPC123008'),
-    ('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789009', 'EPC123009'),
-    ('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789010', 'EPC123010');
+    ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004917'),
+    ('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789029', 'A00000000000000000004921'),
+    ('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789036', 'EPC123003'),
+    ('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789043', 'EPC123004'),
+    ('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789050', 'EPC123005'),
+    ('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789067', 'EPC123006'),
+    ('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789074', 'EPC123007'),
+    ('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789081', 'EPC123008'),
+    ('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789098', 'EPC123009'),
+    ('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789104', 'EPC123010');
         
     INSERT INTO inventory (productId, locationId, quantity) VALUES
     (1, 1, 10), (1, 2, 10),
