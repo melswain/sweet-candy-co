@@ -56,32 +56,13 @@
 
         <section class="info-card" id="cart-history">
             <h2>Your Shopping Cart History</h2>
-            <div class="history-controls">
-                <label for="cart-id">Enter Cart ID:</label>
-                <input type="text" id="cart-id">
-                <label for="client-id">Enter Client ID:</label>
-                <input type="text" id="client-id">
-                <button id="view-history-btn">View History</button>
+            <p class="history-tip">Below are your recent carts. Click a cart to view its items.</p>
+
+            <div id="carts-list">
+                <p>Loading your carts...</p>
             </div>
-
-            <p class="history-tip">Enter your Cart ID and Client ID to view past orders.</p>
-
-            <table id="history-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Date Purchased</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="4" class="no-data">Use the search above to view cart history.</td></tr>
-                </tbody>
-            </table>
         </section>
-        
     </main>
-
 </body>
+    <script src="{{ url_for('static', filename='customer.js') }}"></script>
 </html>

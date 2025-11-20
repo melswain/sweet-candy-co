@@ -73,3 +73,46 @@ def addRewardPoints(customer_id, reward_points):
         return True, "Successfully added reward points!"
     except Exception as e:
         return False, "Failed to add reward points: {e}"
+    
+# def verifyMembershipNumber(customer_id):
+#     print('Verifying membership...')
+#     try:
+#         customer = Customer.getCustomer(customer_id).first()
+#         if customer:
+#             return True, "Customer exists."
+#         else:
+#             return False, "Customer not found."
+#     except Exception as e:
+#         return False, f"Error verifying membership: {e}"
+    
+def getCustomerById(customer_id):
+    try:
+        customer = Customer.getCustomerById(customer_id)
+        if customer:
+            return True, customer
+        else:
+            return False, "Customer not found."
+    except Exception as e:
+        return False, f"Error getting customer: {e}"
+    
+def subtractRewardPoints(customer_id, points):
+    try:
+        customer = Customer.subtractRewardPoints(customer_id, points)
+        if customer:
+            return True
+        else:
+            return False, "Could not subtract points from customer."
+    except Exception as e:
+        return False, f"Error subtracting points: {e}"
+    
+def customer_login(customer_id, password):
+    try:
+        print('made it here.')
+        customer = Customer.login_customer(customer_id, password)
+        if customer:
+            return True, None
+        else:
+            print('Error logging in. Username and/or password could be incorrect.')
+            return False, f"Error logging in. Username and/or password could be incorrect."
+    except Exception as e:
+        return False, f"Error logging in: {e}"

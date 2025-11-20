@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer, addRewardPoints
-from Controllers.cart_controller import addCart
-from Controllers.cart_item_controller import addPayment as addCartItem
+from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login
+from Controllers.cart_controller import addCart, getCartsByCustomer
+from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
 from Controllers.payment_controller import addPayment
 from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
 from Controllers.inventory_controller import removeInventory, searchInventory
@@ -25,8 +25,18 @@ from Models.product import Product
 # import fanControl
 import os
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+
+load_dotenv()
 app = Flask(__name__)
-app.secret_key = os.getenv('FLASK_SECRET_KEY')
+app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
+
+
+
+# app = Flask(__name__)
+# app.secret_key = os.getenv('FLASK_SECRET_KEY')
 
 current_fan_state = False
 
@@ -130,6 +140,10 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
+    if 'membership_number' not in session:
+        flash("Please enter your membership number first.")
+        return redirect(url_for('index'))
+
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -167,14 +181,54 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
+@app.route('/get-reward-points')
+def get_reward_points():
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 400
+
+    success, customer = getCustomerById(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": "Customer not found"}), 404
+
+    return jsonify({
+        "status": "success",
+        "points": customer.total_reward_points
+    })
+
 @app.route('/finalize-payment', methods=['POST'])
 def finalize_payment():
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
     expiry = data.get('expiryDate') or data.get('expiry')
+    use_points = data.get('usePoints') in (True, 'true', 'True')
 
     # membership number (if scanned earlier) is kept in session
     membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 400
+
+    # Calculate totals
+    def to_decimal(v):
+        return Decimal(str(v)) if not isinstance(v, Decimal) else v
+
+    subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
+    gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    reward_points = int(subtotal // Decimal('10') * 100)
+
+    # If user chooses to apply reward points, compute discount and subtract points
+    if use_points:
+        success, customer = getCustomerById(membership_number)
+        if success:
+            points = getattr(customer, 'total_reward_points', 0)
+            # 100 points = $1 discount (this is consistent with earlier logic)
+            discount_dollars = Decimal(points // 100)
+            if discount_dollars > 0:
+                total = (total - discount_dollars).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                points_used = int(discount_dollars * 100)
+                subtractRewardPoints(membership_number, points_used)
 
     # Simulate payment processing (no real gateway here)
     print('Finalizing payment. Card:', card_number, 'Expiry:', expiry, 'Membership:', membership_number)
@@ -186,20 +240,11 @@ def finalize_payment():
         except Exception as e:
             print('Warning: failed to remove inventory for', item, e)
 
-    # Calculate totals
-    def to_decimal(v):
-        return Decimal(str(v)) if not isinstance(v, Decimal) else v
-    
-    subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
-    gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    reward_points = int(subtotal // Decimal('10') * 100)
-
+    # Add reward points to customer balance
     customer_success, customer_result = addRewardPoints(membership_number, reward_points)
     if not customer_success:
         return jsonify({"status": "error", "message": customer_result}), 400
-    
+
     # Create cart using the cart controller
     cart_success, cart_result = addCart(membership_number, float(total), reward_points)
     if not cart_success:
@@ -208,7 +253,7 @@ def finalize_payment():
     # Get cart ID from the result
     cart_id = cart_result
     print('Cart id: ', cart_id)
-    
+
     # Create cart items for each product
     for item in items:
         cart_item_success, cart_item_message = addCartItem(
@@ -219,7 +264,7 @@ def finalize_payment():
         )
         if not cart_item_success:
             return jsonify({"status": "error", "message": cart_item_message}), 400
-    
+
     # Create payment record
     payment_success, payment_message = addPayment(cart_id, card_number, expiry)
 
@@ -338,6 +383,7 @@ def delete_product():
 @app.route('/clear-cart', methods=['GET'])
 def clear_cart():
     items.clear()
+    session.pop('membership_number', None)
     return jsonify({"status": "success"})
 
 @app.route('/search-item', methods=['POST'])
@@ -383,6 +429,51 @@ def search_item():
 def customerPage():
     return render_template('customerPage.html')
 
+
+@app.route('/customers')
+def my_carts():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    # Use membership_number stored in session to identify customer
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+
+    success, carts_or_msg = getCartsByCustomer(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": carts_or_msg}), 500
+
+    carts = carts_or_msg
+    # Attach items to each cart
+    for cart in carts:
+        try:
+            ok, items_or_msg = getItemsByCart(cart['cartId'])
+            if ok:
+                cart['items'] = items_or_msg
+            else:
+                cart['items'] = []
+        except Exception:
+            cart['items'] = []
+
+    return jsonify({"status": "success", "carts": carts})
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        print(username, password)
+        login_result = customer_login(username, password)
+
+        print(login_result)
+
+        if (login_result):
+            session['customer_id'] = username
+            return redirect(url_for('customerPage'))
+        return 'Invalid credentials'
+    return render_template('login.html')
+
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
 # temp2 = sensor_data['Frig2'].get('temperature', '0')
@@ -406,3 +497,5 @@ def customerPage():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
