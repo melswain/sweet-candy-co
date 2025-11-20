@@ -140,9 +140,9 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
-    if 'membership_number' not in session:
-        flash("Please enter your membership number first.")
-        return redirect(url_for('index'))
+    # if 'membership_number' not in session:
+    #     flash("Please enter your membership number first.")
+    #     return redirect(url_for('index'))
 
     def to_decimal(v):
         if isinstance(v, Decimal):
