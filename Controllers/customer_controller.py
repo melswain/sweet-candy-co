@@ -109,11 +109,32 @@ def subtractRewardPoints(customer_id, points):
 def customer_login(customer_id, password):
     try:
         print('made it here.')
-        customer = Customer.login_customer(customer_id, password)
-        if customer:
+        ok = Customer.login_customer(customer_id, password)
+        if ok:
             return True, None
         else:
-            print('Error logging in. Username and/or password could be incorrect.')
             return False, f"Error logging in. Username and/or password could be incorrect."
     except Exception as e:
         return False, f"Error logging in: {e}"
+
+
+def register_customer(customer_id, password):
+    """Register an account only if the customer exists and currently has no password set."""
+    try:
+        # verify customer exists
+        query = "SELECT customerId, password FROM customer WHERE customerId = ?"
+        from Models.database import fetchone
+        row = fetchone(query, (customer_id,))
+        if not row:
+            return False, "Customer ID not found."
+        current_pw = row[1]
+        if current_pw and current_pw.strip() != '':
+            return False, "Account already registered."
+
+        # set password
+        ok = Customer.set_password(customer_id, password)
+        if ok:
+            return True, "Account registered successfully."
+        return False, "Failed to set password."
+    except Exception as e:
+        return False, f"Error during registration: {e}"

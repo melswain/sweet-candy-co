@@ -1,6 +1,7 @@
 # models/customer.py
 from sqlalchemy import Column, Integer, String
-from .database import Base, execute, fetchone, fetchall
+from .database import Base, execute, fetchone, fetchall, get_connection
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Customer(Base):
     __tablename__ = 'customer'
@@ -71,6 +72,29 @@ class Customer(Base):
         if result:
             return True, result
         return False, None
+
+    @staticmethod
+    def get_password_hash(customer_id):
+        query = "SELECT password FROM customer WHERE customerId = ?"
+        res = fetchone(query, (customer_id,))
+        if res:
+            return res[0]
+        return None
+
+    @staticmethod
+    def set_password(customer_id, password_plain):
+        # store hashed password
+        pw_hash = generate_password_hash(password_plain)
+        query = "UPDATE customer SET password = ? WHERE customerId = ?"
+        try:
+            with get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(query, (pw_hash, customer_id))
+                conn.commit()
+                return True
+        except Exception as e:
+            print('Error setting password:', e)
+            return False
     
     @staticmethod
     def subtractRewardPoints(customer_id, points):
@@ -79,19 +103,12 @@ class Customer(Base):
     
     @staticmethod
     def login_customer(customer_id, password):
-        query = "SELECT * FROM customer WHERE customerId = ?"
-        
         try:
-            customer = fetchone(query, (customer_id,))
-            if not customer:
-                print("No customer found for ID:", customer_id)
+            pw_hash = Customer.get_password_hash(customer_id)
+            if not pw_hash:
+                # no password set
                 return False
-
-            print(customer)
-
-            if customer[2] == password:
-                return True
+            return check_password_hash(pw_hash, password)
         except Exception as e:
-            print("Error during login_customer:", e)
-
-        return False
+            print('Error during login_customer:', e)
+            return False

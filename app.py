@@ -33,6 +33,10 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
 
+# Ensure DB has the password column on startup
+from Models.database import ensure_customer_password_column
+ensure_customer_password_column()
+
 
 
 # app = Flask(__name__)
@@ -465,15 +469,35 @@ def my_carts():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        login_result = customer_login(username, password)
-
-        if (login_result):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        success, msg = customer_login(username, password)
+        if success:
             session['customer_id'] = username
+            session['membership_number'] = username
             return redirect(url_for('customerPage'))
-        return 'Invalid credentials'
+        flash(msg)
+        return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('login')) 
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json() or {}
+    customer_id = data.get('customerId') or request.form.get('username')
+    password = data.get('password') or request.form.get('password')
+    if not customer_id or not password:
+        return jsonify({'status': 'error', 'message': 'Missing customerId or password'}), 400
+
+    from Controllers.customer_controller import register_customer
+    success, msg = register_customer(customer_id, password)
+    if success:
+        return jsonify({'status': 'success', 'message': msg})
+    return jsonify({'status': 'error', 'message': msg}), 400
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
