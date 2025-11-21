@@ -1,4 +1,5 @@
 # models/customer.py
+from types import SimpleNamespace
 from sqlalchemy import Column, Integer, String
 from .database import Base, execute, fetchone, fetchall, get_connection
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -72,11 +73,32 @@ class Customer(Base):
         if result:
             return True, result
         return False, None
+    @staticmethod
+    def getCustomerData(customer_id):
+        # query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
+        query = """
+                FROM customer WHERE customerId = ?
+                """
+        result = fetchall(query, (customer_id,))
+        if result and len(result) > 0:
+            row = result[0]
+            keys = ['customerId','name','email','phone','totalRewardPoints','created_at'];
+            customer_data = [
+                            SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
+                            for r in result
+                            ]
+            # return True, Customer(customer_id=row[0],
+            #                       name=row[1],
+            #                       email=row[2],
+            #                       phone=row[3],
+            #                       totalRewardPoints=row[4],
+            #                       created_at=row[5],)
+            return True, customer_data
+        return False, None
 
     @staticmethod
     def get_password_hash(customer_id):
         query = "SELECT password FROM customer WHERE customerId = ?"
-        res = fetchone(query, (customer_id,))
         if res:
             return res[0]
         return None
@@ -99,7 +121,6 @@ class Customer(Base):
     @staticmethod
     def subtractRewardPoints(customer_id, points):
         query = "UPDATE customer SET totalRewardPoints = totalRewardPoints - ? WHERE customerId = ?"
-        return execute(query, (points, customer_id)) is True
     
     @staticmethod
     def login_customer(customer_id, password):

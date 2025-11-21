@@ -1,8 +1,10 @@
 # models/inventory.py
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, execute, fetchone
+from .database import Base, execute, fetchone, fetchall
 from datetime import datetime
+from types import SimpleNamespace
+
 
 class Inventory(Base):
     __tablename__ = 'inventory'
@@ -77,3 +79,18 @@ class Inventory(Base):
             return True, result[0]
         except Exception as e:
             return f"Failed to find inventory record:\n{e}"
+    @staticmethod
+    def getInventory():
+        query = """
+                SELECT i.inventoryId,i.productId,p.name,p.price,i.quantity,i.locationId,i.lastUpdated
+                FROM inventory as i
+                JOIN product as p
+                    ON  i.productId = p.productId
+                WHERE i.locationId = 1
+                """
+        rows = fetchall(query)
+        if rows is False or rows is None:
+            return False, "Failed retrieve Inventory"
+        keys = ['inventoryId','productId','name','price','quantity','locationId','lastUpdated']
+        inventory_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
+        return True,inventory_list

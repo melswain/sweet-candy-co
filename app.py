@@ -3,12 +3,13 @@ from dotenv import load_dotenv
 
 from time import sleep
 
-from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login
-from Controllers.cart_controller import addCart, getCartsByCustomer
+from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login, getCustomerData
+from Controllers.cart_controller import addCart, getCartsByCustomer, getCustomerCartHistory
 from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
 from Controllers.payment_controller import addPayment
 from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
-from Controllers.inventory_controller import removeInventory, searchInventory
+from Controllers.inventory_controller import removeInventory, searchInventory, addInventory, getInventory
+
 
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -111,8 +112,10 @@ def index():
     ]
 
     products = Product.get_all_products()
+    success,inventory = getInventory()
     
-    return render_template('index.html', fridges=fridge_data,products=products)
+    
+    return render_template('index.html', fridges=fridge_data,products=products,inventory=inventory)
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -374,10 +377,11 @@ def add_product():
     quantity = request.form.get('quantity');
     quantity = 0 if quantity is None else request.form.get('quantity');
 
-    message = Product.create(name=name, type_=type_,price=price,
-                            expiration_date=expirationDate,manufacturer_name=manufacturerName,
-                            upc=upc,epc=epc,quantity = quantity
-                            )
+    success,message,newProductId = Product.create(name=name, type_=type_,price=price,expiration_date=expirationDate,manufacturer_name=manufacturerName,upc=upc,epc=epc)
+    if(success):
+        success2,message2 = addInventory(newProductId,1,quantity=quantity)
+    else:
+        print(message)
     
     return redirect(url_for('index'))
 
@@ -435,7 +439,25 @@ def search_item():
     
 @app.route('/customer_page')
 def customerPage():
-    return render_template('customerPage.html')
+    if 'user_id' not in session:
+        return redirect('/login')
+    # Use membership_number stored in session to identify customer
+    membership_number = session.get('membership_number')
+    membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+    # success,customer_data = getCustomerData(987654321012)
+    # success1, cart_history_data = getCustomerCartHistory(987654321012)
+    success,customer_data = getCustomerData(membership_number)
+    success1, cart_history_data = getCustomerCartHistory(membership_number)
+    print(cart_history_data)
+    print(customer_data)
+    if success:
+        return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
+    else:
+        return print(customer_data),404
+    
+    
 
 
 @app.route('/customers')

@@ -1,10 +1,3 @@
-class CartService {
-    static async fetchMyCarts() {
-        const res = await fetch('/my-carts');
-        if (!res.ok) throw new Error('Failed to fetch carts');
-        return res.json();
-    }
-}
 
 function renderCarts(carts) {
     const container = document.getElementById('carts-list');
