@@ -4,11 +4,12 @@ from dotenv import load_dotenv
 from time import sleep
 
 from Controllers.customer_controller import addCustomer, addRewardPoints, getCustomerById, subtractRewardPoints, customer_login, getCustomerData
-from Controllers.cart_controller import addCart, getCartsByCustomer
+from Controllers.cart_controller import addCart, getCartsByCustomer, getCustomerCartHistory
 from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
 from Controllers.payment_controller import addPayment
 from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
 from Controllers.inventory_controller import removeInventory, searchInventory
+
 
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -436,8 +437,11 @@ def customerPage():
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
     success,customer_data = getCustomerData(987654321012)
+    success1, cart_history_data = getCustomerCartHistory(987654321012)
+    print(cart_history_data)
+    print(customer_data)
     if success:
-        return render_template('customerPage.html',customer_data = customer_data)
+        return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
     else:
         return print(customer_data),404
     

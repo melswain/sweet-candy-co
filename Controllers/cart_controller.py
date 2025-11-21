@@ -18,3 +18,13 @@ def getCartsByCustomer(customer_id):
         return True, carts
     except Exception as e:
         return False, f"Failed to get carts: {e}"
+    
+def getCustomerCartHistory(customerId):
+    try:
+        success,cart_history = Cart.get_customer_cartHistory(customerId)
+        if success:
+            return True, cart_history
+        else:
+            return False,"No Cart History Found"
+    except Exception as e:
+        return False, f"Error getting cart history: {e}"

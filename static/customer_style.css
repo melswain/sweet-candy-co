@@ -10,7 +10,6 @@
  * --card-bg: aliceblue 
  */
 
-
 body {
     font-family: 'Barlow', sans-serif;
     background-color: #ffbcd9;
@@ -23,8 +22,8 @@ h1{
     color: #F694C1;
 }
 h2 {
-   font-family: 'Barriecito', 'Barlow', sans-serif;
-  color: #ff69b46d;
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    color: #ff69b46d;
 }
 header {
     text-align: center;
@@ -64,7 +63,6 @@ header h1 {
     font-size: 1.8rem;
 }
 
-
 .field-row {
     display: flex;
     flex-direction: column;
@@ -93,13 +91,11 @@ header h1 {
     color: #F47D2F;
 }
 
-
 .field-row input:not([disabled]) {
     background-color: #ffffff;
     border-color: #A9DEF9; 
     color: #333; 
 }
-
 
 @media (min-width: 640px) {
     .field-row {
@@ -116,53 +112,6 @@ header h1 {
     }
 }
 
-
-.actions {
-    text-align: right;
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-}
-
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#edit-btn {
-    background-color: #A9DEF9; 
-    color: #0688c9; 
-}
-
-#edit-btn:hover {
-    background-color: #8ac0e8;
-    transform: translateY(-2px);
-}
-
-#save-btn {
-    background-color: #F694C1; 
-    color: white;
-}
-
-#save-btn:hover:not([disabled]) {
-    background-color: #e37da9;
-    transform: translateY(-2px);
-}
-
-#save-btn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
 hr {
     border: none;
     height: 12px;
@@ -170,44 +119,6 @@ hr {
     margin: 40px auto;
     border-radius: 6px;
 }
-
-
-.history-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-    margin-bottom: 15px;
-}
-
-.history-controls input {
-    width: 100%;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #F47D2F;
-    background-color: #ffc8695a;
-    color: #F47D2F;
-    font-family: 'Barlow', sans-serif;
-    outline: none;
-}
-
-#view-history-btn {
-    padding: 15px 20px;
-    margin-top: 10px;
-    align-self: flex-start; 
-}
-
-@media (min-width: 640px) {
-    .history-controls {
-        flex-direction: row;
-        align-items: flex-end;
-    }
-    #view-history-btn {
-        margin-top: 0;
-        align-self: center;
-    }
-}
-
 
 .history-tip {
     font-style: italic;
@@ -217,39 +128,71 @@ hr {
     text-align: center;
 }
 
-#history-table {
+/* --- Table Styling adapted from .productManagement-container --- */
+
+.info-card table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 10px;
     border: 2px solid #E4C1F9; 
-    border-radius: 10px;
-    overflow: hidden; /
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-#history-table thead tr {
-    background-color: #A9DEF9;
+.info-card th {
+    background-color: #A9DEF9; 
     color: #0688c9; 
-}
-
-#history-table th, #history-table td {
-    padding: 12px;
+    padding: 12px 8px;
     text-align: left;
-    border-bottom: 1px solid #E4C1F9; 
+    font-weight: bold;
+    border: 1px solid #F694C1; 
 }
 
-#history-table tbody tr:nth-child(even) {
-    background-color: rgba(237, 231, 177, 0.3); 
+.info-card td {
+    padding: 10px 8px;
+    color: #333;
+    border: 1px solid #F694C1; 
 }
 
-#history-table tbody tr:hover {
-    background-color: rgba(228, 193, 249, 0.5); 
+.info-card tbody tr:nth-child(even) {
+    background-color: #EDE7B155; 
+}
+
+.info-card tbody tr:hover {
+    background-color: #E4C1F955; 
+    cursor: default;
     transition: background-color 0.3s;
 }
 
-#history-table .no-data {
+.info-card tbody tr td[colspan] {
     text-align: center;
     font-style: italic;
-    color: #999;
     padding: 20px;
-    background-color: white !important;
+    background-color: #ffffff;
+}
+
+/* Button styles (if needed, though not used in the provided HTML) */
+.add-btn {
+    font-weight: bold; 
+    font-size: 1.5rem; 
+    line-height: 1;
+    padding: 5px 12px;
+    background: #D3F8E2; 
+    color: #155724; 
+    border-color: #D3F8E2;
+}
+
+.open-delete-modal{
+    background: #F694C1; 
+    color: #bc1361;
+}
+
+.open-update-modal{
+    padding: 10px 15px;
+    background: #A9DEF9; 
+    color: #0688c9; 
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
 }

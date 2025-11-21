@@ -1,8 +1,9 @@
 # models/cart.py
 from sqlalchemy import Column, Integer, Numeric, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from .database import Base, get_connection
+from .database import Base, get_connection, fetchall
 from datetime import datetime
+from types import SimpleNamespace
 
 class Cart(Base):
     __tablename__ = 'cart'
@@ -66,3 +67,26 @@ class Cart(Base):
                 return carts
         except Exception as e:
             raise
+
+    
+    @staticmethod
+    def get_customer_cartHistory(customerId):
+        query ="""
+                SELECT ca.cartId,p.name,ca.totalCartPrice,ca.checkoutDate
+                FROM cart as ca
+                JOIN cart_item as ci
+                    ON ca.cartId = ci.cartId
+                JOIN product as p
+                    ON p.productId = ci.productId
+                WHERE ca.customerId = ?
+               """
+        result = fetchall(query,(customerId,));
+        if result and len(result) > 0:
+            keys = ['cartId','name','totalCartPrice','checkoutDate'];
+            cart_history = [
+                            SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
+                            for r in result
+                            ]
+            return True, cart_history
+        else:
+            return False, None

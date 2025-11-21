@@ -81,13 +81,13 @@ class Customer(Base):
     def getCustomerData(customer_id):
         # query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
         query = """
-                SELECT customerId, name, email, phone, totalRewardPoints
+                SELECT customerId, name, email, phone, totalRewardPoints,created_at
                 FROM customer WHERE customerId = ?
                 """
         result = fetchall(query, (customer_id,))
         if result and len(result) > 0:
             row = result[0]
-            keys = ['customerId','name','email','phone','totalRewardPoints',];
+            keys = ['customerId','name','email','phone','totalRewardPoints','created_at'];
             customer_data = [
                             SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
                             for r in result
