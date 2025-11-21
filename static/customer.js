@@ -64,3 +64,17 @@ function loadMyCarts() {
 document.addEventListener('DOMContentLoaded', () => {
     loadMyCarts();
 });
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    fetch('/logout', {
+        method: 'POST',
+        credentials: 'include'
+    })
+    .then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else {
+            window.location.reload(); // fallback
+        }
+    });
+});

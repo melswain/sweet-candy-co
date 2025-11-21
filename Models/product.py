@@ -66,7 +66,6 @@ class Product(Base):
 
     @staticmethod
     def get_by_upc(upc):
-        print('Product')
         """Find a product by its UPC code.
         
         Args:
@@ -76,7 +75,7 @@ class Product(Base):
             tuple: Row containing product data or None if not found
         """
         query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE upc = ?"
-        print('Getting upc...' + upc)
+        
         row = fetchone(query, (upc,))
         if not row:
             return None
@@ -170,7 +169,7 @@ class Product(Base):
         return False, "Failed to apply discount."
     
     @staticmethod
-    def get_allProducts():
+    def get_all_products():
         query = """SELECT p.*, i.quantity 
                    FROM product as p 
                    JOIN inventory as i 

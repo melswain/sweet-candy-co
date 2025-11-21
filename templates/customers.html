@@ -11,15 +11,16 @@
 <body>
 
   <div class="cart-section">
-    <h2>Candy Cart</h2>
+    <h2 data-translate="candyCart">Candy Cart</h2>
+
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Unit</th>
-            <th>Total</th>
+            <th data-translate="item">Item</th>
+            <th data-translate="quantity">Quantity</th>
+            <th data-translate="unit">Unit</th>
+            <th data-translate="total">Total</th>
             <th></th>
           </tr>
         </thead>
@@ -38,46 +39,55 @@
         </tbody>
       </table>
     </div>
+
     <div class="summary-wrapper">
       <div class="rewards-box red">
-        <p>Reward Points</p>
+        <p data-translate="rewardPoints">Reward Points</p>
         <p>{{ reward_points }}</p>
       </div>
-        <div class="summary">
-          <p><strong>Subtotal:</strong> ${{ format_money(subtotal) }}</p>
-          <p><strong>GST:</strong> ${{ format_money(gst) }}</p>
-          <p><strong>QST:</strong> ${{ format_money(qst) }}</p>
-          <p><strong>Total:</strong> ${{ format_money(total) }}</p>
-        </div>
+
+      <div class="summary">
+          <p><strong data-translate="subtotal">Subtotal:</strong> ${{ format_money(subtotal) }}</p>
+          <p><strong data-translate="gst">GST:</strong> ${{ format_money(gst) }}</p>
+          <p><strong data-translate="qst">QST:</strong> ${{ format_money(qst) }}</p>
+          <p><strong data-translate="total_amount">Total:</strong> ${{ format_money(total) }}</p>
       </div>
     </div>
+  </div>
 
   <div class="control-panel">
     <div class="button-row">
-      <button onclick="callForAssistance()" class="btn jumbo red">Call for Assistance</button>
-      <button onclick="clearCart()" class="btn jumbo blue">Clear Cart</button>
+      <button onclick="callForAssistance()" class="btn jumbo red" data-translate="callAssistance">Call for Assistance</button>
+      <button onclick="clearCart()" class="btn jumbo blue" data-translate="clearCart">Clear Cart</button>
     </div>
+
     <div class="button-row">
-      <button onclick="openSearchModal()" class="btn jumbo blue">Search Item Code</button>
-      <button class="btn jumbo yellow">Change Language</button>
+      <button onclick="openSearchModal()" class="btn jumbo blue" data-translate="searchItemCode">Search Item Code</button>
+      <button class="btn jumbo yellow" onclick="toggleLanguage()" data-translate="changeLanguage">Change Language</button>
     </div>
+
     <div class="button-row single">
-      <button onclick="startPayment()" class="button green">Pay with Card</button>
+      <button onclick="startPayment()" class="button green" data-translate="payWithCard">Pay with Card</button>
     </div>
   </div>
 
   <!-- Search Item Modal -->
   <div id="searchModal" class="modal">
     <div class="modal-content">
-      <h3>Search Item by Code</h3>
-      <input class="membership-input" type="text" id="searchCodeInput" placeholder="Enter item code">
-      <button class="search-buttons" onclick="searchItem()">Search</button>
+      <h3 data-translate="searchItemByCode">Search Item by Code</h3>
+      <input class="membership-input" 
+             type="text" 
+             id="searchCodeInput" 
+             placeholder="Enter item code"
+             data-translate-placeholder="enterItemCode">
+
+      <button class="search-buttons" onclick="searchItem()" data-translate="search">Search</button>
 
       <div id="searchResult"></div>
 
       <div class="modal-buttons">
-        <button class="search-buttons" id="addItemBtn" onclick="addItem()">Add</button>
-        <button class="search-buttons" onclick="closeSearchModal()">Close</button>
+        <button class="search-buttons" id="addItemBtn" onclick="addItem()" data-translate="add">Add</button>
+        <button class="search-buttons" onclick="closeSearchModal()" data-translate="close">Close</button>
       </div>
     </div>
   </div>
@@ -85,38 +95,46 @@
   <!-- Payment Modal -->
   <div id="paymentModal" class="modal">
     <div class="modal-content">
-      <h3>Simulate a Payment</h3>
-      <p>Please "scan" or enter a card number to simulate payment.</p>
-      <label for="cardNumberInput">Card Number</label>
-      <input class="membership-input" type="text" id="cardNumberInput" placeholder="xxxx-xxxx-xxxx-xxxx" />
-      <label for="expiryInput">Expiry (MM/YY)</label>
+      <h3 data-translate="simulatePayment">Simulate a Payment</h3>
+      <p data-translate="scanOrEnterCard">Please "scan" or enter a card number to simulate payment.</p>
+
+      <label for="cardNumberInput" data-translate="cardNumber">Card Number</label>
+      <input class="membership-input" type="text" id="cardNumberInput" placeholder="xxxx-xxxx-xxxx-xxxx">
+
+      <label for="expiryInput" data-translate="expiry">Expiry (MM/YY)</label>
       <input class="membership-input" type="text" id="expiryInput" placeholder="MM/YY" />
+
       <div class="payment-buttons">
-        <button class="modal-button" onclick="makePayment()">Pay</button>
-        <button class="modal-button" onclick="closePaymentModal()">Cancel</button>
+        <button class="modal-button" onclick="makePayment()" data-translate="pay">Pay</button>
+        <button class="modal-button" onclick="closePaymentModal()" data-translate="cancel">Cancel</button>
       </div>
     </div>
   </div>
 
   <!-- Reward Points Modal -->
   <div id="pointsModal" class="modal">
-  <div class="modal-content">
-    <p>You have <span id="pointsValue"></span> points.</p>
-    <p>Would you like to redeem <span id="discountValue"></span> dollars off your total?</p>
-    <button onclick="applyPointsDiscount()">Yes</button>
-    <button onclick="skipPointsDiscount()">No</button>
+    <div class="modal-content">
+      <p>
+        <span data-translate="youHavePoints">You have</span><span id="pointsValue"></span>points.
+        <span data-translate="wouldYouLikeRedeem">Would you like to redeem $</span><span id="discountValue"></span>?
+      </p>
+      <button onclick="applyPointsDiscount()" data-translate="yes">Yes</button>
+      <button onclick="skipPointsDiscount()" data-translate="no">No</button>
+    </div>
   </div>
-</div>
 
   <!-- Membership Card Modal -->
   <div id="membershipModal" class="modal">
     <div class="modal-content">
-      <h3>Scan Membership Card</h3>
-      <p>Can't scan your card? No problem! Insert your number below.</p>
+      <h3 data-translate="scanMembership">Scan Membership Card</h3>
+
+      <p data-translate="cannotScan">Can't scan your card? No problem! Insert your number below.</p>
+
       <input class="membership-input" type="text" id="membershipInput" placeholder="Membership #">
+
       <div class="membership-buttons">
-        <button class="modal-button" onclick="submitMembership()">Submit</button>
-        <button class="modal-button" onclick="continueToPayment()">Continue without membership</button>
+        <button class="modal-button" onclick="submitMembership()" data-translate="submit">Submit</button>
+        <button class="modal-button" onclick="continueToPayment()" data-translate="continueWithout">Continue without membership</button>
       </div>
     </div>
   </div>
@@ -124,9 +142,9 @@
   <!-- Payment Confirmation Modal -->
   <div id="payment-modal" class="modal">
     <div class="modal-content">
-      <h3>Payment completed!</h3>
-      <p>A receipt has been sent to the email associated with your account.</p>
-      <p>Don't forget your candy!</p>
+      <h3 data-translate="paymentCompleted">Payment completed!</h3>
+      <p data-translate="receiptSent">A receipt has been sent to the email associated with your account.</p>
+      <p data-translate="dontForgetCandy">Don't forget your candy!</p>
     </div>
   </div>
 
@@ -135,6 +153,7 @@
 
   <!-- Notification popup-->
   <div id="notification" class="notification"></div>
+
 </body>
 <script src="{{ url_for('static', filename='checkout.js') }}"></script>
 </html>

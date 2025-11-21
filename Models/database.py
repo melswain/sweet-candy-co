@@ -29,7 +29,6 @@ def execute(query, params=None):
   try:
     with get_cursor() as cursor:
       cursor.execute(query, params)
-      print(cursor.rowcount)
       return True
   except Exception as e:
     print(f"Error: {e}")
@@ -172,10 +171,10 @@ def setup_database():
     (2, 4.00, 12.00, 35.00, 45.00);  -- West Island location
 
     INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
-    ('987654321012', 'Dog1', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
-    ('987654321029', 'Cat2', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
-    ('987654321036', 'Bird3', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
-    ('987654321043', 'Bunny4', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
+    ('987654321012', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+    ('987654321029', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
+    ('987654321036', '', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
+    ('987654321043', '', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
 
     INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
     ('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004917'),
@@ -204,3 +203,19 @@ def setup_database():
     with get_connection() as conn:
         conn.executescript(schema)
         conn.commit()
+
+
+def ensure_customer_password_column():
+  """Ensure the 'password' column exists on the customer table. If missing, add it."""
+  try:
+    with get_connection() as conn:
+      cursor = conn.cursor()
+      cursor.execute("PRAGMA table_info(customer)")
+      cols = cursor.fetchall()
+      names = [c[1] for c in cols]
+      if 'password' not in names:
+        cursor.execute("ALTER TABLE customer ADD COLUMN password TEXT")
+        conn.commit()
+        print('Added password column to customer table')
+  except Exception as e:
+    print('Error ensuring password column:', e)

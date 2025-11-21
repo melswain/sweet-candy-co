@@ -253,3 +253,26 @@ hr {
     padding: 20px;
     background-color: white !important;
 }
+
+.logout-container {
+    text-align: right;
+    margin: 10px 20px;
+}
+
+#logoutBtn {
+    background-color: aliceblue;
+    color: #F694C1;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 15px;
+    cursor: pointer;
+    display: inline-block;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+    font-family: 'Barriecito', 'Barlow', sans-serif;
+    font-size: 1.5em;
+}
+
+#logoutBtn:hover {
+    background-color: #D3F8E2;
+}
