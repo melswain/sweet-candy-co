@@ -59,8 +59,10 @@ class Product(Base):
                 discount
             ))
             if result is True:
-                return True,"Product created successfully."
-            return False, "Failed to create product."
+                query = "SELECT COUNT(*) FROM product";
+                result = fetchone(query)
+                return True,"Product created successfully.",result[0]
+            return False, "Failed to create product.",0
         except Exception as e:
             return False, f"Error creating product: {str(e)}"
 

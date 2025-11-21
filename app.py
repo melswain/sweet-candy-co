@@ -8,7 +8,7 @@ from Controllers.cart_controller import addCart, getCartsByCustomer, getCustomer
 from Controllers.cart_item_controller import addPayment as addCartItem, getItemsByCart
 from Controllers.payment_controller import addPayment
 from Controllers.product_controller import getProductWithUpc, getProductWithEpc, getProductWithId
-from Controllers.inventory_controller import removeInventory, searchInventory
+from Controllers.inventory_controller import removeInventory, searchInventory, addInventory, getInventory
 
 
 from decimal import Decimal, ROUND_HALF_UP
@@ -112,8 +112,10 @@ def index():
     ]
 
     products = Product.get_all_products()
+    success,inventory = getInventory()
     
-    return render_template('index.html', fridges=fridge_data,products=products)
+    
+    return render_template('index.html', fridges=fridge_data,products=products,inventory=inventory)
 
 @app.route('/add', methods=['POST'])
 def add():
@@ -375,10 +377,11 @@ def add_product():
     quantity = request.form.get('quantity');
     quantity = 0 if quantity is None else request.form.get('quantity');
 
-    message = Product.create(name=name, type_=type_,price=price,
-                            expiration_date=expirationDate,manufacturer_name=manufacturerName,
-                            upc=upc,epc=epc,quantity = quantity
-                            )
+    success,message,newProductId = Product.create(name=name, type_=type_,price=price,expiration_date=expirationDate,manufacturer_name=manufacturerName,upc=upc,epc=epc)
+    if(success):
+        success2,message2 = addInventory(newProductId,1,quantity=quantity)
+    else:
+        print(message)
     
     return redirect(url_for('index'))
 
