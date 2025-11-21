@@ -222,10 +222,12 @@ def finalize_payment():
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     reward_points = int(subtotal // Decimal('10') * 100)
 
+    success, customer = getCustomerById(membership_number)
+    email = customer[1][2]
+
     # If user chooses to apply reward points, compute discount and subtract points
     if use_points:
         print("using points...")
-        success, customer = getCustomerById(membership_number)
         if success:
             print(customer[1][1])
             points = customer[1][1]
@@ -273,11 +275,6 @@ def finalize_payment():
     # Create payment record
     payment_success, payment_message = addPayment(cart_id, card_number, expiry)
 
-    # Clear cart and membership
-    items.clear()
-    session.pop('membership_number', None)
-    session.pop('usePoints', None)
-
     receipt_html = """
         <h2>🧾 Receipt</h2>
         <table border="1" cellspacing="0" cellpadding="6">
@@ -307,7 +304,7 @@ def finalize_payment():
         send_receipt_email(
             sender_email="yakin726@gmail.com",
             app_password="phwskofgaeasirge",
-            receiver_email="dummyjeff14@gmail.com",
+            receiver_email=email,
             subject="Your Purchase Receipt",
             html_content=receipt_html
         )
@@ -315,6 +312,11 @@ def finalize_payment():
         print("❌ Email failed:", e)
         # Email failure should NOT stop checkout — but return warning
         return jsonify({"status": "warning", "message": "Payment processed but email failed", "error": str(e)}), 500
+
+    # Clear cart and membership
+    items.clear()
+    session.pop('membership_number', None)
+    session.pop('usePoints', None)
 
     return jsonify({"status": "success", "message": "Payment processed (simulated)"})
 
@@ -477,30 +479,30 @@ def search_item():
     
 @app.route('/customer_page')
 def customerPage():
-    if 'user_id' not in session:
+    if 'customer_id' not in session:
         return redirect('/login')
+    
     # Use membership_number stored in session to identify customer
     membership_number = session.get('membership_number')
     membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
+    
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
-    # success,customer_data = getCustomerData(987654321012)
-    # success1, cart_history_data = getCustomerCartHistory(987654321012)
+    
     success,customer_data = getCustomerData(membership_number)
     success1, cart_history_data = getCustomerCartHistory(membership_number)
     print(cart_history_data)
     print(customer_data)
+    
     if success:
         return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
     else:
-        return print(customer_data),404
-    
-    
-
+        return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
+        # return print(customer_data), 404
 
 @app.route('/customers')
 def my_carts():
-    if 'user_id' not in session:
+    if 'customer_id' not in session:
         return redirect('/login')
 
     # Use membership_number stored in session to identify customer

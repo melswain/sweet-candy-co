@@ -68,11 +68,12 @@ class Customer(Base):
     
     @staticmethod
     def getCustomerById(customer_id):
-        query = " SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ? "
+        query = " SELECT customerId, totalRewardPoints, email FROM customer WHERE customerId = ? "
         result = fetchone(query, (customer_id,))
         if result:
             return True, result
         return False, None
+    
     @staticmethod
     def getCustomerData(customer_id):
         # query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
@@ -99,9 +100,9 @@ class Customer(Base):
     @staticmethod
     def get_password_hash(customer_id):
         query = "SELECT password FROM customer WHERE customerId = ?"
-        if res:
-            return res[0]
-        return None
+        password = fetchone(query, (customer_id,))
+        print("Password: ", password[0])
+        return password[0]
 
     @staticmethod
     def set_password(customer_id, password_plain):
@@ -129,6 +130,7 @@ class Customer(Base):
             if not pw_hash:
                 # no password set
                 return False
+            print(check_password_hash(pw_hash, password))
             return check_password_hash(pw_hash, password)
         except Exception as e:
             print('Error during login_customer:', e)

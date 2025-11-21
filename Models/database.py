@@ -63,19 +63,19 @@ PRAGMA foreign_keys = ON;
 -- ----------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS store_location (
-      locationId INTEGER PRIMARY KEY AUTOINCREMENT,
-      locationName TEXT NOT NULL,
-      address TEXT NOT NULL
+    locationId INTEGER PRIMARY KEY AUTOINCREMENT,
+    locationName TEXT NOT NULL,
+    address TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS customer (
-      customerId TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      password TEXT,
-      email TEXT UNIQUE,
-      phone TEXT NOT NULL,
-      totalRewardPoints INTEGER DEFAULT 0,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    customerId TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    password TEXT,
+    email TEXT UNIQUE,
+    phone TEXT NOT NULL,
+    totalRewardPoints INTEGER DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS cart (
