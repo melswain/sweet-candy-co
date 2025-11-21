@@ -89,6 +89,7 @@ def getCustomerById(customer_id):
     try:
         customer = Customer.getCustomerById(customer_id)
         if customer:
+            print(customer)
             return True, customer
         else:
             return False, "Customer not found."

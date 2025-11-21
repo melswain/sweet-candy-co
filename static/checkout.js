@@ -54,21 +54,27 @@ function submitMembership() {
     .then(response => response.json())
     .then(data => {
     console.log("Server response:", data);
-    fetch('/get-reward-points')
-        .then(res => res.json())
-        .then(pointsData => {
-            if (pointsData.status === "success") {
-                const points = pointsData.points;
-                const discount = Math.floor(points / 100);
-                if (discount > 0) {
-                    showPointsModal(points, discount);
-                } else {
-                    continueToPayment();
-                }
+    fetch('/get-reward-points', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(pointsData => {
+        if (pointsData.status === "success") {
+            const points = pointsData.points;
+            const discount = Math.floor(points / 100);
+            if (discount > 0) {
+                console.log('Membership detected... proceeding to points...')
+                showPointsModal(points, discount);
             } else {
+                console.log('No discount... proceeding to payment...');
                 continueToPayment();
             }
-        });
+        } else {
+            console.log(pointsData);
+            console.log('No membership... proceeding to payment...');
+            continueToPayment();
+        }
+    });
     })
     .catch(error => {
         console.error("Error:", error);
@@ -84,9 +90,20 @@ function showPointsModal(points, discount) {
 }
 
 function applyPointsDiscount() {
-    sessionStorage.setItem("usePoints", "true");
-    document.getElementById("pointsModal").style.display = "none";
-    continueToPayment();
+    fetch('/set-use-points', {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(pointsData => {
+        if (pointsData.status === "success") {
+            sessionStorage.setItem("usePoints", "true");
+            document.getElementById("pointsModal").style.display = "none";
+            continueToPayment();
+        } else {
+            document.getElementById("pointsModal").style.display = "none";
+            continueToPayment();
+        }
+    });
 }
 
 function skipPointsDiscount() {

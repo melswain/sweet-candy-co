@@ -29,7 +29,6 @@ def execute(query, params=None):
   try:
     with get_cursor() as cursor:
       cursor.execute(query, params)
-      print(cursor.rowcount)
       return True
   except Exception as e:
     print(f"Error: {e}")

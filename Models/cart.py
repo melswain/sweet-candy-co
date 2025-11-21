@@ -22,7 +22,6 @@ class Cart(Base):
 
     @staticmethod
     def create(customer_id, total_price, reward_points=0):
-        print('Creating cart...')
         query = """
             INSERT INTO cart (customerId, totalCartPrice, totalRewardPoints)
             VALUES (?, ?, ?)
@@ -33,7 +32,6 @@ class Cart(Base):
                 cursor.execute(query, (customer_id, total_price, reward_points))
                 cart_id = cursor.lastrowid
                 conn.commit()
-                print('LAST INSERTED ID: ', cart_id)
                 if cart_id:
                     return True, cart_id
                 raise Exception('Failed to obtain last insert id')

@@ -1,6 +1,6 @@
 # models/customer.py
 from sqlalchemy import Column, Integer, String
-from .database import Base, execute, fetchone
+from .database import Base, execute, fetchone, fetchall
 
 class Customer(Base):
     __tablename__ = 'customer'
@@ -16,7 +16,6 @@ class Customer(Base):
 
     @staticmethod        
     def create(name, email, phone):
-        print('Creating customer...')
 
         customer_id = Customer.generate_next_customer_id()
         query = """
@@ -25,10 +24,8 @@ class Customer(Base):
         """
         result = execute(query, (customer_id, name, email, phone))
         if result is True:
-            print('Customer added successfully.')
             return True, "Customer added successfully."
         else:
-            print('Error adding customer.')
             raise Exception('Error adding customer')
         
     @staticmethod
@@ -69,11 +66,10 @@ class Customer(Base):
     
     @staticmethod
     def getCustomerById(customer_id):
-        query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
-        result = execute(query, (customer_id,))
-        if result and len(result) > 0:
-            row = result[0]
-            return True, Customer(customer_id=row[0], total_reward_points=row[1])
+        query = " SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ? "
+        result = fetchone(query, (customer_id,))
+        if result:
+            return True, result
         return False, None
     
     @staticmethod
@@ -83,7 +79,6 @@ class Customer(Base):
     
     @staticmethod
     def login_customer(customer_id, password):
-        print("we're at model now.")
         query = "SELECT * FROM customer WHERE customerId = ?"
         
         try:
