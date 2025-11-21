@@ -76,24 +76,12 @@ class Customer(Base):
     
     @staticmethod
     def getCustomerData(customer_id):
-        # query = "SELECT customerId, totalRewardPoints FROM customer WHERE customerId = ?"
-        query = """
-                FROM customer WHERE customerId = ?
-                """
-        result = fetchall(query, (customer_id,))
-        if result and len(result) > 0:
-            row = result[0]
-            keys = ['customerId','name','email','phone','totalRewardPoints','created_at'];
-            customer_data = [
-                            SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
-                            for r in result
-                            ]
-            # return True, Customer(customer_id=row[0],
-            #                       name=row[1],
-            #                       email=row[2],
-            #                       phone=row[3],
-            #                       totalRewardPoints=row[4],
-            #                       created_at=row[5],)
+        query = "SELECT * FROM customer WHERE customerId = ?"
+        result = fetchone(query, (customer_id,))
+        if result:
+            # result is already a tuple of values from the row
+            # convert it to a list (array)
+            customer_data = list(result)
             return True, customer_data
         return False, None
 

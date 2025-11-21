@@ -484,21 +484,22 @@ def customerPage():
     
     # Use membership_number stored in session to identify customer
     membership_number = session.get('membership_number')
-    membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
+    # membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
     
     if not membership_number:
+        print("No membership number in session...")
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
     
-    success,customer_data = getCustomerData(membership_number)
+    success, customer_data = getCustomerData(membership_number)
+    print("Membership number: ", membership_number)
+    print("Customer data: ", customer_data)
     success1, cart_history_data = getCustomerCartHistory(membership_number)
-    print(cart_history_data)
-    print(customer_data)
     
     if success:
-        return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
+        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data)
     else:
-        return render_template('customerPage.html',customer_data = customer_data,cart_history_data=cart_history_data)
-        # return print(customer_data), 404
+        # return render_template('customerPage.html', customer_data = customer_data,cart_history_data=cart_history_data)
+        return print(customer_data), 404
 
 @app.route('/customers')
 def my_carts():
