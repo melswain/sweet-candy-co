@@ -278,6 +278,44 @@ def finalize_payment():
     session.pop('membership_number', None)
     session.pop('usePoints', None)
 
+    receipt_html = """
+        <h2>🧾 Receipt</h2>
+        <table border="1" cellspacing="0" cellpadding="6">
+        <tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
+    """
+
+    for item in items:
+        receipt_html += f"""
+            <tr>
+                <td>{item['name']}</td>
+                <td>{item['quantity']}</td>
+                <td>${item['unit']:.2f}</td>
+                <td>${item['total']:.2f}</td>
+            </tr>
+        """
+
+    receipt_html += f"""
+        </table><br>
+        <b>Subtotal:</b> ${subtotal:.2f}<br>
+        <b>GST:</b> ${gst:.2f}<br>
+        <b>QST:</b> ${qst:.2f}<br>
+        <b>Total:</b> ${total:.2f}<br>
+        <b>Reward Points Earned:</b> {reward_points}<br>
+    """
+
+    try:
+        send_receipt_email(
+            sender_email="yakin726@gmail.com",
+            app_password="phwskofgaeasirge",
+            receiver_email="dummyjeff14@gmail.com",
+            subject="Your Purchase Receipt",
+            html_content=receipt_html
+        )
+    except Exception as e:
+        print("❌ Email failed:", e)
+        # Email failure should NOT stop checkout — but return warning
+        return jsonify({"status": "warning", "message": "Payment processed but email failed", "error": str(e)}), 500
+
     return jsonify({"status": "success", "message": "Payment processed (simulated)"})
 
 @app.route('/set-use-points', methods=['POST'])
@@ -542,7 +580,18 @@ def register():
 #     if response:
 #         turnOnFan()
 
+def send_receipt_email(sender_email, app_password, receiver_email, subject, html_content):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.attach(MIMEText(html_content, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+
+    print("✅ Receipt email sent successfully!")
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-

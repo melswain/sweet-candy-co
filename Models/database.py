@@ -196,7 +196,7 @@ INSERT INTO product (name, type, price, expirationDate, discountPercentage, manu
 
 
 INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
-('987654321012', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+('987654321012', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Sarah Johnson', 'melanie.l.swain@gmail.com', '438-555-0101', 0),
 ('987654321029', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
 ('987654321036', '', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
 ('987654321043', '', 'David Kim', 'davidk@email.com', '514-555-0104', 0);
