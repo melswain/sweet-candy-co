@@ -18,5 +18,44 @@
         </div>
         <button type="submit" class="btn btn-primary">Log In</button>
     </form>
+    <hr>
+    <h3>Register Account</h3>
+    <p>Only customers with an existing Customer ID and no password set can register.</p>
+    <form id="register-form" method="POST" action="/register">
+        <div class="mb-3">
+            <label for="reg-username" class="form-label">Customer ID:</label>
+            <input type="text" name="username" id="reg-username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="reg-password" class="form-label">Password:</label>
+            <input type="password" name="password" id="reg-password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="reg-password2" class="form-label">Confirm Password:</label>
+            <input type="password" name="password2" id="reg-password2" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Register</button>
+    </form>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('reg-username').value.trim();
+            const p1 = document.getElementById('reg-password').value;
+            const p2 = document.getElementById('reg-password2').value;
+            if (p1 !== p2) { alert('Passwords do not match'); return; }
+
+            const res = await fetch('/register', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ customerId: id, password: p1 })
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success') {
+                alert('Registration successful — you can now log in');
+                window.location.reload();
+            } else {
+                alert('Registration failed: ' + (data.message || data));
+            }
+        });
+    </script>
 </body>
 </html>

@@ -34,6 +34,10 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY') or "supersecretfallbackkey"
 
+# Ensure DB has the password column on startup
+from Models.database import ensure_customer_password_column
+ensure_customer_password_column()
+
 
 
 # app = Flask(__name__)
@@ -107,14 +111,12 @@ def index():
         }
     ]
 
-    products = Product.get_allProducts()
-    print(products)
+    products = Product.get_all_products()
     
     return render_template('index.html', fridges=fridge_data,products=products)
 
 @app.route('/add', methods=['POST'])
 def add():
-    print('Add route')
     name = request.form.get('name')
     email = request.form.get('email')
     phone = request.form.get('phone')
@@ -141,10 +143,6 @@ def toggle():
 
 @app.route('/checkout')
 def checkout():
-    if 'membership_number' not in session:
-        flash("Please enter your membership number first.")
-        return redirect(url_for('index'))
-
     def to_decimal(v):
         if isinstance(v, Decimal):
             return v
@@ -182,19 +180,20 @@ def get_membership():
     response = make_response(jsonify({"status": "success", "membership_number": membership_number}))
     return response
 
-@app.route('/get-reward-points')
+@app.route('/get-reward-points', methods=['GET'])
 def get_reward_points():
     membership_number = session.get('membership_number')
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 400
 
     success, customer = getCustomerById(membership_number)
+    print("Customer: ", customer[1][1])
     if not success:
         return jsonify({"status": "error", "message": "Customer not found"}), 404
 
     return jsonify({
         "status": "success",
-        "points": customer.total_reward_points
+        "points": customer[1][1]
     })
 
 @app.route('/finalize-payment', methods=['POST'])
@@ -202,7 +201,9 @@ def finalize_payment():
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
     expiry = data.get('expiryDate') or data.get('expiry')
-    use_points = data.get('usePoints') in (True, 'true', 'True')
+    use_points = session.get('usePoints')
+
+    print(use_points)
 
     # membership number (if scanned earlier) is kept in session
     membership_number = session.get('membership_number')
@@ -221,9 +222,11 @@ def finalize_payment():
 
     # If user chooses to apply reward points, compute discount and subtract points
     if use_points:
+        print("using points...")
         success, customer = getCustomerById(membership_number)
         if success:
-            points = getattr(customer, 'total_reward_points', 0)
+            print(customer[1][1])
+            points = customer[1][1]
             # 100 points = $1 discount (this is consistent with earlier logic)
             discount_dollars = Decimal(points // 100)
             if discount_dollars > 0:
@@ -253,7 +256,6 @@ def finalize_payment():
 
     # Get cart ID from the result
     cart_id = cart_result
-    print('Cart id: ', cart_id)
 
     # Create cart items for each product
     for item in items:
@@ -272,8 +274,15 @@ def finalize_payment():
     # Clear cart and membership
     items.clear()
     session.pop('membership_number', None)
+    session.pop('usePoints', None)
 
     return jsonify({"status": "success", "message": "Payment processed (simulated)"})
+
+@app.route('/set-use-points', methods=['POST'])
+def set_use_points():
+    session['usePoints'] = 'true'
+    return jsonify({'status': 'ok'})
+
 
 @app.route('/scan', methods=['POST'])
 def scan_item():
@@ -351,7 +360,7 @@ def update_product():
                                             new_upc=new_upc,new_epc=new_epc,
                                             new_quantity=new_quantity
                                             )
-    print(message);
+    
     return redirect(url_for('index'))
 
 @app.route('/add_product', methods=['POST'])
@@ -370,21 +379,20 @@ def add_product():
                             expiration_date=expirationDate,manufacturer_name=manufacturerName,
                             upc=upc,epc=epc,quantity = quantity
                             )
-    print(message);
+    
     return redirect(url_for('index'))
 
 @app.route('/delete_product', methods=['POST'])
 def delete_product():
     productId = request.form.get('productId')
-    print("productID is :" + productId)
     message = Product.delete_product(productId=productId)
-    print(message);
     return redirect(url_for('index'))
 
 @app.route('/clear-cart', methods=['GET'])
 def clear_cart():
     items.clear()
     session.pop('membership_number', None)
+    session.pop('usePoints', None)
     return jsonify({"status": "success"})
 
 @app.route('/search-item', methods=['POST'])
@@ -479,18 +487,35 @@ def my_carts():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        print(username, password)
-        login_result = customer_login(username, password)
-
-        print(login_result)
-
-        if (login_result):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        success, msg = customer_login(username, password)
+        if success:
             session['customer_id'] = username
+            session['membership_number'] = username
             return redirect(url_for('customerPage'))
-        return 'Invalid credentials'
+        flash(msg)
+        return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('login')) 
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json() or {}
+    customer_id = data.get('customerId') or request.form.get('username')
+    password = data.get('password') or request.form.get('password')
+    if not customer_id or not password:
+        return jsonify({'status': 'error', 'message': 'Missing customerId or password'}), 400
+
+    from Controllers.customer_controller import register_customer
+    success, msg = register_customer(customer_id, password)
+    if success:
+        return jsonify({'status': 'success', 'message': msg})
+    return jsonify({'status': 'error', 'message': msg}), 400
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')

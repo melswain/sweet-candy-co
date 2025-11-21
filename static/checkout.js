@@ -1,3 +1,87 @@
+// Translation dictionary
+const translations = {
+    en: {
+        candyCart: "Candy Cart",
+        item: "Item",
+        quantity: "Quantity",
+        unit: "Unit",
+        total: "Total",
+        rewardPoints: "Reward Points",
+        subtotal: "Subtotal:",
+        gst: "GST:",
+        qst: "QST:",
+        total_amount: "Total:",
+        callAssistance: "Call for Assistance",
+        clearCart: "Clear Cart",
+        searchItemCode: "Search Item Code",
+        changeLanguage: "Change Language",
+        payWithCard: "Pay with Card",
+        searchItemByCode: "Search Item by Code",
+        enterItemCode: "Enter item code",
+        search: "Search",
+        add: "Add",
+        close: "Close",
+        simulatePayment: "Simulate a Payment",
+        scanOrEnterCard: "Please \"scan\" or enter a card number to simulate payment.",
+        cardNumber: "Card Number",
+        expiry: "Expiry (MM/YY)",
+        pay: "Pay",
+        cancel: "Cancel",
+        youHavePoints: "You have",
+        wouldYouLikeRedeem: "Would you like to redeem",
+        yes: "Yes",
+        no: "No",
+        scanMembership: "Scan Membership Card",
+        cannotScan: "Can't scan your card? No problem! Insert your number below.",
+        submit: "Submit",
+        continueWithout: "Continue without membership",
+        paymentCompleted: "Payment completed!",
+        receiptSent: "A receipt has been sent to the email associated with your account.",
+        dontForgetCandy: "Don't forget your candy!"
+    },
+
+    fr: {
+        candyCart: "Panier de Bonbons",
+        item: "Article",
+        quantity: "Quantité",
+        unit: "Unité",
+        total: "Total",
+        rewardPoints: "Points Récompenses",
+        subtotal: "Sous-total :",
+        gst: "TPS :",
+        qst: "TVQ :",
+        total_amount: "Total :",
+        callAssistance: "Appeler de l’aide",
+        clearCart: "Vider le Panier",
+        searchItemCode: "Rechercher un Code d’Article",
+        changeLanguage: "Changer la Langue",
+        payWithCard: "Payer par Carte",
+        searchItemByCode: "Rechercher un article par code",
+        enterItemCode: "Entrer le code de l’article",
+        search: "Rechercher",
+        add: "Ajouter",
+        close: "Fermer",
+        simulatePayment: "Simuler un Paiement",
+        scanOrEnterCard: "Veuillez « scanner » ou entrer un numéro de carte.",
+        cardNumber: "Numéro de Carte",
+        expiry: "Expiration (MM/AA)",
+        pay: "Payer",
+        cancel: "Annuler",
+        youHavePoints: "Vous avez",
+        wouldYouLikeRedeem: "Souhaitez-vous utiliser",
+        yes: "Oui",
+        no: "Non",
+        scanMembership: "Scanner la Carte de Membre",
+        cannotScan: "Impossible de scanner? Entrez votre numéro.",
+        submit: "Soumettre",
+        continueWithout: "Continuer sans adhésion",
+        paymentCompleted: "Paiement réussi!",
+        receiptSent: "Un reçu a été envoyé à votre courriel.",
+        dontForgetCandy: "N'oubliez pas vos bonbons!"
+    }
+};
+
+
 function parseMoney(s) {
     return Number(String(s).replace(/[^0-9.-]+/g,"")) || 0;
 }
@@ -54,21 +138,27 @@ function submitMembership() {
     .then(response => response.json())
     .then(data => {
     console.log("Server response:", data);
-    fetch('/get-reward-points')
-        .then(res => res.json())
-        .then(pointsData => {
-            if (pointsData.status === "success") {
-                const points = pointsData.points;
-                const discount = Math.floor(points / 100);
-                if (discount > 0) {
-                    showPointsModal(points, discount);
-                } else {
-                    continueToPayment();
-                }
+    fetch('/get-reward-points', {
+        method: 'GET'
+    })
+    .then(res => res.json())
+    .then(pointsData => {
+        if (pointsData.status === "success") {
+            const points = pointsData.points;
+            const discount = Math.floor(points / 100);
+            if (discount > 0) {
+                console.log('Membership detected... proceeding to points...')
+                showPointsModal(points, discount);
             } else {
+                console.log('No discount... proceeding to payment...');
                 continueToPayment();
             }
-        });
+        } else {
+            console.log(pointsData);
+            console.log('No membership... proceeding to payment...');
+            continueToPayment();
+        }
+    });
     })
     .catch(error => {
         console.error("Error:", error);
@@ -84,9 +174,20 @@ function showPointsModal(points, discount) {
 }
 
 function applyPointsDiscount() {
-    sessionStorage.setItem("usePoints", "true");
-    document.getElementById("pointsModal").style.display = "none";
-    continueToPayment();
+    fetch('/set-use-points', {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(pointsData => {
+        if (pointsData.status === "success") {
+            sessionStorage.setItem("usePoints", "true");
+            document.getElementById("pointsModal").style.display = "none";
+            continueToPayment();
+        } else {
+            document.getElementById("pointsModal").style.display = "none";
+            continueToPayment();
+        }
+    });
 }
 
 function skipPointsDiscount() {
@@ -372,3 +473,33 @@ function addItem() {
     console.log("Added to cart:", currentItem);
     closeSearchModal();
 }
+
+function changeLanguage(lang) {
+    document.querySelectorAll("[data-translate]").forEach(el => {
+        const key = el.getAttribute("data-translate");
+        if (translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        }
+    });
+
+     // Update all placeholder translations
+    document.querySelectorAll("[data-translate-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-translate-placeholder");
+        if (translations[lang] && translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        }
+    });
+    
+    localStorage.setItem("language", lang);
+}
+
+function toggleLanguage() {
+    const current = localStorage.getItem("language") || "en";
+    const next = current === "en" ? "fr" : "en";
+    changeLanguage(next);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const saved = localStorage.getItem("language") || "en";
+    changeLanguage(saved);
+});
