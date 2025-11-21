@@ -2,102 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sweet Candy Co. - My Account</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=BBH+Sans+Bogle&family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Barriecito&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='customer_style.css') }}">
+    <title data-translate="addCustomer">Add Customer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <div class="logout-container">
-        <button id="logoutBtn">Logout</button>
-    </div>
-
+    <!-- HEADER -->
     <header>
-        <h1>Sweet Candy Co.</h1>
+        <h1 data-translate="welcome">Welcome</h1>
+
+        <!-- LANGUAGE TOGGLE BUTTON -->
+        <button id="languageToggle" class="lang-btn">
+            Français
+        </button>
     </header>
 
-    <main class="container">
-        
-        <section class="info-card" id="account-info">
-            <h2>Your Account Information</h2>
-            {% set customer = customer_data[0] %}
-            {% if customer %}
-            <form id="account-form">
+    <main>
+        <!-- CUSTOMER FORM -->
+        <h2 data-translate="addCustomer">Add Customer</h2>
 
-                <div class="field-row">
-                    <label for="customerId">Customer ID</label>
-                    <input type="text" id="customerId"  value="{{customer.customerId}}" disabled>
-                </div>
-                <div class="field-row">
-                    <label for="name">Name</label>
-                    <input type="text" id="name"  value="{{customer.name}}" disabled>
-                </div>
+        <form id="customerForm">
 
-                <div class="field-row">
-                    <label for="email">Email</label>
-                    <input type="email" id="email"  value="{{customer.email}}" disabled>
-                </div>
-                <div class="field-row">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone"  value="{{customer.phone}}" disabled>
-                </div>
-                <div class="field-row">
-                    <label for="total-rewards">Total Reward Points</label>
-                    <input type="text" id="total-rewards"  value="{{customer.totalRewardPoints}}" disabled>
-                </div>
+            <label for="name" data-translate="customerName">Customer Name</label>
+            <input type="text" id="name" name="name">
 
-                <div class="field-row">
-                    <label for="created-at">Created At</label>
-                    <input type="text" id="created-at" value="{{customer.created_at}}" disabled>
-                </div>
-               
-                <!-- <div class="actions">
-                    <button type="button" id="edit-btn">Edit Information</button>
-                    <button type="submit" id="save-btn" disabled>Save Changes</button>
-                </div> -->
-            </form>
-             {% else %}
-                <p>No Customer data found</p>
-            {% endif %}
-        </section>
+            <label for="email" data-translate="email">Email</label>
+            <input type="email" id="email" name="email">
 
-        <hr>
+            <label for="phone" data-translate="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone">
 
-        <section class="info-card" id="cart-history">
-            <h2>Your Shopping Cart History</h2>
-            <div id="carts-list">
-                {% if cart_history_data %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cart ID</th>
-                            <th>Item Name</th>
-                            <th>Quantity</th>
-                            <th>Total Price</th>
-                            <th>Checkout Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cart_item in cart_history_data %}
-                        <tr>
-                            <td>{{ cart_item.cartId }}</td>
-                            <td>{{ cart_item.name }}</td>
-                            <td>{{ cart_item.quantity }}</td>
-                            <td>${{ cart_item.totalCartPrice }}</td>
-                            <td>{{ cart_item.checkoutDate }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>You have no past shopping carts.</p>
-                {% endif %}
-            </div>
-        </section>
+            <button type="submit" data-translate="submit">Submit</button>
+        </form>
     </main>
+
+    <script src="customer.js"></script>
 </body>
-    <script src="{{ url_for('static', filename='customer.js') }}"></script>
 </html>

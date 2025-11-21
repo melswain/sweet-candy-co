@@ -439,13 +439,13 @@ def search_item():
     
 @app.route('/customer_page')
 def customerPage():
-    if 'user_id' not in session:
-        return redirect('/login')
-    # Use membership_number stored in session to identify customer
-    membership_number = session.get('membership_number')
-    membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
-    if not membership_number:
-        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+    # if 'user_id' not in session:
+    #     return redirect('/login')
+    # # Use membership_number stored in session to identify customer
+    # membership_number = session.get('membership_number')
+    # membership_number = 1 if membership_number is None else session.get('membership_number'); #! Remove later 
+    # if not membership_number:
+    #     return jsonify({"status": "error", "message": "No membership number in session"}), 401
     # success,customer_data = getCustomerData(987654321012)
     # success1, cart_history_data = getCustomerCartHistory(987654321012)
     success,customer_data = getCustomerData(membership_number)
