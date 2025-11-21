@@ -76,12 +76,11 @@ class Customer(Base):
     
     @staticmethod
     def getCustomerData(customer_id):
-        query = "SELECT * FROM customer WHERE customerId = ?"
+        query = "SELECT customerId, name, email, phone, totalRewardPoints, created_at FROM customer WHERE customerId = ?"
         result = fetchone(query, (customer_id,))
-        if result:
-            # result is already a tuple of values from the row
-            # convert it to a list (array)
-            customer_data = list(result)
+        if len(result) > 0:
+            keys = ['customerId', 'name', 'email', 'phone', 'totalRewardPoints', 'created_at']
+            customer_data = SimpleNamespace(**dict(zip(keys, result)))
             return True, customer_data
         return False, None
 
