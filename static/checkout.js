@@ -81,7 +81,6 @@ const translations = {
     }
 };
 
-
 function parseMoney(s) {
     return Number(String(s).replace(/[^0-9.-]+/g,"")) || 0;
 }

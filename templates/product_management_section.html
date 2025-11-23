@@ -15,11 +15,10 @@
         <th>Expiration Date</th>
         <th>Manufacturer Name</th>
         <th>UPC</th>
-        <th>QUANTITY</th>
         <th></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="productTableBody">
       {% for product in products %}
       <tr>
         <td>{{product.productId}}</td>
@@ -29,7 +28,6 @@
         <td>{{product.expirationDate}}</td>
         <td>{{product.manufacturerName}}</td>
         <td>{{product.upc}}</td>
-        <td>{{product.quantity}}</td>
         <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
       </tr>
       {% else %}
@@ -42,7 +40,7 @@
   
   <!--* Update Modal  -->
     <div class="update-modal">
-      <form method="POST" class="update-form-content" action="/update_product" >
+      <form class="update-form-content" id="updateProductForm" >
           <div class="form-grid">
               <div class="form-field-group">
                   <label for="modal-productId">Product ID</label>
@@ -72,10 +70,6 @@
               <div class="form-field-group">
                   <label for="modal-upc">Product UPC</label>
                   <input name="upc" type="text" id="modal-upc">
-              </div>
-              <div class="form-field-group">
-                  <label for="modal-epc">Product EPC</label>
-                  <input name="epc" type="text" id="modal-epc">
               </div>
           </div>
           
@@ -120,10 +114,6 @@
               <div class="form-field-group">
                   <label for="modal-upc">Product UPC</label>
                   <input name="upc" type="text">
-              </div>
-              <div class="form-field-group">
-                  <label for="modal-epc">Product EPC</label>
-                  <input name="epc" type="text">
               </div>
           </div>
           

@@ -184,15 +184,15 @@ class Product(Base):
         return product_list
     
     @staticmethod
-    def update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc):
+    def update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc):
         query = """
                 UPDATE product 
                 SET name = ?, type = ?
                     , price = ?, expirationDate = ?, manufacturerName = ?
-                    , upc = ?, epc = ?
+                    , upc = ?
                  WHERE productId = ? """
         
-        result = execute(query, (new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc, productId))
+        result = execute(query, (new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, productId))
         print(result)
         if result:
             return True, "Product updated successfully."

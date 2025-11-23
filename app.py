@@ -16,7 +16,7 @@ from Services.fan_service import toggle_fan
 from Services.reward_service import get_points
 from Services.payment_service import process_payment
 from Services.scan_service import process_scan
-from Services.product_service import update_product, add_product
+from Services.product_service import update_product, add_product, get_all_products
 from Services.search_service import search_item
 
 # from Services.fan_service import turnOnFan
@@ -203,6 +203,7 @@ def remove_item():
 @app.route('/update_product', methods=['POST'])
 def update_products():
     data = request.form.to_dict()
+    print(data)
     result = update_product(data)
 
     return result
@@ -213,6 +214,11 @@ def create_new_product():
     status, message, id = add_product(data)
 
     return jsonify({"status": status, "message": message, "id": id}), 400
+
+@app.route('/products', methods=['GET'])
+def get_products():
+    products = get_all_products()
+    return jsonify(products)
 
 @app.route('/clear-cart', methods=['GET'])
 def clear_cart():

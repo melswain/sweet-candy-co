@@ -30,9 +30,9 @@ def getAllProducts():
     except Exception as e:
         return f"Failed to get products: {e}"
     
-def update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc):
+def update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc):
     try:
-        products = Product.update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc)
+        products = Product.update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc)
         return True, products
     except Exception as e:
         return False, f"Failed to update product: {e}"

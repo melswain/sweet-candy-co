@@ -12,23 +12,12 @@
     <div class="title-box">
       <h1>Sweet Candy Co.</h1>
     </div>
-
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="notification" id="notification">
-          <button class="close-btn" onclick="closeNotification()">×</button>
-          {% for message in messages %}
-            <p>{{ message }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
   
     <div class="section-1">
       <div class="column-1">
         <div class="form-container">
           <h2>Add Customer Account</h2>
-          <form action="/add" method="post">
+          <form id="addCustomerForm">
             <input type="text" name="name" placeholder="Name" required><br>
             <input type="email" name="email" placeholder="Email" required><br>
             <input type="tel" name="phone" placeholder="Phone" required><br>
@@ -62,6 +51,8 @@
     {% include 'product_management_section.html' %}
     {% include 'inventory_management_section.html' %}
   </div>
+
+  <div id="notification" class="notification"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/gaugeJS/dist/gauge.min.js"></script>
   <script src="https://fastly.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>

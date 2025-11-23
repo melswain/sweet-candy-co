@@ -1,6 +1,5 @@
 # services/product_service.py
-from Controllers.inventory_controller import addInventory
-from Controllers.product_controller import update_product, create_product
+from Controllers.product_controller import getAllProducts, create_product
 from Controllers import product_controller
 
 def update_product(data):
@@ -12,8 +11,7 @@ def update_product(data):
             new_price=data.get("price"),
             new_expirationDate=data.get("expirationDate"),
             new_manufacturerName=data.get("manufacturerName"),
-            new_upc=data.get("upc"),
-            new_epc=data.get("epc")
+            new_upc=data.get("upc")
         )
         return {"success": result, "message": message}
     except Exception as e:
@@ -34,5 +32,13 @@ def add_product(data):
         if success:
             return {"success": True, "message": message, "id": newProductId}
 
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+    
+def get_all_products():
+    try:
+        products = getAllProducts()
+        product_dicts = [vars(p) for p in products]
+        return {"success": True, "products": product_dicts}
     except Exception as e:
         return {"success": False, "message": str(e)}

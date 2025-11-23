@@ -87,11 +87,21 @@ button {
 }
 
 .notification {
-  margin-top: 20px;
-  background: #D3F8E2;
-  padding: 10px;
-  border-radius: 10px;
-  color: #155724;
+  position: fixed;
+  top: 20px;
+  right: -300px;
+  background-color: #D3F8E2;
+  color: black;
+  padding: 15px 25px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 16px;
+  z-index: 9999;
+  transition: right 0.5s ease-in-out;
+}
+
+.notification.show {
+  right: 20px;
 }
 
 .alert {

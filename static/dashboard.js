@@ -13,20 +13,16 @@ function sendToggle(state) {
     .then(data => console.log(data));
 }
 
-document.querySelectorAll('.open-update-modal').forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-        const modal = document.querySelector('.update-modal');
-        
+document.getElementById("productTableBody").addEventListener("click", (event) => {
+    if (event.target.classList.contains("open-update-modal")) {
+        const modal = document.querySelector(".update-modal");
 
-        modal.style.display = 'flex'; 
-        
-        setTimeout(() => {
-            modal.classList.add('active'); // triggers fade-in
-        }, 10);
+        modal.style.display = "flex";
+        setTimeout(() => modal.classList.add("active"), 10);
 
-        modal.querySelectorAll('input').forEach(input => input.value = '');
+        modal.querySelectorAll("input").forEach(input => input.value = "");
 
-        const row = event.target.closest('tr');
+        const row = event.target.closest("tr");
         if (row) {
             modal.querySelector('input[name="productId"]').value = row.cells[0].textContent.trim();
             modal.querySelector('input[name="name"]').value = row.cells[1].textContent.trim();
@@ -35,10 +31,8 @@ document.querySelectorAll('.open-update-modal').forEach((btn) => {
             modal.querySelector('input[name="expirationDate"]').value = row.cells[4].textContent.trim();
             modal.querySelector('input[name="manufacturerName"]').value = row.cells[5].textContent.trim();
             modal.querySelector('input[name="upc"]').value = row.cells[6].textContent.trim();
-            modal.querySelector('input[name="epc"]').value = row.cells[7].textContent.trim();
-            modal.querySelector('input[name="quantity"]').value = row.cells[8].textContent.trim();
         }
-    });
+    }
 });
 
 // Close modal when clicking Cancel
@@ -154,7 +148,6 @@ async function updateReadings() {
     const response = await fetch("/sensor_data");
     const data = await response.json();
 
-    console.log(data);
     Object.entries(data).forEach(([key, fridge]) => {
         // Update humidity text + meter
         const humidityText = document.getElementById(`humidity-${key}`);
@@ -173,5 +166,105 @@ async function updateReadings() {
 }
 
 // Refresh every 5 seconds
-setInterval(updateReadings, 60000);
+setInterval(updateReadings, 5000);
 updateReadings();
+
+document.getElementById("addCustomerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch("/add", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Server error: " + response.status);
+        }
+
+        const result = await response.json();
+        showNotification("Customer add successfully!");
+        console.log(result);
+    } catch (err) {
+        console.error(err);
+        showNotification("Error adding message: " + err.message);
+    }
+});
+
+function showNotification(message, duration = 3000) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, duration);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("updateProductForm").addEventListener("submit", async function(e) {
+        console.log("submitting");
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch("/update_product", {
+                method: "POST",
+                body: formData
+            });
+
+            if (!response.ok) throw new Error("Server error: " + response.status);
+
+            const result = await response.json();
+            console.log(result);
+            showNotification("Product updated successfully!");
+
+            document.querySelector(".update-modal").style.display = "none";
+            refreshProducts();
+        } catch (err) {
+            showNotification("Product updated successfully!");
+            console.error(err);
+        }
+    });
+});
+
+async function refreshProducts() {
+    try {
+        const response = await fetch("/products");
+        if (!response.ok) {
+            showNotification("Failed to reload products. Try reloading your page.");
+            return;
+        }
+
+        const products = await response.json();
+        console.log(products)
+        const tbody = document.getElementById("productTableBody");
+        tbody.innerHTML = "";
+
+        if (products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No products found</td></tr>`;
+        return;
+        }
+
+        products["products"].forEach((product, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${product.productId}</td>
+                <td>${product.name}</td>
+                <td>${product.type}</td>
+                <td>${product.price}</td>
+                <td>${product.expirationDate}</td>
+                <td>${product.manufacturerName}</td>
+                <td>${product.upc}</td>
+                <td><button class="open-update-modal" data-index="${index+1}">Update</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (err) {
+        showNotification("Failed to reload products. Try reloading your page.");
+        console.error("Error refreshing products:", err);
+    }
+}
