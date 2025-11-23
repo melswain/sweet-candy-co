@@ -173,5 +173,5 @@ async function updateReadings() {
 }
 
 // Refresh every 5 seconds
-setInterval(updateReadings, 5000);
+setInterval(updateReadings, 60000);
 updateReadings();

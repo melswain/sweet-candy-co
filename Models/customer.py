@@ -18,8 +18,9 @@ class Customer(Base):
 
     @staticmethod        
     def create(name, email, phone):
-
+        print('Creating a new customer...')
         customer_id = Customer.generate_next_customer_id()
+        print("New customer id: ", customer_id)
         query = """
             INSERT INTO customer (customerId, name, email, phone)
             VALUES (?, ?, ?, ?)
@@ -45,26 +46,36 @@ class Customer(Base):
             raise Exception("Failed to update reward points.")
         
     @staticmethod
-    def calculate_checksum(base_digits):
-        # GS1-style Modulo-10 checksum
-        weights = [3 if i % 2 == 0 else 1 for i in range(len(base_digits))]
-        total = sum(int(d) * w for d, w in zip(base_digits[::-1], weights))
+    def calculate_checksum(base_digits: str) -> str:
+        total = 0
+        for i, d in enumerate(reversed(base_digits)):
+            weight = 3 if (i % 2 == 0) else 1
+            total += int(d) * weight
         return str((10 - (total % 10)) % 10)
 
     @staticmethod
     def generate_next_customer_id():
-        # Get last customer ID from db
-        query = "SELECT customer_id FROM customer ORDER BY customer_id DESC LIMIT 1"
-        result = execute(query)
-        if result and isinstance(result, list) and len(result) > 0:
-            last_id = result[0][0]
-            base = int(last_id[:11]) + 1
+        # Get last ID
+        result = fetchone("SELECT customerId FROM customer ORDER BY customerId DESC LIMIT 1")
+        if result:
+            last_id = str(result[0])
+            base = int(last_id[:-1]) + 1
         else:
-            base = 98765432101  # Starting base
+            base = 987654321
 
-        base_str = str(base).zfill(11)
-        checksum = Customer.calculate_checksum(base_str)
-        return base_str + checksum
+        while True:
+            base_str = str(base).zfill(9)
+            checksum = Customer.calculate_checksum(base_str)
+            candidate_id = base_str + checksum
+            
+            # check if candidate exists
+            check_query = "SELECT COUNT(1) FROM customer WHERE customerId = ?"
+            count = fetchone(check_query, (candidate_id,))
+            print(count)
+            if count[0] == 0:
+                return candidate_id
+
+            base += 1
     
     @staticmethod
     def getCustomerById(customer_id):
