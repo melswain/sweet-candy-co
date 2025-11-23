@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<div class="productManagement-container">
+  <div class="productManagement-header">
+    <button class="add-btn">+</button>
+    <h2>Product Management</h2>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Product ID</th>
+        <th>Product Name</th>
+        <th>Type</th>
+        <th>Price</th>
+        <th>Expiration Date</th>
+        <th>Manufacturer Name</th>
+        <th>UPC</th>
+        <th>QUANTITY</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+      <tr>
+        <td>{{product.productId}}</td>
+        <td>{{product.name}}</td>
+        <td>{{product.type}}</td>
+        <td>{{product.price}}</td>
+        <td>{{product.expirationDate}}</td>
+        <td>{{product.manufacturerName}}</td>
+        <td>{{product.upc}}</td>
+        <td>{{product.quantity}}</td>
+        <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" style="text-align:center;">No bookings found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <!--* Update Modal  -->
+    <div class="update-modal">
+      <form method="POST" class="update-form-content" action="/update_product" >
+          <div class="form-grid">
+              <div class="form-field-group">
+                  <label for="modal-productId">Product ID</label>
+                  <input name="productId" type="text" id="modal-productId" readonly>
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-name">Product Name</label>
+                  <input name="name" type="text" id="modal-name">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-type">Product Type</label>
+                  <input name="type" type="text" id="modal-type">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-price">Product Price</label>
+                  <input name="price" type="text" id="modal-price">
+              </div>
+              
+              <div class="form-field-group">
+                  <label for="modal-expirationDate">Product Exp-Date</label>
+                  <input name="expirationDate" type="text" id="modal-expirationDate">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-manufacturerName">Product Manufacturer Name</label>
+                  <input name="manufacturerName" type="text" id="modal-manufacturerName">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-upc">Product UPC</label>
+                  <input name="upc" type="text" id="modal-upc">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-epc">Product EPC</label>
+                  <input name="epc" type="text" id="modal-epc">
+              </div>
+          </div>
+          
+          <div class="update-modal-buttons">
+              <button type="submit" class="update-confirm-btn">Update</button>
+              <button type="button" class="update-cancel-btn">Cancel</button>
+          </div>
+          
+      </form>
+    </div>
+</div>
+
+<!--* Add Modal  -->
+  <div class="add-modal">
+      <form method="POST" class="add-form-content" action="/add_product" >
+          <div class="form-grid">
+              <div class="form-field-group">
+                  <label for="modal-productId">Product ID</label>
+                  <input name="productId" type="text" placeholder="Automatically Given" disabled>
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-name">Product Name</label>
+                  <input name="name" type="text">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-type">Product Type</label>
+                  <input name="type" type="text" >
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-price">Product Price</label>
+                  <input name="price" type="text" >
+              </div>
+              
+              <div class="form-field-group">
+                  <label for="modal-expirationDate">Product Exp-Date</label>
+                  <input name="expirationDate" type="text">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-manufacturerName">Product Manufacturer Name</label>
+                  <input name="manufacturerName" type="text">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-upc">Product UPC</label>
+                  <input name="upc" type="text">
+              </div>
+              <div class="form-field-group">
+                  <label for="modal-epc">Product EPC</label>
+                  <input name="epc" type="text">
+              </div>
+          </div>
+          
+          <div class="add-modal-buttons">
+              <button type="submit" class="add-confirm-btn">Add</button>
+              <button type="button" class="add-cancel-btn">Cancel</button>
+          </div>
+      </form>
+    </div>

@@ -35,8 +35,8 @@ current_fan_state = False
 
 #MQTT setup
 sensor_data = {
-    "Frig1": {"temperature": 50, "humidity": None},
-    "Frig2": {"temperature": None, "humidity": None}
+    "Frig1": {"temperature": 1, "humidity": 30},
+    "Frig2": {"temperature": 0, "humidity": 50}
 }
 
 MQTT_BROKER = "172.20.10.12"  
@@ -79,16 +79,16 @@ items = [
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"
 
-@app.route('/')
+@app.route('/dashboard')
 def index():
     fridge_data = [
         {
-        'name': 'Fridge 1', 
+        'name': 'Frig1', 
         'temperature': sensor_data['Frig1']['temperature'] or 'N/A',
         'humidity': sensor_data['Frig1']['humidity'] or 'N/A'
         },
         {
-        'name' : 'Fridge 2',
+        'name' : 'Frig2',
         'temperature': sensor_data['Frig2']['temperature'] or 'N/A',
         'humidity': sensor_data['Frig2']['humidity'] or 'N/A'
         }
@@ -111,8 +111,8 @@ def add():
 
 @app.route('/sensor_data')
 def get_sensor_data():
-    return sensor_data
-    
+    return jsonify(sensor_data)
+
 @app.route('/fan', methods=['POST'])
 def toggle():
     data = request.get_json()
@@ -278,7 +278,7 @@ def register():
     data = request.get_json() or {}
     customer_id = data.get('customerId') or request.form.get('username')
     password = data.get('password') or request.form.get('password')
-    
+
     if not customer_id or not password:
         return jsonify({'status': 'error', 'message': 'Missing customerId or password'}), 400
 
