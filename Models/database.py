@@ -31,7 +31,7 @@ def execute(query, params=None):
       cursor.execute(query, params)
       return True
   except Exception as e:
-    print(f"Error: {e}")
+    print(f"Error: {e} ", query)
     return False
 
 def fetchall(query, params=None):
@@ -63,19 +63,19 @@ PRAGMA foreign_keys = ON;
 -- ----------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS store_location (
-      locationId INTEGER PRIMARY KEY AUTOINCREMENT,
-      locationName TEXT NOT NULL,
-      address TEXT NOT NULL
+    locationId INTEGER PRIMARY KEY AUTOINCREMENT,
+    locationName TEXT NOT NULL,
+    address TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS customer (
-      customerId TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      password TEXT,
-      email TEXT UNIQUE,
-      phone TEXT NOT NULL,
-      totalRewardPoints INTEGER DEFAULT 0,
-      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    customerId TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    password TEXT,
+    email TEXT UNIQUE,
+    phone TEXT NOT NULL,
+    totalRewardPoints INTEGER DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS cart (
@@ -183,7 +183,7 @@ INSERT INTO maintenance_threshold (locationId, minTemperature, maxTemperature, m
 (2, 4.00, 12.00, 35.00, 45.00);
 
 INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
-('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004917'),
+('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004933'),
 ('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789029', 'A00000000000000000004921'),
 ('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789036', 'EPC123003'),
 ('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789043', 'EPC123004'),
@@ -196,7 +196,7 @@ INSERT INTO product (name, type, price, expirationDate, discountPercentage, manu
 
 
 INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
-('987654321012', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Sarah Johnson', 'sarah.j@email.com', '438-555-0101', 0),
+('987654321012', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Sarah Johnson', 'melanie.l.swain@gmail.com', '438-555-0101', 0),
 ('987654321029', 'scrypt:32768:8:1$119fU81mnH3H5noC$629274f97157e19e4d35c95a8cc1da3960a7a11d0201eb0fc7bf5379f12ba64d89c5fe735ba6c09ee97e4d6996da6a8031edd3db8dcb0ed1796ea46050066381', 'Michael Chen', 'mchen@email.com', '514-555-0102', 0),
 ('987654321036', '', 'Emily Rodriguez', 'emily.r@email.com', '613-555-0103', 0),
 ('987654321043', '', 'David Kim', 'davidk@email.com', '514-555-0104', 0);

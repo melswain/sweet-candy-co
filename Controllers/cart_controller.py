@@ -20,7 +20,7 @@ def getCartsByCustomer(customer_id):
     
 def getCustomerCartHistory(customerId):
     try:
-        success,cart_history = Cart.get_customer_cartHistory(customerId)
+        success, cart_history = Cart.get_customer_cartHistory(customerId)
         if success:
             return True, cart_history
         else:
