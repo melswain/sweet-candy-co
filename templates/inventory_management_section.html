@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<div class="inventoryManagement-container">
+  <div class="inventoryManagement-header">
+    <h2>Inventory Management</h2>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Inventory ID</th>
+        <th>Product ID </th>
+        <th>Product name</th>
+        <th>Product Price</th>
+        <th>Quantity</th>
+        <th>Location ID</th>
+        <th>Last Updated</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inventory_item in inventory %} 
+      <tr>
+        <td>{{inventory_item.inventoryId}}</td>
+        <td>{{inventory_item.productId}}</td>
+        <td>{{inventory_item.name}}</td>
+        <td>{{inventory_item.price}}</td>
+        <td>{{inventory_item.quantity}}</td>
+        <td>{{inventory_item.locationId}}</td>
+        <td>{{inventory_item.lastUpdated}}</td>
+        <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" style="text-align:center;">No bookings found</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

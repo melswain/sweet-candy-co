@@ -27,8 +27,8 @@ const translations = {
         expiry: "Expiry (MM/YY)",
         pay: "Pay",
         cancel: "Cancel",
-        youHavePoints: "You have",
-        wouldYouLikeRedeem: "Would you like to redeem",
+        youHavePoints: "You have ",
+        wouldYouLikeRedeem: "Would you like to redeem $",
         yes: "Yes",
         no: "No",
         scanMembership: "Scan Membership Card",
@@ -67,8 +67,8 @@ const translations = {
         expiry: "Expiration (MM/AA)",
         pay: "Payer",
         cancel: "Annuler",
-        youHavePoints: "Vous avez",
-        wouldYouLikeRedeem: "Souhaitez-vous utiliser",
+        youHavePoints: "Vous avez ",
+        wouldYouLikeRedeem: "Souhaitez-vous utiliser $",
         yes: "Oui",
         no: "Non",
         scanMembership: "Scanner la Carte de Membre",
@@ -80,7 +80,6 @@ const translations = {
         dontForgetCandy: "N'oubliez pas vos bonbons!"
     }
 };
-
 
 function parseMoney(s) {
     return Number(String(s).replace(/[^0-9.-]+/g,"")) || 0;

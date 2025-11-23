@@ -17,6 +17,7 @@ def removeInventory(product_id, location_id, quantity):
 def searchInventory(product_id, location_id):
     try:
         item_id = Inventory.search_item(product_id, location_id)
+        print("Item: ", item_id[1])
         return True, item_id[1]
     except Exception as e:
         return f"Failed to find product:\n{e}"

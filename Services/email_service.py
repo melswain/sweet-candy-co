@@ -1,20 +1,31 @@
-# import smtplib, imaplib, email
-# from email.mime.text import MIMEText
-# from email.mime.multipart import MIMEMultipart
+#  services/email_service.py
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
+# import imaplib, email
 # from time import sleep
+
 # import fanControl
 
 # Gmail Info
 sender_email = "yakin726@gmail.com"
-sending_app_password = "phwskofgaeasirge"  # App password (no spaces)
-receiver_email = "dummyjeff14@gmail.com"
+sending_app_password = "phwskofgaeasirge"
+# receiver_email = "dummyjeff14@gmail.com"
 receiving_app_password = "zlpqxbhrwvkdzoxd"
 
-# # Gmail Info
-# sender_email = "kishaan2006@gmail.com"
-# sending_app_password = "imntfpdfsbgxacrp"  # App password (no spaces)
-# receiver_email = "uselessmayl@gmail.com"
-# receiving_app_password = "iagqjihgfsfiwgdo"
+def send_receipt_email(receiver_email, subject, html_content):
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.attach(MIMEText(html_content, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, sending_app_password)
+        server.send_message(msg)
+
+    print("Receipt email sent successfully!")
+
 
 # # Sending code
 # def sendEmail():
