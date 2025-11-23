@@ -89,7 +89,6 @@
           <td>{{product.epc}}</td>
           <td>{{product.quantity}}</td>
           <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
-          <td><button class="open-delete-modal" data-index="{{ loop.index }}">Delete</button></td>
         </tr>
         {% else %}
         <tr>
@@ -135,11 +134,6 @@
                 <div class="form-field-group">
                     <label for="modal-epc">Product EPC</label>
                     <input name="epc" type="text" id="modal-epc">
-                </div>
-
-                <div class="form-field-group">
-                    <label for="modal-quantity">Quantity</label>
-                    <input name="quantity" type="text" id="modal-quantity">
                 </div>
             </div>
             
@@ -189,32 +183,11 @@
                     <label for="modal-epc">Product EPC</label>
                     <input name="epc" type="text">
                 </div>
-
-                <div class="form-field-group">
-                    <label for="modal-quantity">Quantity</label>
-                    <input name="quantity" type="text">
-                </div>
             </div>
             
             <div class="add-modal-buttons">
                 <button type="submit" class="add-confirm-btn">Add</button>
                 <button type="button" class="add-cancel-btn">Cancel</button>
-            </div>
-        </form>
-      </div>
-
-      <!--* Delete Modal -->
-      <div class="delete-modal">
-        <form method="POST" class="delete-form-content" action="/delete_product" >
-          <h2 class="delete-warning-header"> Are you sure you want to delete product:
-          <span id="delete-product-id-display">?</span> 
-          </h2> 
-          
-          <input type="hidden" name="productId" id="delete-product-id-input">
-            
-            <div class="delete-modal-buttons">
-                <button type="submit" class="delete-confirm-btn">Delete</button>
-                <button type="button" class="delete-cancel-btn">Cancel</button>
             </div>
         </form>
       </div>
@@ -249,7 +222,6 @@
             <td>{{inventory_item.locationId}}</td>
             <td>{{inventory_item.lastUpdated}}</td>
             <td><button class="open-update-modal" data-index="{{ loop.index }}">Update</button></td>
-            <td><button class="open-delete-modal" data-index="{{ loop.index }}">Delete</button></td>
           </tr>
           {% else %}
           <tr>
@@ -393,58 +365,6 @@
         });
       }
     });
-
-
-      // Delete Product Interaction
-    document.querySelectorAll('.open-delete-modal').forEach((btn) => {
-        btn.addEventListener('click', (event) => {
-            const modal = document.querySelector('.delete-modal');
-
-
-           
-
-            modal.querySelectorAll('input').forEach(input => input.value = '');
-
-            const row = event.target.closest('tr');
-            if (row) {
-                const productId = row.cells[0].textContent.trim();
-
-                document.getElementById('delete-product-id-display').textContent = productId;
-                document.getElementById('delete-product-id-input').value = productId;
-
-                 modal.style.display = 'flex'; 
-            
-                setTimeout(() => {
-                    modal.classList.add('active'); // Add 'active' class to trigger fade-in
-                }, 10); // A small delay is usually sufficient
-            }
-        });
-    });
-
-    // Close modal when clicking Cancel
-    document.querySelector('.delete-cancel-btn').addEventListener('click', () => {
-        const modal = document.querySelector('.delete-modal');
-        modal.classList.remove('active'); 
-        modal.addEventListener('transitionend', function handler() {
-            modal.style.display = 'none';
-            modal.removeEventListener('transitionend', handler); 
-        });
-    });
-
-    document.querySelector('.delete-modal').addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-modal')) {
-            const modal = document.querySelector('.delete-modal');
-            modal.classList.remove('active'); 
-            modal.addEventListener('transitionend', function handler() {
-                modal.style.display = 'none';
-                modal.removeEventListener('transitionend', handler);
-            });
-        }
-    });
-
-    
-
-
   </script>
 </body>
 </html>

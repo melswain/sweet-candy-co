@@ -58,11 +58,12 @@ class Product(Base):
                 epc,
                 discount
             ))
+
             if result is True:
                 query = "SELECT COUNT(*) FROM product";
                 result = fetchone(query)
-                return True,"Product created successfully.",result[0]
-            return False, "Failed to create product.",0
+                return True, "Product created successfully.", result[0]
+            return False, "Failed to create product.", 0
         except Exception as e:
             return False, f"Error creating product: {str(e)}"
 
@@ -131,9 +132,6 @@ class Product(Base):
             return True, "Price updated successfully."
         return False, "Failed to update price."
     
-     
-
-
     @staticmethod
     def get_expiring_soon(days=30):
         """Get products expiring within the specified number of days.
@@ -186,22 +184,17 @@ class Product(Base):
         return product_list
     
     @staticmethod
-    def update_product(productId,new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,new_quantity):
+    def update_product(productId, new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc):
         query = """
                 UPDATE product 
                 SET name = ?, type = ?
                     , price = ?, expirationDate = ?, manufacturerName = ?
                     , upc = ?, epc = ?
                  WHERE productId = ? """
-        query2 = """
-                UPDATE inventory
-                SET quantity = ?
-                WHERE productId = ?
-                    AND locationId = 1;
-                 """
-        result = execute(query,(new_name,new_type,new_price,new_expirationDate,new_manufacturerName,new_upc,new_epc,productId))
-        result2 = execute(query2,(new_quantity,productId,))
-        if result is True and result2 is True:
+        
+        result = execute(query, (new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, new_epc, productId))
+        print(result)
+        if result:
             return True, "Product updated successfully."
         return False, "Failed to update Product."
     

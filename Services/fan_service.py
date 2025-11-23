@@ -1,3 +1,4 @@
+# services/fan_service.py
 # import RPi.GPIO as GPIO
 from time import sleep
 
@@ -33,5 +34,11 @@ def turnOffFan():
 
 turnOffFan()
 
+def toggle_fan(enabled: bool):
+    if enabled:
+        success, message = turnOnFan()
+    else:
+        success, message = turnOffFan()
 
-
+    print(f"Switch is now {'ON' if enabled else 'OFF'}")
+    return success, message

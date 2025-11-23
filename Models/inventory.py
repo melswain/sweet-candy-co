@@ -79,10 +79,11 @@ class Inventory(Base):
             return True, result[0]
         except Exception as e:
             return f"Failed to find inventory record:\n{e}"
+    
     @staticmethod
     def getInventory():
         query = """
-                SELECT i.inventoryId,i.productId,p.name,p.price,i.quantity,i.locationId,i.lastUpdated
+                SELECT i.inventoryId, i.productId, p.name, p.price, i.quantity, i.locationId, i.lastUpdated
                 FROM inventory as i
                 JOIN product as p
                     ON  i.productId = p.productId
