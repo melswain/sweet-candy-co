@@ -37,6 +37,7 @@ def add_product(data):
 def get_all_products():
     try:
         products = getAllProducts()
+        print("Products service: ", products)
         product_dicts = [vars(p) for p in products]
         return {"success": True, "products": product_dicts}
     except Exception as e:

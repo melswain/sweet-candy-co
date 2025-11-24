@@ -89,8 +89,7 @@ button {
 .notification {
   position: fixed;
   top: 20px;
-  right: -300px;
-  background-color: #D3F8E2;
+  right: -500px;
   color: black;
   padding: 15px 25px;
   border-radius: 6px;
@@ -102,6 +101,7 @@ button {
 
 .notification.show {
   right: 20px;
+  background-color: #D3F8E2;
 }
 
 .alert {

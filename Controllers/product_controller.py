@@ -19,6 +19,7 @@ def getProductWithId(id):
 def getAllProducts():
     try:
         products = Product.get_all_products()
+        print("Products controller: ", products)
         return products
     except Exception as e:
         return f"Failed to get products: {e}"

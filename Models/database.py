@@ -246,7 +246,7 @@ INSERT INTO cart_item (cartId, productId, quantity, totalProductPrice) VALUES
 (9, 4, 1, 1.00),
 (10, 9, 2, 11.00);
 
-INSERT INTO ProductInstance (productId, epcCode, manufacturedAt) VALUES 
+INSERT INTO ProductInstance (productId, epcCode) VALUES 
 (1, 'A00000000000000000004930'),
 (1, 'A00000000000000000004931'),
 (2, 'A00000000000000000004932'),

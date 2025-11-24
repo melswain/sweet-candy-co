@@ -186,16 +186,22 @@ document.getElementById("addCustomerForm").addEventListener("submit", async func
         }
 
         const result = await response.json();
-        showNotification("Customer add successfully!");
-        console.log(result);
+        if (result.success === "True") {
+            showNotification("Customer added successfully!", 3000, "#D3F8E2");
+            console.log(result);
+        } else {
+            showNotification(result.message, 5000, "#FFD700");
+            console.log(result)
+        }
     } catch (err) {
         console.error(err);
-        showNotification("Error adding message: " + err.message);
+        showNotification("Error adding message: " + err.message, 5000, "#FFD700");
     }
 });
 
-function showNotification(message, duration = 3000) {
+function showNotification(message, duration = 3000, color = '#D3F8E2') {
     const notification = document.getElementById('notification');
+    notification.style.setProperty('background-color', color, 'important');
     notification.textContent = message;
     notification.classList.add('show');
 
@@ -220,12 +226,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const result = await response.json();
             console.log(result);
-            showNotification("Product updated successfully!");
+            showNotification("Product updated successfully!", 3000, "#D3F8E2");
 
             document.querySelector(".update-modal").style.display = "none";
             refreshProducts();
         } catch (err) {
-            showNotification("Product updated successfully!");
+            showNotification("Product could not be updated!", 5000, "#FFD700");
             console.error(err);
         }
     });
@@ -235,7 +241,7 @@ async function refreshProducts() {
     try {
         const response = await fetch("/products");
         if (!response.ok) {
-            showNotification("Failed to reload products. Try reloading your page.");
+            showNotification("Failed to reload products. Try reloading your page.", 5000, "#FFD700");
             return;
         }
 
@@ -264,7 +270,7 @@ async function refreshProducts() {
             tbody.appendChild(row);
         });
     } catch (err) {
-        showNotification("Failed to reload products. Try reloading your page.");
+        showNotification("Failed to reload products. Try reloading your page.", 5000, "#FFD700");
         console.error("Error refreshing products:", err);
     }
 }

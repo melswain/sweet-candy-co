@@ -152,10 +152,10 @@ class Product(Base):
     def get_all_products():
         query = """
             SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc
-            FROM product
-            WHERE storeLocationId = 1;
+            FROM product;
         """
         rows = fetchall(query)
+        print("Products model: ", rows)
         if rows is False or rows is None:
             return False, "Failed retrieve Products"
         
