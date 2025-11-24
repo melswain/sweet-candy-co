@@ -1,6 +1,6 @@
 # services/scan_service.py
 
-from Controllers.product_controller import getProductWithUpc, getProductWithEpc
+from Controllers.product_controller import getProductWithUpc
 
 def normalize_code(code: str):
     # UPC codes sometimes have a leading zero
@@ -11,7 +11,7 @@ def normalize_code(code: str):
 def process_scan(code, items):
     code = normalize_code(code)
 
-    product = getProductWithUpc(code) or getProductWithEpc(code)
+    product = getProductWithUpc(code)
     if not product or not hasattr(product, 'productId'):
         return {
             "status": 404,

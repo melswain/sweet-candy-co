@@ -25,8 +25,7 @@ def add_product(data):
             price=data.get("price"),
             expiration_date=data.get("expirationDate"),
             manufacturer_name=data.get("manufacturerName"),
-            upc=data.get("upc"),
-            epc=data.get("epc")
+            upc=data.get("upc")
         )
         
         if success:

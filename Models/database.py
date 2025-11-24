@@ -55,7 +55,6 @@ def fetchone(query, params=None):
 def setup_database():
     """Create all tables and constraints for the candystore database."""
     schema = """
-      -- Enable Foreign Key constraints, which is required for SQLite to enforce them.
 PRAGMA foreign_keys = ON;
 
 -- ----------------------------------------------------------------------
@@ -79,83 +78,88 @@ CREATE TABLE IF NOT EXISTS customer (
 );
 
 CREATE TABLE IF NOT EXISTS cart (
-      cartId INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId TEXT,
-      totalCartPrice REAL NOT NULL,
-      totalRewardPoints INTEGER DEFAULT 0,
-      checkoutDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (customerId) REFERENCES customer(customerId)
+    cartId INTEGER PRIMARY KEY AUTOINCREMENT,
+    customerId TEXT,
+    totalCartPrice REAL NOT NULL,
+    totalRewardPoints INTEGER DEFAULT 0,
+    checkoutDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customerId) REFERENCES customer(customerId)
 );
 
 CREATE TABLE IF NOT EXISTS product (
-      productId INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      price REAL NOT NULL,
-      expirationDate TEXT NOT NULL,
-      discountPercentage REAL DEFAULT 1.00,
-      manufacturerName TEXT,
-      upc TEXT NOT NULL UNIQUE,
-      epc TEXT NOT NULL
+    productId INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    price REAL NOT NULL,
+    expirationDate TEXT NOT NULL,
+    discountPercentage REAL DEFAULT 1.00,
+    manufacturerName TEXT,
+    upc TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS cart_item (
-      cartItemId INTEGER PRIMARY KEY AUTOINCREMENT,
-      cartId INTEGER NOT NULL,
-      productId INTEGER NOT NULL,
-      quantity INTEGER NOT NULL,
-      -- CRITICAL FIX: Changed DECIMAL(10,0) to REAL to allow fractional prices
-      totalProductPrice REAL NOT NULL,
-      FOREIGN KEY (cartId) REFERENCES cart(cartId),
-      FOREIGN KEY (productId) REFERENCES product(productId)
+    cartItemId INTEGER PRIMARY KEY AUTOINCREMENT,
+    cartId INTEGER NOT NULL,
+    productId INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    totalProductPrice REAL NOT NULL,
+    FOREIGN KEY (cartId) REFERENCES cart(cartId),
+    FOREIGN KEY (productId) REFERENCES product(productId)
 );
 
 CREATE TABLE IF NOT EXISTS environment_reading (
-      readingId INTEGER PRIMARY KEY AUTOINCREMENT,
-      locationId INTEGER NOT NULL,
-      temperature REAL NOT NULL,
-      humidity REAL NOT NULL,
-      timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
+    readingId INTEGER PRIMARY KEY AUTOINCREMENT,
+    locationId INTEGER NOT NULL,
+    temperature REAL NOT NULL,
+    humidity REAL NOT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (locationId) REFERENCES store_location(locationId)
 );
 
 CREATE TABLE IF NOT EXISTS inventory (
-      inventoryId INTEGER PRIMARY KEY AUTOINCREMENT,
-      productId INTEGER NOT NULL,
-      locationId INTEGER NOT NULL,
-      quantity INTEGER NOT NULL,
-      lastUpdated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (productId) REFERENCES product(productId),
-      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
+    inventoryId INTEGER PRIMARY KEY AUTOINCREMENT,
+    productId INTEGER NOT NULL,
+    locationId INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    lastUpdated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (productId) REFERENCES product(productId),
+    FOREIGN KEY (locationId) REFERENCES store_location(locationId)
 );
 
 CREATE TABLE IF NOT EXISTS maintenance_threshold (
-      thresholdId INTEGER PRIMARY KEY AUTOINCREMENT,
-      locationId INTEGER NOT NULL UNIQUE,
-      minTemperature REAL NOT NULL,
-      maxTemperature REAL NOT NULL,
-      minHumidity REAL NOT NULL,
-      maxHumidity REAL NOT NULL,
-      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
+    thresholdId INTEGER PRIMARY KEY AUTOINCREMENT,
+    locationId INTEGER NOT NULL UNIQUE,
+    minTemperature REAL NOT NULL,
+    maxTemperature REAL NOT NULL,
+    minHumidity REAL NOT NULL,
+    maxHumidity REAL NOT NULL,
+    FOREIGN KEY (locationId) REFERENCES store_location(locationId)
 );
 
 CREATE TABLE IF NOT EXISTS maintenance_alert (
-      alertId INTEGER PRIMARY KEY AUTOINCREMENT,
-      locationId INTEGER NOT NULL,
-      parameterType TEXT CHECK(parameterType IN ('temperature', 'humidity')),
-      value REAL NOT NULL,
-      thresholdBreach TEXT CHECK(thresholdBreach IN ('LOW', 'HIGH')),
-      timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (locationId) REFERENCES store_location(locationId)
+    alertId INTEGER PRIMARY KEY AUTOINCREMENT,
+    locationId INTEGER NOT NULL,
+    parameterType TEXT CHECK(parameterType IN ('temperature', 'humidity')),
+    value REAL NOT NULL,
+    thresholdBreach TEXT CHECK(thresholdBreach IN ('LOW', 'HIGH')),
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (locationId) REFERENCES store_location(locationId)
 );
 
 CREATE TABLE IF NOT EXISTS payment (
-      paymentId INTEGER PRIMARY KEY AUTOINCREMENT,
-      cartId INTEGER UNIQUE,
-      cardNumber TEXT NOT NULL,
-      expiryDate TEXT NOT NULL,
-      timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (cartId) REFERENCES cart(cartId)
+    paymentId INTEGER PRIMARY KEY AUTOINCREMENT,
+    cartId INTEGER UNIQUE,
+    cardNumber TEXT NOT NULL,
+    expiryDate TEXT NOT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cartId) REFERENCES cart(cartId)
+);
+
+CREATE TABLE ProductInstance (
+    productInstanceId INTEGER PRIMARY KEY AUTOINCREMENT,
+    productId INTEGER NOT NULL,
+    epcCode TEXT UNIQUE NOT NULL,
+    FOREIGN KEY (productId) REFERENCES Product(productId)
 );
 
 -- ----------------------------------------------------------------------
@@ -182,17 +186,17 @@ INSERT INTO maintenance_threshold (locationId, minTemperature, maxTemperature, m
 (1, 5.00, 13.00, 35.00, 45.00),
 (2, 4.00, 12.00, 35.00, 45.00);
 
-INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc) VALUES
-('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012', 'A00000000000000000004933'),
-('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789029', 'A00000000000000000004921'),
-('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789036', 'EPC123003'),
-('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789043', 'EPC123004'),
-('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789050', 'EPC123005'),
-('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789067', 'EPC123006'),
-('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789074', 'EPC123007'),
-('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789081', 'EPC123008'),
-('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789098', 'EPC123009'),
-('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789104', 'EPC123010');
+INSERT INTO product (name, type, price, expirationDate, discountPercentage, manufacturerName, upc) VALUES
+('Chocolate Dream Bar', 'Chocolate', 3.99, '2026-12-31', 1.00, 'Sweet Candy Co', '123456789012'),
+('Rainbow Sour Strips', 'Gummy', 4.50, '2026-10-15', 1.00, 'Sweet Candy Co', '123456789029'),
+('Peanut Butter Cups 4pk', 'Chocolate', 5.99, '2026-11-30', 1.00, 'Sweet Candy Co', '123456789036'),
+('Cherry Licorice Twists', 'Licorice', 3.50, '2026-09-20', 1.00, 'Sweet Candy Co', '123456789043'),
+('Sea Salt Caramels 6pc', 'Caramel', 6.99, '2026-08-15', 1.00, 'Sweet Candy Co', '123456789050'),
+('Mixed Fruit Hard Candy', 'Hard Candy', 2.99, '2027-01-15', 1.00, 'Sweet Candy Co', '123456789067'),
+('Mint Chocolate Thins', 'Chocolate', 4.99, '2026-11-15', 1.00, 'Sweet Candy Co', '123456789074'),
+('Gummy Bears Pack', 'Gummy', 3.99, '2026-10-01', 1.00, 'Sweet Candy Co', '123456789081'),
+('Toffee Crunch Bar', 'Toffee', 4.50, '2026-12-15', 1.00, 'Sweet Candy Co', '123456789098'),
+('Assorted Lollipops 5pk', 'Lollipop', 5.99, '2027-02-28', 1.00, 'Sweet Candy Co', '123456789104');
 
 
 INSERT INTO customer (customerId, password, name, email, phone, totalRewardPoints) VALUES
@@ -240,8 +244,29 @@ INSERT INTO cart_item (cartId, productId, quantity, totalProductPrice) VALUES
 (8, 3, 1, 6.50),
 (9, 6, 2, 6.40),
 (9, 4, 1, 1.00),
-(10, 9, 2, 11.00);    
-    
+(10, 9, 2, 11.00);
+
+INSERT INTO ProductInstance (productId, epcCode, manufacturedAt) VALUES 
+(1, 'A00000000000000000004930'),
+(1, 'A00000000000000000004931'),
+(2, 'A00000000000000000004932'),
+(2, 'A00000000000000000004933'),
+(3, 'A00000000000000000004934'),
+(3, 'A00000000000000000004935'),
+(4, 'A00000000000000000004936'),
+(4, 'A00000000000000000004937'),
+(5, 'A00000000000000000004938'),
+(5, 'A00000000000000000004939'),
+(6, 'A00000000000000000004940'),
+(6, 'A00000000000000000004941'),
+(7, 'A00000000000000000004942'),
+(7, 'A00000000000000000004943'),
+(8, 'A00000000000000000004944'),
+(8, 'A00000000000000000004945'),
+(9, 'A00000000000000000004946'),
+(9, 'A00000000000000000004947'),
+(10, 'A00000000000000000004948'),
+(10, 'A00000000000000000004949');
 
     """
     with get_connection() as conn:

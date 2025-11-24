@@ -17,7 +17,6 @@ class Product(Base):
     discountPercentage = Column(Numeric(3,2), default=1.00)
     manufacturerName = Column(String(100))
     upc = Column(String(50), nullable=False, unique=True)
-    epc = Column(String(50), nullable=False)
 
     # Relationships
     cart_items = relationship("CartItem", back_populates="product")
@@ -27,7 +26,7 @@ class Product(Base):
         return f"<Product(name='{self.name}', type='{self.type}', price=${self.price})>"
 
     @staticmethod
-    def create(name, type_, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
+    def create(name, type_, price, expiration_date, upc, manufacturer_name="Sweet Candy Co", discount=1.00):
         """Create a new product in the database.
         
         Args:
@@ -36,7 +35,6 @@ class Product(Base):
             price (float): Product price
             expiration_date (date): Expiration date
             upc (str): Universal Product Code
-            epc (str): Electronic Product Code
             manufacturer_name (str, optional): Manufacturer name. Defaults to "Sweet Candy Co"
             discount (float, optional): Discount percentage. Defaults to 1.00 (no discount)
         
@@ -44,7 +42,7 @@ class Product(Base):
             tuple: (success (bool), message (str))
         """
         query = """
-            INSERT INTO product (name, type, price, expirationDate, manufacturerName, upc, epc, discountPercentage)
+            INSERT INTO product (name, type, price, expirationDate, manufacturerName, upc, discountPercentage)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
         try:
@@ -55,7 +53,6 @@ class Product(Base):
                 expiration_date,
                 manufacturer_name,
                 upc,
-                epc,
                 discount
             ))
 
@@ -77,42 +74,25 @@ class Product(Base):
         Returns:
             tuple: Row containing product data or None if not found
         """
-        query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE upc = ?"
+        query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, FROM product WHERE upc = ?"
         
         row = fetchone(query, (upc,))
         if not row:
             return None
         # map tuple to SimpleNamespace for attribute access (product.productId etc.)
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
-        return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
-
-    @staticmethod
-    def get_by_epc(epc):
-        """Find a product by its UPC code.
-        
-        Args:
-            upc (str): Universal Product Code to search for
-            
-        Returns:
-            tuple: Row containing product data or None if not found
-        """
-        query = "SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product WHERE epc = ?"
-        row = fetchone(query, (epc,))
-        if not row:
-            return None
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc']
         return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
     
     @staticmethod
     def get_by_id(id):
         query = """
-            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc
             FROM product WHERE productId = ?
         """
         row = fetchone(query, (id,))
         if not row:
             return None
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc']
         return SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)})
 
     @staticmethod
@@ -143,12 +123,12 @@ class Product(Base):
             list: List of products expiring within the specified timeframe
         """
         query = """
-            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc, epc FROM product
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc FROM product
             WHERE date(expirationDate) <= date('now', '+' || ? || ' days')
             ORDER BY expirationDate
         """
         rows = fetchall(query, (days,))
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc']
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc']
         return [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
 
     @staticmethod
@@ -170,16 +150,16 @@ class Product(Base):
     
     @staticmethod
     def get_all_products():
-        query = """SELECT p.*, i.quantity 
-                   FROM product as p 
-                   JOIN inventory as i 
-                   ON p.productId = i.productId
-                   WHERE locationId = 1;
-                """
+        query = """
+            SELECT productId, name, type, price, expirationDate, discountPercentage, manufacturerName, upc
+            FROM product
+            WHERE storeLocationId = 1;
+        """
         rows = fetchall(query)
         if rows is False or rows is None:
             return False, "Failed retrieve Products"
-        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc','epc','quantity']
+        
+        keys = ['productId','name','type','price','expirationDate','discountPercentage','manufacturerName','upc']
         product_list = [SimpleNamespace(**{k: row[i] for i,k in enumerate(keys)}) for row in rows]
         return product_list
     

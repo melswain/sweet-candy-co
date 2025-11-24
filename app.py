@@ -172,7 +172,7 @@ def set_use_points():
 @app.route('/scan', methods=['POST'])
 def scan_item():
     data = request.get_json() or {}
-    code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
+    code = data.get('code') or data.get('itemCode') or data.get('upc')
 
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
