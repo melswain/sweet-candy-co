@@ -48,6 +48,24 @@
       </div>
     </div>
 
+    <div class="report-container">
+      <div id="inventory-report" class="report-card">
+        <h3>Generate Inventory Report</h3>
+
+        <div>
+          <label for="report-format">Format:</label>
+          <select id="report-format" name="report-format">
+            <option value="pdf">PDF</option>
+            <option value="csv" selected>CSV</option>
+          </select>
+        </div>
+
+        <div>
+          <button id="generate-report">Generate report</button>
+        </div>
+      </div>
+    </div>
+
     {% include 'product_management_section.html' %}
     {% include 'inventory_management_section.html' %}
 

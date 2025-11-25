@@ -159,7 +159,7 @@ CREATE TABLE productInstance (
     productInstanceId INTEGER PRIMARY KEY AUTOINCREMENT,
     productId INTEGER NOT NULL,
     epcCode TEXT UNIQUE NOT NULL,
-    FOREIGN KEY (productId) REFERENCES Product(productId)
+    FOREIGN KEY (productId) REFERENCES product(productId)
 );
 
 -- ----------------------------------------------------------------------
@@ -247,10 +247,10 @@ INSERT INTO cart_item (cartId, productId, quantity, totalProductPrice) VALUES
 (10, 9, 2, 11.00);
 
 INSERT INTO productInstance (productId, epcCode) VALUES 
-(1, 'A00000000000000000004930'),
-(1, 'A00000000000000000004931'),
+(1, 'A00000000000000000004896'),
+(1, 'A00000000000000000004933'),
 (2, 'A00000000000000000004932'),
-(2, 'A00000000000000000004933'),
+(2, 'A00000000000000000004930'),
 (3, 'A00000000000000000004934'),
 (3, 'A00000000000000000004935'),
 (4, 'A00000000000000000004936'),

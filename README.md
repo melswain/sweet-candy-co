@@ -45,7 +45,7 @@ python rfid_service.py
 ### PowerShell
 
 set env vars for the current PowerShell session
-$env:RFID_SERIAL_PORT = 'COM3'            # change to your port
+$env:RFID_SERIAL_PORT = 'COM4'            # change to your port
 $env:RFID_BAUD = '9600'                  # change if needed
 $env:RFID_SERVER_URL = 'http://127.0.0.1:5000/scan'
 

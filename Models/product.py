@@ -155,7 +155,6 @@ class Product(Base):
             FROM product;
         """
         rows = fetchall(query)
-        print("Products model: ", rows)
         if rows is False or rows is None:
             return False, "Failed retrieve Products"
         
@@ -173,7 +172,6 @@ class Product(Base):
                  WHERE productId = ? """
         
         result = execute(query, (new_name, new_type, new_price, new_expirationDate, new_manufacturerName, new_upc, productId))
-        print(result)
         if result:
             return True, "Product updated successfully."
         return False, "Failed to update Product."

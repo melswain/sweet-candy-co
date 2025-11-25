@@ -502,18 +502,3 @@ document.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("language") || "en";
     changeLanguage(saved);
 });
-
-// Connect to broker over WebSocket
-const client = mqtt.connect("ws://localhost:9001");
-
-client.on("connect", () => {
-    console.log("Connected to MQTT broker");
-    client.subscribe("rfid/scan/store1");
-});
-
-client.on("message", (topic, message) => {
-    const epc = message.toString();
-    console.log("Scanned EPC:", epc);
-
-    showNotification("Cart item added successfully!", 3000);
-});
