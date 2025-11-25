@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS payment (
     FOREIGN KEY (cartId) REFERENCES cart(cartId)
 );
 
-CREATE TABLE ProductInstance (
+CREATE TABLE productInstance (
     productInstanceId INTEGER PRIMARY KEY AUTOINCREMENT,
     productId INTEGER NOT NULL,
     epcCode TEXT UNIQUE NOT NULL,
@@ -246,7 +246,7 @@ INSERT INTO cart_item (cartId, productId, quantity, totalProductPrice) VALUES
 (9, 4, 1, 1.00),
 (10, 9, 2, 11.00);
 
-INSERT INTO ProductInstance (productId, epcCode) VALUES 
+INSERT INTO productInstance (productId, epcCode) VALUES 
 (1, 'A00000000000000000004930'),
 (1, 'A00000000000000000004931'),
 (2, 'A00000000000000000004932'),

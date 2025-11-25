@@ -5,7 +5,7 @@ from flask import Flask, make_response, render_template, request, redirect, url_
 from dotenv import load_dotenv
 from time import sleep
 from decimal import Decimal, ROUND_HALF_UP
-# import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
 
 from Controllers.customer_controller import addCustomer, customer_login, getCustomerData, register_customer
 from Controllers.cart_controller import getCustomerCartHistory
@@ -19,6 +19,9 @@ from Services.payment_service import process_payment
 from Services.scan_service import process_scan
 from Services.product_service import update_product, add_product, get_all_products
 from Services.search_service import search_item
+from Services.epc_reader_service import handle_rfid
+from Services.temperature_readings_service import handle_temperature, update_sensor_data
+from Services.epc_reader_service import start_epc_reader
 
 from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
 from flask import send_file, request
@@ -43,42 +46,56 @@ sensor_data = {
     "Frig2": {"temperature": 0, "humidity": 50}
 }
 
-MQTT_BROKER = "172.20.10.12"  
+items = []
+
+MQTT_BROKER = "localhost"  
 MQTT_PORT = 1883
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker with result code "+str(rc))
+    client.subscribe("rfid/scan/store1")
     client.subscribe("Frig1/#")
     client.subscribe("Frig2/#")
 
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
-    if topic.startswith("Frig1"):
-        if "temperature" in topic:
-            sensor_data["Frig1"]["temperature"] = payload
-        elif "humidity" in topic:
-            sensor_data["Frig1"]["humidity"] = payload
-    elif topic.startswith("Frig2"):
-        if "temperature" in topic:
-            sensor_data["Frig2"]["temperature"] = payload
-        elif "humidity" in topic:
-            sensor_data["Frig2"]["humidity"] = payload
+
+    if topic == "rfid/scan/store1":
+        handle_rfid(payload, items)
+    elif topic == "environment/store1/temperature":
+        handle_temperature(payload)
+    elif topic.startswith("Frig"):
+        update_sensor_data(sensor_data, topic, payload)
+    else:
+        print(f"Unhandled topic {topic}: {payload}")
+
+
+# Initialize MQTT client
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+try:
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.loop_start()
+    print('MQTT client started and listening')
+except Exception as e:
+    print('Failed to start MQTT client:', e)
+
+try:
+    start_epc_reader(port='COM3', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
+    print('Started serial EPC reader (background thread)')
+except Exception as e:
+    print('Failed to start serial EPC reader:', e)
 
 # mqtt_client = mqtt.Client()
 # mqtt_client.on_connect = on_connect
 # mqtt_client.on_message = on_message
 # mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-# mqtt_client.loop_start()  # run in background
+# mqtt_client.loop_start()
 
 GST_RATE = Decimal('0.05')
 QST_RATE = Decimal('0.09975')
-
-items = [
-        # {'id': 1,'name': 'Chocolate Dream Bar', 'quantity': 4, 'unit': 3.99, 'total': 15.96},
-        # {'id': 2, 'name': 'Rainbow Sour Strips', 'quantity': 1, 'unit': 4.50, 'total': 4.50},
-        # {'id': 3, 'name': 'Peanut Butter Cups 4pk', 'quantity': 1, 'unit': 5.99, 'total': 5.99}
-    ]
 
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"
