@@ -1,4 +1,5 @@
 import os
+import io
 
 from flask import Flask, make_response, render_template, request, redirect, url_for, flash, jsonify, session
 from dotenv import load_dotenv
@@ -21,6 +22,9 @@ from Services.search_service import search_item
 from Services.epc_reader_service import handle_rfid
 from Services.temperature_readings_service import handle_temperature, update_sensor_data
 from Services.epc_reader_service import start_epc_reader
+
+from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
+from flask import send_file, request
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -330,6 +334,49 @@ def register():
 #     response = readEmail()
 #     if response:
 #         turnOnFan()
+
+@app.route('/reports/sales.csv')
+def download_sales_csv():
+    """
+    Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+    Example: /reports/sales.csv?start=2025-09-01&end=2025-09-30
+    """
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+    sales = fetch_sales_rows(start_date=start, end_date=end)
+    csv_io = generate_csv_bytes(sales)
+    # filename with date range
+    name = "sales_report"
+    if start:
+        name += f"_{start.strftime('%Y%m%d')}"
+    if end:
+        name += f"_{end.strftime('%Y%m%d')}"
+    name += ".csv"
+    return send_file(csv_io,
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     download_name=name)
+
+@app.route('/reports/sales.pdf')
+def download_sales_pdf():
+    """
+    Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+    """
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+    sales = fetch_sales_rows(start_date=start, end_date=end)
+    pdf_io = generate_pdf_bytes(sales, title="Sales Report")
+    name = "sales_report"
+    if start:
+        name += f"_{start.strftime('%Y%m%d')}"
+    if end:
+        name += f"_{end.strftime('%Y%m%d')}"
+    name += ".pdf"
+    return send_file(pdf_io,
+                     mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=name)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -50,7 +50,43 @@
 
     {% include 'product_management_section.html' %}
     {% include 'inventory_management_section.html' %}
+
+
+    <div class="report-downloads">
+    <h3>Reports</h3>
+    <form id="reportForm" action="">
+    <label>Start date: <input type="date" id="reportStart" name="start"></label>
+    <label>End date: <input type="date" id="reportEnd" name="end"></label>
+    </form>
+    <a id="csvLink" class="btn" href="/reports/sales.csv" download>Download CSV</a>
+    <a id="pdfLink" class="btn" href="/reports/sales.pdf" download>Download PDF</a>
+    </div>
+
+    <script>
+      const startInput = document.getElementById('reportStart');
+      const endInput = document.getElementById('reportEnd');
+      const csvLink = document.getElementById('csvLink');
+      const pdfLink = document.getElementById('pdfLink');
+
+      function updateLinks() {
+        const start = startInput.value;
+        const end = endInput.value;
+        const params = new URLSearchParams();
+        if (start) params.set('start', start);
+        if (end) params.set('end', end);
+        csvLink.href = '/reports/sales.csv' + (params.toString() ? '?' + params.toString() : '');
+        pdfLink.href = '/reports/sales.pdf' + (params.toString() ? '?' + params.toString() : '');
+      }
+
+      startInput.addEventListener('input', updateLinks);
+      endInput.addEventListener('input', updateLinks);
+      // initialize
+      updateLinks();
+    </script>
+
   </div>
+
+  
 
   <div id="notification" class="notification"></div>
 
