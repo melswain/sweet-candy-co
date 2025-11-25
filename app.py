@@ -20,6 +20,7 @@ from Services.product_service import update_product, add_product, get_all_produc
 from Services.search_service import search_item
 from Services.epc_reader_service import handle_rfid
 from Services.temperature_readings_service import handle_temperature, update_sensor_data
+from Services.epc_reader_service import start_epc_reader
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -43,7 +44,7 @@ sensor_data = {
 
 items = []
 
-MQTT_BROKER = "172.20.10.12"  
+MQTT_BROKER = "localhost"  
 MQTT_PORT = 1883
 
 def on_connect(client, userdata, flags, rc):
@@ -66,7 +67,7 @@ def on_message(client, userdata, msg):
         print(f"Unhandled topic {topic}: {payload}")
 
 
-# Initialize MQTT client for the Flask app so incoming messages update sensor_data
+# Initialize MQTT client
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
@@ -77,20 +78,17 @@ try:
 except Exception as e:
     print('Failed to start MQTT client:', e)
 
-# Optionally start the serial EPC reader that publishes to the MQTT broker.
-from Services.epc_reader_service import start_epc_reader
-if os.getenv('START_EPC_READER', '0') == '1':
-    try:
-        start_epc_reader(port='COM3', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
-        print('Started serial EPC reader (background thread)')
-    except Exception as e:
-        print('Failed to start serial EPC reader:', e)
+try:
+    start_epc_reader(port='COM3', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
+    print('Started serial EPC reader (background thread)')
+except Exception as e:
+    print('Failed to start serial EPC reader:', e)
 
 # mqtt_client = mqtt.Client()
 # mqtt_client.on_connect = on_connect
 # mqtt_client.on_message = on_message
 # mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-# mqtt_client.loop_start()  # run in background
+# mqtt_client.loop_start()
 
 GST_RATE = Decimal('0.05')
 QST_RATE = Decimal('0.09975')

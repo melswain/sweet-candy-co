@@ -9,8 +9,12 @@ function sendToggle(state) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: state })
     })
-    .then(response => response.text())
-    .then(data => console.log(data));
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        showNotification(data.message);
+    })
+    .catch(err => console.error("Error:", err));
 }
 
 document.getElementById("productTableBody").addEventListener("click", (event) => {
