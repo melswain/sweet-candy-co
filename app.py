@@ -6,6 +6,7 @@ from time import sleep
 from decimal import Decimal, ROUND_HALF_UP
 import paho.mqtt.client as mqtt
 
+
 from Controllers.customer_controller import addCustomer, customer_login, getCustomerData, register_customer
 from Controllers.cart_controller import getCustomerCartHistory
 from Controllers.product_controller import getAllProducts
@@ -20,7 +21,7 @@ from Services.product_service import update_product, add_product, get_all_produc
 from Services.search_service import search_item
 from Services.epc_reader_service import handle_rfid
 from Services.temperature_readings_service import handle_temperature, update_sensor_data
-from Services.epc_reader_service import start_epc_reader
+from Services.epc_reader_service import start_epc_reader, _reader_loop
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -56,6 +57,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
+    print('TOPIC: ', topic)
 
     if topic == "rfid/scan/store1":
         handle_rfid(payload, items)
@@ -71,6 +73,7 @@ def on_message(client, userdata, msg):
 mqtt_client = mqtt.Client()
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
+
 try:
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
     mqtt_client.loop_start()
@@ -79,7 +82,7 @@ except Exception as e:
     print('Failed to start MQTT client:', e)
 
 try:
-    start_epc_reader(port='COM3', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
+    start_epc_reader(port='COM4', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
     print('Started serial EPC reader (background thread)')
 except Exception as e:
     print('Failed to start serial EPC reader:', e)
@@ -332,4 +335,4 @@ def register():
 #         turnOnFan()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
