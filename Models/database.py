@@ -159,7 +159,16 @@ CREATE TABLE productInstance (
     productInstanceId INTEGER PRIMARY KEY AUTOINCREMENT,
     productId INTEGER NOT NULL,
     epcCode TEXT UNIQUE NOT NULL,
-    FOREIGN KEY (productId) REFERENCES Product(productId)
+    FOREIGN KEY (productId) REFERENCES product(productId)
+);
+
+CREATE TABLE inventoryReport (
+    inventoryReportId INTEGER PRIMARY KEY,
+    productName TEXT NOT NULL,
+    productId INTEGER NOT NULL,
+    availableQuantity INTEGER NOT NULL,
+    lastRestocked DATETIME NOT NULL,
+    FOREIGN KEY (productId) REFERENCES product(productId)
 );
 
 -- ----------------------------------------------------------------------

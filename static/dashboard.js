@@ -278,3 +278,23 @@ async function refreshProducts() {
         console.error("Error refreshing products:", err);
     }
 }
+
+document.getElementById('generate-report').addEventListener('click', () => {
+    const format = document.getElementById('report-format').value;
+    fetch('/inventory-report', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format })
+    })
+    .then(r => r.ok ? r.blob() : Promise.reject(r))
+    .then(blob => {
+        // Trigger download with the chosen format
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inventory-report.${format === 'xlsx' ? 'xlsx' : format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    })
+    .catch(err => console.error('Report generation failed:', err));
+});
