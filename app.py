@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, make_response, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, make_response, render_template, request, redirect, url_for, flash, jsonify, session, send_file
 from dotenv import load_dotenv
 from time import sleep
 from decimal import Decimal, ROUND_HALF_UP
@@ -19,9 +19,8 @@ from Services.payment_service import process_payment
 from Services.scan_service import process_scan
 from Services.product_service import update_product, add_product, get_all_products
 from Services.search_service import search_item
-from Services.epc_reader_service import handle_rfid
 from Services.temperature_readings_service import handle_temperature, update_sensor_data
-from Services.epc_reader_service import start_epc_reader, _reader_loop
+from Services.inventory_report_service import export_inventory_report
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -50,23 +49,22 @@ MQTT_PORT = 1883
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker with result code "+str(rc))
-    client.subscribe("rfid/scan/store1")
     client.subscribe("Frig1/#")
     client.subscribe("Frig2/#")
 
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
-    print('TOPIC: ', topic)
-
-    if topic == "rfid/scan/store1":
-        handle_rfid(payload, items)
-    elif topic == "environment/store1/temperature":
-        handle_temperature(payload)
-    elif topic.startswith("Frig"):
-        update_sensor_data(sensor_data, topic, payload)
-    else:
-        print(f"Unhandled topic {topic}: {payload}")
+    if topic.startswith("Frig1"):
+        if "temperature" in topic:
+            sensor_data["Frig1"]["temperature"] = payload
+        elif "humidity" in topic:
+            sensor_data["Frig1"]["humidity"] = payload
+    elif topic.startswith("Frig2"):
+        if "temperature" in topic:
+            sensor_data["Frig2"]["temperature"] = payload
+        elif "humidity" in topic:
+            sensor_data["Frig2"]["humidity"] = payload
 
 
 # Initialize MQTT client
@@ -80,18 +78,6 @@ try:
     print('MQTT client started and listening')
 except Exception as e:
     print('Failed to start MQTT client:', e)
-
-try:
-    start_epc_reader(port='COM4', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
-    print('Started serial EPC reader (background thread)')
-except Exception as e:
-    print('Failed to start serial EPC reader:', e)
-
-# mqtt_client = mqtt.Client()
-# mqtt_client.on_connect = on_connect
-# mqtt_client.on_message = on_message
-# mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-# mqtt_client.loop_start()
 
 GST_RATE = Decimal('0.05')
 QST_RATE = Decimal('0.09975')
@@ -192,7 +178,7 @@ def set_use_points():
 @app.route('/scan', methods=['POST'])
 def scan_item():
     data = request.get_json() or {}
-    code = data.get('code') or data.get('itemCode') or data.get('upc')
+    code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
 
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
@@ -312,6 +298,19 @@ def register():
     if success:
         return jsonify({'status': 'success', 'message': msg})
     return jsonify({'status': 'error', 'message': msg}), 400
+
+@app.route('/inventory-report')
+def get_inventory_report():
+    format_type = request.args.get('format', 'pdf')
+    print(f'fetching inventory report... format: {format_type}')
+    file_path = export_inventory_report(format_type)
+    
+    if not file_path or not os.path.exists(file_path):
+        return jsonify({'status': 'error', 'message': 'Failed to generate report'}), 500
+    
+    mime_type = 'text/csv' if format_type == 'csv' else 'application/pdf'
+    return send_file(file_path, mimetype=mime_type, as_attachment=True, 
+                     download_name=f'inventory_report.{format_type}')
 
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')

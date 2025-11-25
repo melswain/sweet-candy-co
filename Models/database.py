@@ -162,15 +162,6 @@ CREATE TABLE productInstance (
     FOREIGN KEY (productId) REFERENCES product(productId)
 );
 
-CREATE TABLE inventoryReport (
-    inventoryReportId INTEGER PRIMARY KEY,
-    productName TEXT NOT NULL,
-    productId INTEGER NOT NULL,
-    availableQuantity INTEGER NOT NULL,
-    lastRestocked DATETIME NOT NULL,
-    FOREIGN KEY (productId) REFERENCES product(productId)
-);
-
 -- ----------------------------------------------------------------------
 -- INDEXES
 -- ----------------------------------------------------------------------

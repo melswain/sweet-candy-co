@@ -281,18 +281,17 @@ async function refreshProducts() {
 
 document.getElementById('generate-report').addEventListener('click', () => {
     const format = document.getElementById('report-format').value;
-    fetch('/inventory-report', {
+    fetch(`/inventory-report?format=${format}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ format })
+        headers: { 'Content-Type': 'application/json' }
     })
     .then(r => r.ok ? r.blob() : Promise.reject(r))
     .then(blob => {
-        // Trigger download with the chosen format
+        if (blob.size === 0) throw new Error("Empty file received");
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `inventory-report.${format === 'xlsx' ? 'xlsx' : format}`;
+        a.download = `inventory-report.${format === 'csv' ? 'csv' : 'pdf'}`;
         a.click();
         URL.revokeObjectURL(url);
     })
