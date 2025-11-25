@@ -41,11 +41,14 @@ sensor_data = {
     "Frig2": {"temperature": 0, "humidity": 50}
 }
 
+items = []
+
 MQTT_BROKER = "172.20.10.12"  
 MQTT_PORT = 1883
 
 def on_connect(client, userdata, flags, rc):
     print("Connected to MQTT broker with result code "+str(rc))
+    client.subscribe("rfid/scan/store1")
     client.subscribe("Frig1/#")
     client.subscribe("Frig2/#")
 
@@ -54,7 +57,7 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode()
 
     if topic == "rfid/scan/store1":
-        handle_rfid(payload)
+        handle_rfid(payload, items)
     elif topic == "environment/store1/temperature":
         handle_temperature(payload)
     elif topic.startswith("Frig"):
@@ -78,7 +81,7 @@ except Exception as e:
 from Services.epc_reader_service import start_epc_reader
 if os.getenv('START_EPC_READER', '0') == '1':
     try:
-        start_epc_reader()
+        start_epc_reader(port='COM3', mqtt_broker=MQTT_BROKER, mqtt_port=MQTT_PORT)
         print('Started serial EPC reader (background thread)')
     except Exception as e:
         print('Failed to start serial EPC reader:', e)
@@ -91,12 +94,6 @@ if os.getenv('START_EPC_READER', '0') == '1':
 
 GST_RATE = Decimal('0.05')
 QST_RATE = Decimal('0.09975')
-
-items = [
-        # {'id': 1,'name': 'Chocolate Dream Bar', 'quantity': 4, 'unit': 3.99, 'total': 15.96},
-        # {'id': 2, 'name': 'Rainbow Sour Strips', 'quantity': 1, 'unit': 4.50, 'total': 4.50},
-        # {'id': 3, 'name': 'Peanut Butter Cups 4pk', 'quantity': 1, 'unit': 5.99, 'total': 5.99}
-    ]
 
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"

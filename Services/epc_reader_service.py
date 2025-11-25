@@ -8,6 +8,9 @@ to run (or run it from a supervisor process).
 import threading
 import time
 import paho.mqtt.client as mqtt
+from flask import jsonify
+
+from Services.scan_service import handle_rfid_epc_scan
 
 try:
     import serial
@@ -69,11 +72,14 @@ def start_epc_reader(port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD,
     return stop_event
 
 
-def handle_rfid(epc):
-    """Callback used by the Flask app when an MQTT message arrives on the
-    RFID topic. For now simply logs and could be extended to update DB.
-    """
+def handle_rfid(epc, items):
     print(f"RFID EPC received via MQTT: {epc}")
+
+    location_id = 1  # TODO: set per-reader
+    status, body = handle_rfid_epc_scan(epc, items, location_id)
+    print(f"RFID EPC received: {epc} -> {status} {body['status']}")
+    return status, body
+
     # TODO: update ProductInstance table, mark product as scanned, etc.
 
 
