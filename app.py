@@ -241,9 +241,12 @@ def search():
         return jsonify({"status": "success", "item": item, "items": items})
     else:
         return jsonify({"status": "error", "message": "Item not found"}), 404
-
-@app.route('/customer_page')
-def customerPage():
+# -----------------------------------------------------------------------------------
+#                          Customer Page Route and Methods
+# -----------------------------------------------------------------------------------
+    
+@app.route('/customer_page',methods=['GET','POST'])
+def customerPage(before_date=None,after_date=None):
     if 'customer_id' not in session:
         return redirect('/login')
     
@@ -252,13 +255,46 @@ def customerPage():
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
     
-    success, customer_data = getCustomerData(membership_number)
-    success1, cart_history_data = getCustomerCartHistory(membership_number)
+    # * Checks if page send data via POST
+    if request.method == "POST":
+        
+        before_date = request.form.get('date-before')
+        after_date = request.form.get('date-after')
+        if before_date == "":
+            before_date = None
+        
+        if after_date == "":
+            after_date = None
+        # print("before date:"+before_date)
+        # print("after date:"+after_date)
+        # print(" is before_date: "+ before_date != None)
+        # print(" is after_date: "+ after_date == "")
+
+        success_cart, cart_history_data = getCustomerCartHistory(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+        success, customer_data = getCustomerData(membership_number)
+
+        if success_cart:
+            return jsonify({"status": "success", "cart_history_data": cart_history_data})
+        else:
+            error_message = cart_history_data #if isinstance(cart_history_data, str) else "Failed to retrieve cart history."
+            return jsonify({"status": "error", "message": error_message}), 500  
+    else: #* The case where it didn't
+        success, customer_data = getCustomerData(membership_number)
     
-    if success:
-        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data)
-    else:
-        return print(customer_data), 404
+        success1, cart_history_data = getCustomerCartHistory(membership_number)
+       
+
+    
+        if success:
+            return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data)
+        else:
+            return print(customer_data), 404
+
+# -----------------------------------------------------------------------------------
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

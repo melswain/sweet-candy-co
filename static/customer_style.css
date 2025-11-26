@@ -1,222 +1,223 @@
 /* * Candy-Cane User Profile Styling
- * Color Palette:
- * --green: #D3F8E2 
- * --purple: #E4C1F9 
- * --pink: #F694C1 (Main Accent)
- * --yellow: #EDE7B1 
- * --blue: #A9DEF9 (Button/Primary)
- * --rose-bg: #ffbcd9 (Page Background)
- * --orange-text: #F47D2F (Input Text/Border)
- * --card-bg: aliceblue 
- */
+         * Color Palette:
+         * --green: #D3F8E2 
+         * --purple: #E4C1F9 
+         * --pink: #F694C1 (Main Accent)
+         * --yellow: #EDE7B1 
+         * --blue: #A9DEF9 (Button/Primary)
+         * --rose-bg: #ffbcd9 (Page Background)
+         * --orange-text: #F47D2F (Input Text/Border)
+         * --card-bg: aliceblue 
+         */
 
-body {
-    font-family: 'Barlow', sans-serif;
-    background-color: #ffbcd9;
-    padding: 30px;
-    margin: 0;
-}
+        body {
+            font-family: 'Barlow', sans-serif;
+            background-color: #ffbcd9;
+            padding: 30px;
+            margin: 0;
+        }
 
-h1{
-    font-family: 'Barriecito', 'Barlow', sans-serif;
-    color: #F694C1;
-}
-h2 {
-    font-family: 'Barriecito', 'Barlow', sans-serif;
-    color: #ff69b46d;
-}
-header {
-    text-align: center;
-    padding: 20px 0;
-}
+        h1{
+            font-family: 'Barriecito', 'Barlow', sans-serif;
+            color: #F694C1;
+        }
+        h2 {
+            font-family: 'Barriecito', 'Barlow', sans-serif;
+            color: #ff69b46d;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+        }
 
-header h1 {
-    display: inline-block;
-    color: #F694C1; 
-    padding: 10px 30px;
-    background-color: aliceblue;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
-    font-size: 2.5rem;
-}
+        header h1 {
+            display: inline-block;
+            color: #F694C1; 
+            padding: 10px 30px;
+            background-color: aliceblue;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+            font-size: 2.5rem;
+        }
 
-.container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 10px;
-}
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 10px;
+        }
 
-.info-card {
-    background-color: aliceblue;
-    padding: 30px;
-    margin-bottom: 30px;
-    border-radius: 20px;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
-}
+        .info-card {
+            background-color: aliceblue;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+        }
 
-.info-card h2 {
-    color: #ff69b4; 
-    border-bottom: 3px dashed #E4C1F9; 
-    padding-bottom: 10px;
-    margin-top: 0;
-    margin-bottom: 30px;
-    font-size: 1.8rem;
-}
+        .info-card h2 {
+            color: #ff69b4; 
+            border-bottom: 3px dashed #E4C1F9; 
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
 
-.field-row {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-    gap: 5px; 
-}
+        .field-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+            gap: 5px; 
+        }
 
-.field-row label {
-    font-weight: 600;
-    color: #333;
-    flex-basis: auto; 
-}
+        .field-row label {
+            font-weight: 600;
+            color: #333;
+            flex-basis: auto; 
+        }
 
-.field-row input {
-    width: 100%;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #F47D2F;
-    color: #F47D2F;
-    background-color: #ffc8695a; 
-    font-family: 'Barlow', sans-serif;
-    transition: all 0.2s ease-in-out;
-}
+        .field-row input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #F47D2F;
+            color: #F47D2F;
+            background-color: #ffc8695a; 
+            font-family: 'Barlow', sans-serif;
+            transition: all 0.2s ease-in-out;
+        }
 
-.field-row input::placeholder {
-    color: #F47D2F;
-}
+        .field-row input::placeholder {
+            color: #F47D2F;
+        }
 
-.field-row input:not([disabled]) {
-    background-color: #ffffff;
-    border-color: #A9DEF9; 
-    color: #333; 
-}
+        .field-row input:not([disabled]) {
+            background-color: #ffffff;
+            border-color: #A9DEF9; 
+            color: #333; 
+        }
 
-@media (min-width: 640px) {
-    .field-row {
-        flex-direction: row;
-        align-items: center;
-        gap: 0;
-    }
-    .field-row label {
-        flex-basis: 40%;
-    }
-    .field-row input {
-        flex-basis: 55%;
-        width: auto;
-    }
-}
+        @media (min-width: 640px) {
+            .field-row {
+                flex-direction: row;
+                align-items: center;
+                gap: 0;
+            }
+            .field-row label {
+                flex-basis: 40%;
+            }
+            .field-row input {
+                flex-basis: 55%;
+                width: auto;
+            }
+        }
 
-hr {
-    border: none;
-    height: 12px;
-    background-color: #E4C1F9; 
-    margin: 40px auto;
-    border-radius: 6px;
-}
+        hr {
+            border: none;
+            height: 12px;
+            background-color: #E4C1F9; 
+            margin: 40px auto;
+            border-radius: 6px;
+        }
 
-.history-tip {
-    font-style: italic;
-    color: #a04b6a; 
-    margin-top: 5px;
-    margin-bottom: 25px;
-    text-align: center;
-}
+        /* --- Custom Styles for Dynamic Carts --- */
 
-/* --- Table Styling adapted from .productManagement-container --- */
+        /* Container for cards - helps with spacing */
+        #cart-results {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-.info-card table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-    border: 2px solid #E4C1F9; 
-    border-radius: 8px;
-    overflow: hidden;
-}
+        /* Reusing info-card style for individual cart items */
+        .cart-card {
+            background-color: #fff; /* Lighter background for nested cards */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.3); /* Lighter shadow */
+        }
+        
+        .cart-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #F694C1; 
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 2px dashed #EDE7B1;
+        }
 
-.info-card th {
-    background-color: #A9DEF9; 
-    color: #0688c9; 
-    padding: 12px 8px;
-    text-align: left;
-    font-weight: bold;
-    border: 1px solid #F694C1; 
-}
+        .cart-header strong {
+            color: #ff69b4; 
+        }
 
-.info-card td {
-    padding: 10px 8px;
-    color: #333;
-    border: 1px solid #F694C1; 
-}
+        .cart-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            border: 1px solid #E4C1F9; 
+            border-radius: 8px;
+            overflow: hidden;
+            font-size: 0.9rem;
+        }
 
-.info-card tbody tr:nth-child(even) {
-    background-color: #EDE7B155; 
-}
+        .cart-items th {
+            background-color: #A9DEF9; 
+            color: #0688c9; 
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #F694C1; 
+        }
+        
+        .cart-items td {
+            padding: 8px 10px;
+            color: #333;
+            border: 1px solid #F694C1; 
+        }
+        
+        .cart-items tbody tr:nth-child(even) {
+            background-color: #EDE7B155; 
+        }
 
-.info-card tbody tr:hover {
-    background-color: #E4C1F955; 
-    cursor: default;
-    transition: background-color 0.3s;
-}
+        .cart-items td[colspan] {
+            text-align: center;
+            font-style: italic;
+            padding: 20px;
+            background-color: #ffffff;
+        }
 
-.info-card tbody tr td[colspan] {
-    text-align: center;
-    font-style: italic;
-    padding: 20px;
-    background-color: #ffffff;
-}
+        /* General table styles (for reference, if using the old server-rendered table) */
+        .info-card table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border: 2px solid #E4C1F9; 
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        /* ... rest of your table styles ... */
 
-/* Button styles (if needed, though not used in the provided HTML) */
-.add-btn {
-    font-weight: bold; 
-    font-size: 1.5rem; 
-    line-height: 1;
-    padding: 5px 12px;
-    background: #D3F8E2; 
-    color: #155724; 
-    border-color: #D3F8E2;
-}
 
-.open-delete-modal{
-    background: #F694C1; 
-    color: #bc1361;
-}
+        .logout-container {
+            text-align: right;
+            margin: 10px 20px;
+        }
 
-.open-update-modal{
-    padding: 10px 15px;
-    background: #A9DEF9; 
-    color: #0688c9; 
-    border: none;
-    border-radius: 10px;
-    font-weight: 500;
-    transition: background-color 0.2s, transform 0.1s;
-    background-color: white !important;
-}
+        #logoutBtn {
+            background-color: aliceblue;
+            color: #F694C1;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            display: inline-block;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+            font-family: 'Barriecito', 'Barlow', sans-serif;
+            font-size: 1.5em;
+        }
 
-.logout-container {
-    text-align: right;
-    margin: 10px 20px;
-}
-
-#logoutBtn {
-    background-color: aliceblue;
-    color: #F694C1;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 15px;
-    cursor: pointer;
-    display: inline-block;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
-    font-family: 'Barriecito', 'Barlow', sans-serif;
-    font-size: 1.5em;
-}
-
-#logoutBtn:hover {
-    background-color: #D3F8E2;
-}
+        #logoutBtn:hover {
+            background-color: #D3F8E2;
+        }

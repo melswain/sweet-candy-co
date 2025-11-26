@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector(".update-modal").style.display = "none";
             refreshProducts();
         } catch (err) {
-            showNotification("Product updated successfully!");
+            showNotification("Product updated  un-successfully!");
             console.error(err);
         }
     });

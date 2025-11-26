@@ -18,9 +18,9 @@ def getCartsByCustomer(customer_id):
     except Exception as e:
         return False, f"Failed to get carts: {e}"
     
-def getCustomerCartHistory(customerId):
+def getCustomerCartHistory(customerId,before_date=None,after_date=None):
     try:
-        success, cart_history = Cart.get_customer_cartHistory(customerId)
+        success, cart_history = Cart.get_customer_cartHistory(customer_id=customerId,before_date=before_date,after_date=after_date)
         if success:
             return True, cart_history
         else:
