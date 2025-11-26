@@ -68,9 +68,16 @@ class Cart(Base):
 
     
     @staticmethod
-    def get_customer_cartHistory(customerId):
+    def get_customer_cartHistory(customer_id,before_date = None, after_date = None):
+    #    ! new Code
         query ="""
-                SELECT ca.cartId,p.name,ca.totalCartPrice,ca.checkoutDate
+                SELECT 
+                    ca.cartId,
+                    p.name,
+                    p.price,
+                    ci.quantity,
+                    ca.totalCartPrice,
+                    ca.checkoutDate
                 FROM cart as ca
                 JOIN cart_item as ci
                     ON ca.cartId = ci.cartId
@@ -78,13 +85,48 @@ class Cart(Base):
                     ON p.productId = ci.productId
                 WHERE ca.customerId = ?
                """
-        result = fetchall(query,(customerId,));
-        if result and len(result) > 0:
-            keys = ['cartId','name','totalCartPrice','checkoutDate'];
-            cart_history = [
-                            SimpleNamespace(**{k: r[i] for i, k in enumerate(keys)}) 
-                            for r in result
-                            ]
-            return True, cart_history
-        else:
-            return False, None
+        params = [customer_id]
+       
+
+        if before_date is not  None:
+            query+= " AND ca.checkoutDate <= ?"
+            params.append(before_date+" 23:59:59")
+
+        if after_date is not None:
+
+            query+= " AND ca.checkoutDate >= ?"
+            params.append(after_date +" 00:00:00")
+        
+        result = fetchall(query,tuple(params))
+
+        if not result:
+            return False, "No cart history found"
+
+        cart_map = {}
+
+        for r in result:
+            cartId = r[0]
+            name = r[1]
+            price = float(r[2])
+            quantity = int(r[3])
+            totalCartPrice = float(r[4])
+            checkoutDate = r[5]
+
+            if cartId not in cart_map:
+                cart_map[cartId] = {
+                    "cartId": cartId,
+                    "totalCartPrice": totalCartPrice,
+                    "checkoutDate": checkoutDate,
+                    "items": []
+                }
+            cart_map[cartId]["items"].append({
+                "productName": name,
+                "quantity": quantity,
+                "unitPrice": price,
+                "totalProductPrice": round(price * quantity, 2)
+            })
+        cart_history = list(cart_map.values())
+
+        return True,cart_history
+
+       

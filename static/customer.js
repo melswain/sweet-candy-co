@@ -1,43 +1,42 @@
 
 function renderCarts(carts) {
-    const container = document.getElementById('carts-list');
-    container.innerHTML = '';
-    if (!carts || carts.length === 0) {
-        container.innerHTML = '<p>No carts found for your account.</p>';
-        return;
-    }
+    const container = document.getElementById("cart-results"); 
+    container.innerHTML = ""; // only remove the carts
 
     carts.forEach(cart => {
-        const card = document.createElement('div');
-        card.className = 'cart-card';
-        const header = document.createElement('div');
-        header.className = 'cart-header';
-        header.innerHTML = `<strong>Cart #${cart.cartId}</strong> — Total: $${cart.totalCartPrice.toFixed(2)} — Points: ${cart.totalRewardPoints} — ${cart.checkoutDate}`;
+        const card = `
+            <div class="cart-card">
+                <div class="cart-header">
+                    <strong>Cart #${cart.cartId}</strong>
+                    — Total: $${parseFloat(cart.totalCartPrice).toFixed(2)}
+                    — ${cart.checkoutDate}
+                </div>
 
-        const itemsTable = document.createElement('table');
-        itemsTable.className = 'cart-items';
-        itemsTable.innerHTML = `
-            <thead><tr><th>Product</th><th>Quantity</th><th>Total</th></tr></thead>
-            <tbody></tbody>
+                <table class="cart-items">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${cart.items.map(item => `
+                            <tr>
+                                <td>${item.productName}</td>
+                                <td>${item.quantity}</td>
+                                <td>$${parseFloat(item.totalProductPrice).toFixed(2)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
         `;
-        const tbody = itemsTable.querySelector('tbody');
-        if (cart.items && cart.items.length) {
-            cart.items.forEach(i => {
-                const r = document.createElement('tr');
-                r.innerHTML = `<td>${i.productName || i.productId}</td><td>${i.quantity}</td><td>$${i.totalProductPrice.toFixed(2)}</td>`;
-                tbody.appendChild(r);
-            });
-        } else {
-            const r = document.createElement('tr');
-            r.innerHTML = `<td colspan="3">No items recorded for this cart.</td>`;
-            tbody.appendChild(r);
-        }
 
-        card.appendChild(header);
-        card.appendChild(itemsTable);
-        container.appendChild(card);
+        container.insertAdjacentHTML("beforeend", card);
     });
 }
+
 
 function loadMyCarts() {
     CartService.fetchMyCarts()
@@ -71,3 +70,67 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
         }
     });
 });
+
+
+//when date had been inputted
+const date_form = document.getElementById('date-filters');
+const date_before_input = document.getElementById("date-before");
+const date_after_input = document.getElementById("date-after");
+
+    // //* Before Input
+    date_before_input.addEventListener("change", async function(e){
+        const formData = new FormData(date_form);
+
+        try{
+            const response = await fetch('/customer_page', {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+
+            
+            if(response.ok && result.status === 'success'){
+                console.log("Filter result received:", result);
+                renderCarts(result.cart_history_data); 
+            } else {
+                const errorMessage = result.message || `Error fetching carts: ${response.statusText}`;
+                document.getElementById('cart-results').innerHTML = `<p class="error">Error: ${errorMessage}</p>`;
+                console.error(errorMessage.a);
+            }
+        }
+        catch(err)
+        {
+            document.getElementById('cart-results').innerHTML = `<p class="error">Request Failed: ${err.message}</p>`;
+            console.error("Filters request failed: ",err);
+        }
+
+    });
+
+    // //* After Input
+    date_after_input.addEventListener("change",async function(e){
+        const formData = new FormData(date_form);
+            try{
+                const response = await fetch('/customer_page', {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if(response.ok && result.status === 'success'){
+                    console.log("Filter result received:", result);
+                    // *** FIX: Render the newly fetched carts ***
+                    renderCarts(result.cart_history_data);
+                } else {
+                    const errorMessage = result.message || `Error fetching carts: ${response.statusText}`;
+                    document.getElementById('cart-results').innerHTML = `<p class="error">Error: ${errorMessage}</p>`;
+                    console.error(errorMessage);
+                }
+            }
+            catch(err)
+            {
+                document.getElementById('cart-results').innerHTML = `<p class="error">Request Failed: ${err.message}</p>`;
+                console.error("Filters request failed: ",err);
+            }
+    });
