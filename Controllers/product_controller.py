@@ -9,13 +9,6 @@ def getProductWithUpc(upc):
     except Exception as e:
         return f"Failed to get product:\n{e}"
 
-def getProductWithEpc(epc):
-    try:
-        product = Product.get_by_epc(epc)
-        return product
-    except Exception as e:
-        return f"Failed to get product:\n{e}"
-
 def getProductWithId(id):
     try:
         product = Product.get_by_id(id)
@@ -37,9 +30,9 @@ def update_product(productId, new_name, new_type, new_price, new_expirationDate,
     except Exception as e:
         return False, f"Failed to update product: {e}"
     
-def create_product(name, type_, price, expiration_date, upc, epc, manufacturer_name="Sweet Candy Co", discount=1.00):
+def create_product(name, type_, price, expiration_date, upc, manufacturer_name="Sweet Candy Co", discount=1.00):
     try:
-        success, message, id = Product.create(name, type_, price, expiration_date, upc, epc, manufacturer_name, discount)
+        success, message, id = Product.create(name, type_, price, expiration_date, upc, manufacturer_name, discount)
         return success, message, id
     except Exception as e:
         return False, f"Failed to create product: {e}", 0

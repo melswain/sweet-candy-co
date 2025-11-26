@@ -29,7 +29,7 @@ class Customer(Base):
         if result is True:
             return True, "Customer added successfully."
         else:
-            raise Exception('Error adding customer')
+            raise Exception('Customer email must be unique')
         
     @staticmethod
     def addRewardPoints(customer_id, points_to_add):
