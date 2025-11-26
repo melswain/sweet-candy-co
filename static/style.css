@@ -7,7 +7,9 @@ body {
 }
 
 .page-wrapper {
-  padding: 30px;
+  padding: 20px;
+  width: 1000px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -89,8 +91,7 @@ button {
 .notification {
   position: fixed;
   top: 20px;
-  right: -300px;
-  background-color: #D3F8E2;
+  right: -500px;
   color: black;
   padding: 15px 25px;
   border-radius: 6px;
@@ -102,6 +103,7 @@ button {
 
 .notification.show {
   right: 20px;
+  background-color: #D3F8E2;
 }
 
 .alert {
@@ -702,12 +704,12 @@ input:checked + .slider:before {
   border-color: #D3F8E2;
 }
 
-.open-delete-modal{
+.open-delete-modal {
   background: #F694C1; 
   color: #bc1361;
 }
 
-.open-update-modal{
+.open-update-modal {
   padding: 10px 15px;
   background: #A9DEF9; 
   color: #0688c9; 
@@ -717,6 +719,28 @@ input:checked + .slider:before {
   transition: background-color 0.2s, transform 0.1s;
 }
 
+.report-container {
+  display: flex;
+  gap: 40px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 20px;
+  font-family: 'Barlow', sans-serif;
+}
 
+.report-card {
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 50%;
+  text-align: center;
+  background-color: aliceblue;
+  box-shadow: 0 0px 4px rgba(255, 105, 180, 0.5);
+}
 
+.report-card h3 {
+  color: #ff69b4;
+}
 
+#generate-report {
+  margin-top: 1em;
+}

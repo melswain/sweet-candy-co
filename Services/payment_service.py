@@ -41,6 +41,7 @@ def process_payment(items, membership_number, card_number, expiry, use_points):
     for item in items:
         try:
             removeInventory(item["id"], 1, item["quantity"])
+            print("REMOVE INVENTORY: ", removeInventory)
         except Exception as e:
             print("Warning: failed to remove inventory", e)
 

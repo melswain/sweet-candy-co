@@ -1,10 +1,12 @@
 import os
+import io
 
-from flask import Flask, make_response, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Flask, make_response, render_template, request, redirect, url_for, flash, jsonify, session, send_file
 from dotenv import load_dotenv
 from time import sleep
 from decimal import Decimal, ROUND_HALF_UP
-# import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqtt
+
 
 from Controllers.customer_controller import addCustomer, customer_login, getCustomerData, register_customer
 from Controllers.cart_controller import getCustomerCartHistory
@@ -18,6 +20,11 @@ from Services.payment_service import process_payment
 from Services.scan_service import process_scan
 from Services.product_service import update_product, add_product, get_all_products
 from Services.search_service import search_item
+from Services.temperature_readings_service import handle_temperature, update_sensor_data
+from Services.inventory_report_service import export_inventory_report
+
+from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
+from flask import send_file, request
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -39,7 +46,9 @@ sensor_data = {
     "Frig2": {"temperature": 0, "humidity": 50}
 }
 
-MQTT_BROKER = "172.20.10.12"  
+items = []
+
+MQTT_BROKER = "localhost"  
 MQTT_PORT = 1883
 
 def on_connect(client, userdata, flags, rc):
@@ -61,20 +70,21 @@ def on_message(client, userdata, msg):
         elif "humidity" in topic:
             sensor_data["Frig2"]["humidity"] = payload
 
-# mqtt_client = mqtt.Client()
-# mqtt_client.on_connect = on_connect
-# mqtt_client.on_message = on_message
-# mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-# mqtt_client.loop_start()  # run in background
+
+# Initialize MQTT client
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+
+try:
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    mqtt_client.loop_start()
+    print('MQTT client started and listening')
+except Exception as e:
+    print('Failed to start MQTT client:', e)
 
 GST_RATE = Decimal('0.05')
 QST_RATE = Decimal('0.09975')
-
-items = [
-        # {'id': 1,'name': 'Chocolate Dream Bar', 'quantity': 4, 'unit': 3.99, 'total': 15.96},
-        # {'id': 2, 'name': 'Rainbow Sour Strips', 'quantity': 1, 'unit': 4.50, 'total': 4.50},
-        # {'id': 3, 'name': 'Peanut Butter Cups 4pk', 'quantity': 1, 'unit': 5.99, 'total': 5.99}
-    ]
 
 def format_money(d: Decimal) ->str:
     return f"{d.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)}"
@@ -329,6 +339,19 @@ def register():
         return jsonify({'status': 'success', 'message': msg})
     return jsonify({'status': 'error', 'message': msg}), 400
 
+@app.route('/inventory-report')
+def get_inventory_report():
+    format_type = request.args.get('format', 'pdf')
+    print(f'fetching inventory report... format: {format_type}')
+    file_path = export_inventory_report(format_type)
+    
+    if not file_path or not os.path.exists(file_path):
+        return jsonify({'status': 'error', 'message': 'Failed to generate report'}), 500
+    
+    mime_type = 'text/csv' if format_type == 'csv' else 'application/pdf'
+    return send_file(file_path, mimetype=mime_type, as_attachment=True, 
+                     download_name=f'inventory_report.{format_type}')
+
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
 # temp2 = sensor_data['Frig2'].get('temperature', '0')
@@ -350,5 +373,48 @@ def register():
 #     if response:
 #         turnOnFan()
 
+@app.route('/reports/sales.csv')
+def download_sales_csv():
+    """
+    Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+    Example: /reports/sales.csv?start=2025-09-01&end=2025-09-30
+    """
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+    sales = fetch_sales_rows(start_date=start, end_date=end)
+    csv_io = generate_csv_bytes(sales)
+    # filename with date range
+    name = "sales_report"
+    if start:
+        name += f"_{start.strftime('%Y%m%d')}"
+    if end:
+        name += f"_{end.strftime('%Y%m%d')}"
+    name += ".csv"
+    return send_file(csv_io,
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     download_name=name)
+
+@app.route('/reports/sales.pdf')
+def download_sales_pdf():
+    """
+    Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+    """
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+    sales = fetch_sales_rows(start_date=start, end_date=end)
+    pdf_io = generate_pdf_bytes(sales, title="Sales Report")
+    name = "sales_report"
+    if start:
+        name += f"_{start.strftime('%Y%m%d')}"
+    if end:
+        name += f"_{end.strftime('%Y%m%d')}"
+    name += ".pdf"
+    return send_file(pdf_io,
+                     mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=name)
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
