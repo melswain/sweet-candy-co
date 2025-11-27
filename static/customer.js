@@ -82,7 +82,7 @@ const date_after_input = document.getElementById("date-after");
         const formData = new FormData(date_form);
 
         try{
-            const response = await fetch('/customer_page', {
+            const response = await fetch('/cart_history_filter', {
                 method: "POST",
                 body: formData
             });
@@ -111,7 +111,7 @@ const date_after_input = document.getElementById("date-after");
     date_after_input.addEventListener("change",async function(e){
         const formData = new FormData(date_form);
             try{
-                const response = await fetch('/customer_page', {
+                const response = await fetch('/cart_history_filter', {
                     method: "POST",
                     body: formData
                 });
