@@ -37,7 +37,18 @@ const translations = {
         continueWithout: "Continue without membership",
         paymentCompleted: "Payment completed!",
         receiptSent: "A receipt has been sent to the email associated with your account.",
-        dontForgetCandy: "Don't forget your candy!"
+        dontForgetCandy: "Don't forget your candy!",
+        darkMode: "Dark Mode",
+        lightMode: "Light Mode",
+        cartCleared: "Cart cleared!",
+        cartItemAdded: "Cart item added successfully!",
+        scanError: "Scan error",
+        scanRequestFailed: "Scan request failed",
+        unknown: "Unknown",
+        itemAdded: "Added {item}",
+        cartItemRemoved: "Cart item(s) removed successfully!",
+        removeFailed: "Failed to remove item",
+        removeError: "Remove request failed"
     },
 
     fr: {
@@ -77,7 +88,18 @@ const translations = {
         continueWithout: "Continuer sans adhésion",
         paymentCompleted: "Paiement réussi!",
         receiptSent: "Un reçu a été envoyé à votre courriel.",
-        dontForgetCandy: "N'oubliez pas vos bonbons!"
+        dontForgetCandy: "N'oubliez pas vos bonbons!",
+        darkMode: "Mode noir",
+        lightMode: "Mode clair",
+        cartCleared: "Panier vidé !",
+        cartItemAdded: "Article ajouté au panier avec succès !",
+        scanError: "Erreur de scan",
+        scanRequestFailed: "La requête de scan a échoué.",
+        unknown: "Inconnu",
+        itemAdded: "{item} ajouté(e)",
+        cartItemRemoved: "Article(s) retiré(s) du panier avec succès !",
+        removeFailed: "Échec de la suppression de l'article",
+        removeError: "La requête de suppression a échoué"
     }
 };
 
@@ -197,9 +219,7 @@ function skipPointsDiscount() {
 
 function continueToPayment() {
     membershipModal.style.display = 'none';
-    // Show payment modal so user can enter/scan card
     paymentModal.style.display = 'block';
-    // focus card input for easy scanning
     
     const cardInput = document.getElementById('cardNumberInput');
     if (cardInput) cardInput.focus();
@@ -267,14 +287,27 @@ function scanCode(code) {
     })
     .then(r => r.json())
     .then(resp => {
+        const lang = localStorage.getItem("language") || "en";
+
         if (resp.status === "success") {
             updateCartDisplay();
-            showNotification("Cart item added successfully!", 3000);
+            const successKey = "cartItemAdded";
+            const successMsg = translations[lang][successKey] || "Cart item added successfully!";
+            showNotification(successMsg, 3000);
         } else {
-            showNotification('Scan error: ' + (resp.message || 'Unknown'), 3000);
+            const errorKey = "scanError";
+            const errorMsg = translations[lang][errorKey] || "Scan error";
+            const detail = resp.message || translations[lang].unknown || "Unknown";
+            showNotification(errorMsg + ": " + detail, 3000);
         }
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+        console.error(err);
+        const lang = localStorage.getItem("language") || "en";
+        const errorKey = "scanRequestFailed";
+        const errorMsg = translations[lang][errorKey] || "Scan request failed";
+        showNotification(errorMsg, 3000);
+    });
 }
 
 function updateCartDisplay() {
@@ -306,7 +339,7 @@ function updateCartDisplay() {
 
 document.querySelectorAll('.remove-btn').forEach(button => {
   button.addEventListener('click', function () {
-    console.log('Removing...')
+    console.log('Removing...');
     const itemRow = this.closest('tr');
     const itemId = itemRow.getAttribute('data-id');
 
@@ -317,39 +350,25 @@ document.querySelectorAll('.remove-btn').forEach(button => {
     })
     .then(response => response.json())
     .then(data => {
+      const lang = localStorage.getItem("language") || "fr";
+
       if (data.status === 'success') {
         updateCartDisplay();
-        showNotification("Cart item(s) removed successfully!", 3000);
+        const successMsg = translations[lang].cartItemRemoved || "Article(s) retiré(s) du panier avec succès !";
+        showNotification(successMsg, 3000);
       } else {
-        alert('Failed to remove item');
+        const failMsg = translations[lang].removeFailed || "Failed to remove item";
+        alert(failMsg);
       }
+    })
+    .catch(err => {
+      console.error('Remove item error', err);
+      const lang = localStorage.getItem("language") || "en";
+      const errorMsg = translations[lang].removeError || "Remove request failed";
+      alert(errorMsg);
     });
   });
 });
-
-function attachRemoveListeners() {
-  document.querySelectorAll('.remove-btn').forEach(button => {
-    button.addEventListener('click', function () {
-      const itemRow = this.closest('tr');
-      const itemId = itemRow.getAttribute('data-id');
-
-      fetch('/remove-item', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: itemId })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          updateCartDisplay();
-          showNotification("Cart item(s) removed successfully!", 3000);
-        } else {
-          alert('Failed to remove item');
-        }
-      });
-    });
-  });
-}
 
 // Payment submit: collect card info and POST to server
 function makePayment() {
@@ -413,13 +432,26 @@ function clearCart() {
         if (data.status === 'success') {
             updateCartDisplay();
             calculateSummary();
+
+            const lang = localStorage.getItem("language") || "en";
+
+            const messageKey = "cartCleared";
+            const message = translations[lang][messageKey] || "Cart cleared!";
+
+            showNotification(message, 3000);
         } else {
-            alert(':Cart clearing failed. ' + (data.message || 'Unknown'));
+            const lang = localStorage.getItem("language") || "en";
+            const failKey = "cartFailed";
+            const failMessage = translations[lang][failKey] || "Cart clearing failed.";
+            alert(failMessage + " " + (data.message || 'Unknown'));
         }
     })
     .catch(err => {
-            console.error('Cart clearing error', err);
-            alert('Cart clearing request failed');
+        console.error('Cart clearing error', err);
+        const lang = localStorage.getItem("language") || "en";
+        const errorKey = "cartError";
+        const errorMessage = translations[lang][errorKey] || "Cart clearing request failed";
+        alert(errorMessage);
     });
 }
 
@@ -439,7 +471,7 @@ function closeSearchModal() {
 }
 
 function searchItem() {
-    console.log('Searching for item...')
+    console.log('Searching for item...');
     const code = document.getElementById("searchCodeInput").value;
     fetch('/search-item', {
         method: 'POST',
@@ -447,17 +479,30 @@ function searchItem() {
         body: JSON.stringify({ code })
     })
     .then(res => {
-        if (!res.ok) throw new Error("Item not found");
+        if (!res.ok) {
+            const lang = localStorage.getItem("language") || "en";
+            const notFoundMsg = translations[lang].itemNotFound || "Item not found";
+            throw new Error(notFoundMsg);
+        }
         return res.json();
     })
     .then(data => {
         currentItem = data.item;
+
+        const lang = localStorage.getItem("language") || "en";
+        const addedTemplate = translations[lang].itemAdded || "Added {item}";
+        const successMsg = translations[lang].cartItemAdded || "Cart item added successfully!";
+
+        // Replace {item} with the actual product name
+        const addedMsg = addedTemplate.replace("{item}", data.item.name);
+
         document.getElementById("searchResult").innerHTML = `
-        <p><strong>Added ${data.item.name}</strong></p>
+            <p><strong>${addedMsg}</strong></p>
         `;
+
         updateCartDisplay();
         calculateSummary();
-        showNotification("Cart item added successfully!", 3000);
+        showNotification(successMsg, 3000);
     })
     .catch(err => {
         document.getElementById("searchResult").innerHTML = `<p style="color:red;">${err.message}</p>`;
@@ -468,7 +513,6 @@ function searchItem() {
 
 function addItem() {
     if (!currentItem) return;
-    // Add to cart logic here
     console.log("Added to cart:", currentItem);
     closeSearchModal();
 }
@@ -501,4 +545,41 @@ function toggleLanguage() {
 document.addEventListener("DOMContentLoaded", () => {
     const saved = localStorage.getItem("language") || "en";
     changeLanguage(saved);
+
+    // Dark mode toggle
+    const modeToggle = document.getElementById('modeToggle');
+    const body = document.body;
+
+    // Check if user has a saved preference
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode === 'true') {
+        body.classList.add('dark-mode');
+        updateToggleButton();
+    }
+
+    // Toggle dark mode on button click
+    if (modeToggle) {
+        modeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            updateToggleButton();
+        });
+    }
+
+    // Update button text/emoji
+    function updateToggleButton() {
+        const isDarkMode = body.classList.contains('dark-mode');
+        if (modeToggle) {
+            // Switch the translation key depending on mode
+            modeToggle.setAttribute("data-translate", isDarkMode ? "lightMode" : "darkMode");
+
+            // Re-run translation for the current language
+            const lang = localStorage.getItem("language") || "en";
+            const key = modeToggle.getAttribute("data-translate");
+            if (translations[lang] && translations[lang][key]) {
+                modeToggle.textContent = translations[lang][key];
+            }
+        }
+    }
 });

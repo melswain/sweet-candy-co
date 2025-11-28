@@ -1,9 +1,51 @@
+:root {
+    --bg-cart: #f8f8f8;
+    --bg-panel: #fff;
+    --bg-primary: #ffffff;
+    --text-primary: #000;
+    --text-secondary: #333;
+    --border-color: #ccc;
+    --table-border: #ccc;
+    --table-row-alt: #f9f9f9;
+    --table-hover: #f0f0f0;
+    --modal-bg: #ffbcd9;
+    --btn-red: #f86dae;
+    --btn-blue: #65c3f3;
+    --btn-yellow: #f9b464;
+    --btn-green: #5cf99b;
+    --notification-bg: #ffbcd9;
+    --notification-text: #000;
+    --shadow: rgba(0,0,0,0.2);
+}
+
+body.dark-mode {
+    --bg-cart: #16213e;
+    --bg-panel: #0f3460;
+    --bg-primary: #1a1a2e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --border-color: #2a3f5f;
+    --table-border: #2a3f5f;
+    --table-row-alt: #0f3460;
+    --table-hover: #1d4d7b;
+    --modal-bg: #16213e;
+    --btn-red: #d1426f;
+    --btn-blue: #4a96d4;
+    --btn-yellow: #d4984a;
+    --btn-green: #48a876;
+    --notification-bg: #16213e;
+    --notification-text: #e0e0e0;
+    --shadow: rgba(0,0,0,0.5);
+}
+
 body {
     font-family: 'Barlow', sans-serif;
     margin: 0;
     display: flex;
     height: 100vh;
-/* background: #ffbcd9; */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {
@@ -21,13 +63,13 @@ h2 {
 
 .cart-section {
     flex: 2;
-    background-color: #f8f8f8;
-    border-right: 2px solid #ccc;
+    background-color: var(--bg-cart);
+    border-right: 2px solid var(--border-color);
 }
 
 .control-panel {
     flex: 1;
-    background-color: #fff;
+    background-color: var(--bg-panel);
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -44,9 +86,10 @@ table {
 }
 
 th, td {
-    border: 1px solid #ccc;
+    border: 1px solid var(--table-border);
     padding: 8px;
     text-align: left;
+    color: var(--text-primary);
 }
 
 .remove-td {
@@ -76,14 +119,15 @@ th, td {
 .table-wrapper {
     height: 300px;
     overflow-y: auto;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
 }
 
 .table-wrapper th,
 .table-wrapper td {
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--border-color);
     text-align: left;
+    color: var(--text-primary);
 }
 
 .summary {
@@ -91,6 +135,7 @@ th, td {
     line-height: 1.6;
     text-align: right;
     align-items: right;
+    color: var(--text-primary);
 }
 
 button {
@@ -102,10 +147,10 @@ button {
     cursor: pointer;
     border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px var(--shadow);
     transition: transform 0.2s ease;
 }
-.green { background-color: #5cf99b; color: white; }
+.green { background-color: var(--btn-green); color: white; }
 
 .button:hover {
     transform: scale(1.05);
@@ -132,7 +177,7 @@ button {
     height: 200px;
     color: white;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px var(--shadow);
     transition: transform 0.2s ease;
 }
 
@@ -140,9 +185,9 @@ button {
     transform: scale(1.05);
 }
 
-.red { background-color: #f86dae; }
-.blue { background-color: #65c3f3; }
-.yellow { background-color: #f9b464}
+.red { background-color: var(--btn-red); }
+.blue { background-color: var(--btn-blue); }
+.yellow { background-color: var(--btn-yellow); }
 
 .jumbo {
     font-weight: bold;
@@ -159,7 +204,7 @@ button {
     height: 100px;
     color: white;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px var(--shadow);
     text-align: center;
 }
 
@@ -180,12 +225,13 @@ button {
 }
 
 .modal-content {
-  background-color: #ffbcd9;
+  background-color: var(--modal-bg);
   margin: 15% auto;
   padding: 20px;
   width: 300px;
   border-radius: 8px;
   text-align: center;
+  color: var(--text-primary);
 }
 
 .membership-buttons {
@@ -232,12 +278,12 @@ button {
 .notification {
   position: fixed;
   top: 20px;
-  right: -300px;
-  background-color: #ffbcd9;
-  color: black;
+  right: -500px;
+  background-color: var(--notification-bg);
+  color: var(--notification-text);
   padding: 15px 25px;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px var(--shadow);
   font-size: 16px;
   z-index: 9999;
   transition: right 0.5s ease-in-out;
@@ -254,4 +300,35 @@ button {
 .search-buttons {
   padding: 20px;
   margin: 0.5em 4em 0.5em 4em;
+}
+
+/* --- Dark Mode Toggle Button --- */
+.mode-toggle-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.mode-toggle-btn {
+    padding: 10px 20px;
+    background-color: var(--btn-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.mode-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+body.dark-mode .mode-toggle-btn {
+    background-color: #FFD700;
+    color: #000;
 }
