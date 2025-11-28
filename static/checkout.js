@@ -271,7 +271,7 @@ function scanCode(code) {
             updateCartDisplay();
             showNotification("Cart item added successfully!", 3000);
         } else {
-            alert('Scan error: ' + (resp.message || 'Unknown'));
+            showNotification('Scan error: ' + (resp.message || 'Unknown'), 3000);
         }
     })
     .catch(err => console.error(err));

@@ -183,12 +183,13 @@ def set_use_points():
 def scan_item():
     data = request.get_json() or {}
     code = data.get('code') or data.get('itemCode') or data.get('upc') or data.get('epc')
+    print("CODE: ", code)
 
     if not code:
         return jsonify({"status": "error", "message": "No code provided"}), 400
 
     result = process_scan(code, items)
-    return jsonify(result["body"]), result["status"]
+    return jsonify(result)
 
 @app.route('/cart-items', methods=['GET'])
 def get_cart_items():
