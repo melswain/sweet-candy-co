@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 
 
 from Controllers.customer_controller import addCustomer, customer_login, getCustomerData, register_customer
-from Controllers.cart_controller import getCustomerCartHistory
+from Controllers.cart_controller import getCustomerCartHistory,getItemPurchaseHistory,getTotalSpending
 from Controllers.product_controller import getAllProducts
 from Controllers.inventory_controller import getInventory
 
@@ -293,11 +293,16 @@ def customerPage(before_date=None,after_date=None):
                 #         error_message = cart_history_data #if isinstance(cart_history_data, str) else "Failed to retrieve cart history."
                 #         return jsonify({"status": "error", "message": error_message}), 500  
                 # else: #* The case where it didn't
+
     success, customer_data = getCustomerData(membership_number)
     success1, cart_history_data = getCustomerCartHistory(membership_number)
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number
+                                        )
+    print(total_spending)
     
     if success:
-        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data)
+        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data,total_spending=total_spending)
     else:
         return print(customer_data), 404
         
@@ -325,12 +330,66 @@ def cart_history_filter(before_date=None,after_date=None):
                                             before_date=before_date,
                                             after_date=after_date
                                         )
+    
     if success_cart:
         return jsonify({"status": "success", "cart_history_data": cart_history_data})
     else:
         error_message = cart_history_data
+        return jsonify({"status": "error", "message": error_message}), 500 
+
+@app.route('/total_spending_filters',methods=["POST"])
+def total_spending_filters(before_date=None,after_date=None):
+    if 'customer_id' not in session:
+        return redirect('/login')
+    
+    membership_number = session.get('membership_number')
+    
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+    
+    before_date = request.form.get('spending-date-before')
+    after_date = request.form.get('spending-date-after')
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print (after_date)
+
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    print(total_spending)
+    
+    if total_spending_success:
+        return jsonify({"status": "success", "spending_report": total_spending})
+    else:
+        error_message = total_spending
         return jsonify({"status": "error", "message": error_message}), 500  
 
+
+@app.route('/search_purchases', methods=['POST'])
+def search_purchases():
+    """Route for 3.2: Search in Purchase History"""
+    # if 'customer_id' not in session:
+    #     return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    membership_number = session.get('membership_number')
+    data = request.get_json() or {}
+    product_name = data.get('product_name')
+
+    if not product_name:
+        return jsonify({"status": "error", "message": "Please enter a product name to search."}), 400
+
+    success, result = getItemPurchaseHistory(membership_number, product_name)
+
+    if success:
+        return jsonify({"status": "success", "report": result})
+    else:
+        return jsonify({"status": "error", "message": result}), 404
 # -----------------------------------------------------------------------------------
 
 @app.route('/login', methods=['GET', 'POST'])

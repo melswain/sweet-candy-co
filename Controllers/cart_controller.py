@@ -27,3 +27,23 @@ def getCustomerCartHistory(customerId,before_date=None,after_date=None):
             return False,"No Cart History Found"
     except Exception as e:
         return False, f"Error getting cart history: {e}"
+    
+def getItemPurchaseHistory(customer_id,product_name):
+    try:
+        success, item_history = Cart.get_item_purchase_history(customerId=customer_id,name=product_name)
+        if success:
+            return True, item_history
+        else:
+            return False,"No Item History Found"
+    except Exception as e:
+        return False, f"Error getting Item history: {e}"
+
+def getTotalSpending(customerId,before_date=None,after_date=None):
+    try:
+        success, total_spending = Cart.get_total_spending(customerId=customerId,before_date=before_date,after_date=after_date)
+        if success:
+            return True, total_spending
+        else:
+            return False,"No Spending History"
+    except Exception as e:
+        return False, f"Error getting Spending History: {e}"

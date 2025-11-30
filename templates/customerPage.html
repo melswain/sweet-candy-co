@@ -21,7 +21,7 @@
     </header>
 
     <main class="container">
-        
+        <!-- ---------------------------------------------------------------CUSTOMER ACCOUNT DATA---------------------------------------------------------------- -->
         <section class="info-card" id="account-info">
             <h2>Your Account Information</h2>
             {% set customer = customer_data %}
@@ -61,7 +61,49 @@
                 <p>No Customer data found</p>
             {% endif %}
         </section>
+<!-- ---------------------------------------------------------------Total Spending Report Section---------------------------------------------------------------- -->
 
+        <section class="info-card" id="spending-report">
+            <h2>Total Spending Report (3.1)</h2>
+            <p style="margin-bottom: 10px;">Calculated for the date range selected below.</p>
+            <form action="POST" id="spending-date-filters">
+                    <div class="field-row date-filters">
+                        <div class="date-input-group">
+                            <label for="date-before">Before Date</label>
+                            <input type="date" id="spending-date-before" name="spending-date-before">
+                        </div>
+                        <div class="date-input-group">
+                            <label for="date-after">After Date</label>
+                            <input type="date" id="spending-date-after" name="spending-date-after" >
+                        </div>
+                    </div>
+            </form>
+            <div class="total-spending-box">
+                <label>Total Spent in Period:</label>
+                <p id="total-spending-amount">
+                    ${{ "%.2f" % (total_spending or 0.0) }}
+                </p>
+            </div>
+        </section>
+
+        <!-- ---------------------------------------------------------------SEARCH IN PURCHASE HISTORY---------------------------------------------------------------- -->
+         
+        <section class="info-card report-card" id="item-search">
+            <h2>Search in Purchase History (3.2)</h2>
+            <form id="product-search-form">
+                <div id="search-form">
+                    <input type="text" id="product-name-input" name="product_name" placeholder="Enter product name (e.g., Chocolate Dream Bar)" required>
+                    <button type="submit" id="search-product-btn" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Search Item</button>
+                </div>
+            </form>
+            
+            <div id="search-results-output">
+                <p class="history-tip">Search results for a specific item will appear here.</p>
+            </div>
+        </section>
+
+
+        <!-- ---------------------------------------------------------------CART-HISTORY---------------------------------------------------------------- -->
         <section class="info-card" id="cart-history">
             <h2>Your Shopping Cart History</h2>
             <div id="carts-list">
