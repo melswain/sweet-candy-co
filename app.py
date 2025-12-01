@@ -23,8 +23,28 @@ from Services.search_service import search_item
 from Services.temperature_readings_service import handle_temperature, update_sensor_data
 from Services.inventory_report_service import export_inventory_report
 
-from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
-from flask import send_file, request
+# from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
+# from Services.report_service import fetch_customer_activity_rows, generate_customer_activity_csv, generate_customer_activity_pdf ,parse_date_param
+
+from Services.report_service import (
+parse_date_param,
+fetch_sales_rows,
+generate_csv_bytes,
+generate_pdf_bytes,
+fetch_customer_activity_rows,
+generate_customer_activity_csv,
+generate_customer_activity_pdf,
+fetch_customer_receipts,
+generate_customer_receipt_history_csv,
+generate_customer_receipt_history_pdf,
+fetch_customer_item_search,
+generate_customer_item_search_csv,
+generate_customer_item_search_pdf
+)
+
+# from flask import send_file, request
+
+
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -317,6 +337,7 @@ def get_inventory_report():
     return send_file(file_path, mimetype=mime_type, as_attachment=True, 
                      download_name=f'inventory_report.{format_type}')
 
+
 # constantly checks for temperature of fridges
 # temp1 = sensor_data['Frig1'].get('temperature', '0')
 # temp2 = sensor_data['Frig2'].get('temperature', '0')
@@ -375,6 +396,161 @@ def download_sales_pdf():
     if end:
         name += f"_{end.strftime('%Y%m%d')}"
     name += ".pdf"
+    return send_file(pdf_io,
+                     mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=name)
+
+
+
+@app.route("/reports/customer-activity")
+def customer_activity_report():
+    from Services.report_service import (
+        parse_date_param,
+        fetch_customer_activity,
+        generate_customer_activity_csv,
+        generate_customer_activity_pdf
+    )
+
+    start = parse_date_param(request.args.get("start"))
+    end = parse_date_param(request.args.get("end"))
+    export = request.args.get("export")
+
+    if not start or not end:
+        return "Missing start or end date", 400
+
+    report = fetch_customer_activity(start, end)
+
+    # CSV Export
+    if export == "csv":
+        csv_bytes = generate_customer_activity_csv(report, start.date(), end.date())
+        return send_file(csv_bytes, mimetype="text/csv",
+                         as_attachment=True,
+                         download_name="customer_activity.csv")
+
+    # PDF Export
+    if export == "pdf":
+        pdf_bytes = generate_customer_activity_pdf(report, start.date(), end.date())
+        return send_file(pdf_bytes, mimetype="application/pdf",
+                         as_attachment=True,
+                         download_name="customer_activity.pdf")
+
+    # Normal page display
+    return render_template("report_customer_activity.html", report=report, start=start, end=end)
+
+
+@app.route('/reports/customer_activity.csv')
+def download_customer_activity_csv_report():
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+
+    if not start or not end:
+        return "Please provide start and end dates", 400
+
+    rows = fetch_customer_activity_rows(start_date=start, end_date=end)
+    csv_io = generate_csv_bytes(rows)
+    
+    name = f"customer_activity_{start.strftime('%Y%m%d')}_{end.strftime('%Y%m%d')}.csv"
+    
+    return send_file(csv_io,
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     download_name=name)
+
+
+@app.route('/reports/customer_activity.pdf')
+def download_customer_activity_pdf_report():
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+
+    if not start or not end:
+        return "Please provide start and end dates", 400
+
+    rows = fetch_customer_activity_rows(start_date=start, end_date=end)
+    pdf_io = generate_pdf_bytes(rows, title="Customer Activity Report")
+
+    name = f"customer_activity_{start.strftime('%Y%m%d')}_{end.strftime('%Y%m%d')}.pdf"
+    
+    return send_file(pdf_io,
+                     mimetype='application/pdf',
+                     as_attachment=True,
+                     download_name=name)
+
+
+
+
+@app.route('/customer/receipts/export')
+def export_customer_receipts():
+    """
+    Export all receipts for the logged-in customer in CSV or PDF.
+    Usage:
+        /customer/receipts/export?format=csv
+        /customer/receipts/export?format=pdf
+    """
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "Not logged in"}), 401
+
+    export_format = request.args.get('format', 'pdf').lower()
+
+    # Fetch all receipts for the customer
+    success, receipts = fetch_customer_receipts(membership_number)
+    if not success:
+        return jsonify({"status": "error", "message": "Failed to load receipts"}), 500
+
+    filename_base = f"receipts_{membership_number}"
+
+    if export_format == 'csv':
+        csv_data = generate_customer_receipt_history_csv(receipts)
+        return send_file(
+            csv_data,
+            mimetype="text/csv",
+            as_attachment=True,
+            download_name=f"{filename_base}.csv"
+        )
+    elif export_format == 'pdf':
+        pdf_data = generate_customer_receipt_history_pdf(receipts, title="Receipt History")
+        return send_file(
+            pdf_data,
+            mimetype="application/pdf",
+            as_attachment=True,
+            download_name=f"{filename_base}.pdf"
+        )
+    else:
+        return jsonify({"status": "error", "message": "Invalid format"}), 400
+
+
+@app.route('/reports2/customer_activity.csv')
+def download_customer_activity_csv_v2():
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+
+    if not start or not end:
+        return "Please provide start and end dates", 400
+
+    rows = fetch_customer_activity_rows(start_date=start, end_date=end)
+    csv_io = generate_csv_bytes(rows)
+    
+    name = f"customer_activity_{start.strftime('%Y%m%d')}_{end.strftime('%Y%m%d')}.csv"
+    
+    return send_file(csv_io,
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     download_name=name)
+
+@app.route('/reports2/customer_activity.pdf')
+def download_customer_activity_pdf_v2():
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+
+    if not start or not end:
+        return "Please provide start and end dates", 400
+
+    rows = fetch_customer_activity_rows(start_date=start, end_date=end)
+    pdf_io = generate_pdf_bytes(rows, title="Customer Activity Report")
+
+    name = f"customer_activity_{start.strftime('%Y%m%d')}_{end.strftime('%Y%m%d')}.pdf"
+    
     return send_file(pdf_io,
                      mimetype='application/pdf',
                      as_attachment=True,

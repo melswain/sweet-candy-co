@@ -583,3 +583,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+
+function getDateParams() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+
+    let params = '';
+    if (start) params += `start=${start}`;
+    if (end) params += (params ? '&' : '') + `end=${end}`;
+    return params ? `?${params}` : '';
+}
+
+document.getElementById('downloadCsv').addEventListener('click', () => {
+    const params = getDateParams();
+    const url = `/reports/customer_activity.csv${params}`;
+    window.open(url, '_blank');
+});
+
+document.getElementById('downloadPdf').addEventListener('click', () => {
+    const params = getDateParams();
+    const url = `/reports/customer_activity.pdf${params}`;
+    window.open(url, '_blank');
+});

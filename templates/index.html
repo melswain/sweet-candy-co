@@ -109,6 +109,46 @@
 
   </div>
 
+  <div class="report-downloads">
+  <h3>Customer Activity Reports</h3>
+  <div class="report-filters">
+    <label for="activityStart">Start Date:</label>
+    <input type="date" id="activityStart" name="start">
+
+    <label for="activityEnd">End Date:</label>
+    <input type="date" id="activityEnd" name="end">
+  </div>
+
+  <div class="report-buttons">
+    <a id="customerCsvLink" class="btn" href="/reports/customer_activity.csv" download>Download CSV</a>
+    <a id="customerPdfLink" class="btn" href="/reports/customer_activity.pdf" download>Download PDF</a>
+  </div>
+</div>
+
+<script>
+  const activityStartInput = document.getElementById('activityStart');
+  const activityEndInput = document.getElementById('activityEnd');
+  const customerCsvLink = document.getElementById('customerCsvLink');
+  const customerPdfLink = document.getElementById('customerPdfLink');
+
+  function updateCustomerLinks() {
+    const start = activityStartInput.value;
+    const end = activityEndInput.value;
+    const params = new URLSearchParams();
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    customerCsvLink.href = '/reports/customer_activity.csv' + (params.toString() ? '?' + params.toString() : '');
+    customerPdfLink.href = '/reports/customer_activity.pdf' + (params.toString() ? '?' + params.toString() : '');
+  }
+
+  activityStartInput.addEventListener('input', updateCustomerLinks);
+  activityEndInput.addEventListener('input', updateCustomerLinks);
+
+  // Initialize links
+  updateCustomerLinks();
+</script>
+
+
   
 
   <div id="notification" class="notification"></div>

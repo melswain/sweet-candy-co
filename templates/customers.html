@@ -59,6 +59,21 @@
     </div>
   </div>
 
+  <div class="download-section">
+  <h3>Export Purchase History</h3>
+  <div class="date-filters">
+    <label for="startDate">Start Date:</label>
+    <input type="date" id="startDate">
+
+    <label for="endDate">End Date:</label>
+    <input type="date" id="endDate">
+
+    <button class="btn export-btn blue" id="downloadCsv">Download CSV</button>
+    <button class="btn export-btn green" id="downloadPdf">Download PDF</button>
+  </div>
+</div>
+
+
   <div class="control-panel">
     <div class="button-row">
       <button onclick="callForAssistance()" class="btn jumbo red" data-translate="callAssistance">Call for Assistance</button>
