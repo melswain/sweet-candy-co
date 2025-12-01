@@ -164,13 +164,14 @@ def finalize_payment():
     data = request.get_json() or {}
     card_number = data.get('cardNumber') or data.get('card')
     expiry = data.get('expiryDate') or data.get('expiry')
-    use_points = session.get('usePoints')
-    membership_number = session.get('membership_number')
+    # If usePoints was set in session it will be a truthy value, but for guests we must disable points
+    use_points = session.get('usePoints') if session.get('membership_number') else False
+    # Allow guest checkout: if membership_number missing, use 0
+    membership_number = session.get('membership_number') or 0
+    # Optional receipt email for guests
+    receipt_email = data.get('email') or data.get('receiptEmail')
 
-    if not membership_number:
-        return jsonify({"status": "error", "message": "No membership number in session"}), 400
-
-    result = process_payment(items, membership_number, card_number, expiry, use_points)
+    result = process_payment(items, card_number, expiry, use_points, membership_number, receipt_email)
 
     return jsonify(result["body"]), result["status"]
 

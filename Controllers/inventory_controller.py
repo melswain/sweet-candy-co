@@ -16,6 +16,7 @@ def removeInventory(product_id, location_id, quantity):
 
 def searchInventory(product_id, location_id):
     try:
+        print("Stuff: ", product_id, location_id)
         item_id = Inventory.search_item(product_id, location_id)
         print("Item: ", item_id[1])
         return True, item_id[1]
