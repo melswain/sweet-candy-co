@@ -17,6 +17,12 @@ def export_inventory_report(format_type):
     else:
         return export_inventory_pdf(report_data)
 
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet
+import os
+
 def export_inventory_pdf(report_data):
     downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
     pdf_file = os.path.join(downloads_path, "inventory_report.pdf")
@@ -25,11 +31,9 @@ def export_inventory_pdf(report_data):
     elements = []
     styles = getSampleStyleSheet()
 
-    # Title
     elements.append(Paragraph("Inventory Report", styles['Title']))
     elements.append(Spacer(1, 12))
 
-    # Table data
     table_data = [["Product Name", "Product ID", "Available Quantity", "Last Restocked"]]
     for item in report_data[1]:
         table_data.append([
@@ -39,9 +43,8 @@ def export_inventory_pdf(report_data):
             item.last_restocked
         ])
 
-    # Create table
     table = Table(table_data, colWidths=[180, 80, 100, 130])
-    table.setStyle(TableStyle([
+    style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#F694C1")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -49,7 +52,20 @@ def export_inventory_pdf(report_data):
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#bc1361")),
-    ]))
+    ])
+
+    # Apply conditional colors to quantity column (index 2)
+    for row_idx, item in enumerate(report_data[1], start=1):
+        qty = item.available_quantity
+        print(qty)
+        if qty > 15:
+            style.add('BACKGROUND', (2, row_idx), (2, row_idx), colors.green)
+        elif 5 <= qty <= 15:
+            style.add('BACKGROUND', (2, row_idx), (2, row_idx), colors.yellow)
+        else:  # qty < 5
+            style.add('BACKGROUND', (2, row_idx), (2, row_idx), colors.red)
+
+    table.setStyle(style)
 
     elements.append(table)
     doc.build(elements)

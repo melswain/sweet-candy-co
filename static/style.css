@@ -1,8 +1,38 @@
 /* Colours: #D3F8E2 (green), #E4C1F9 (purple), #F694C1 (pink), #EDE7B1 (yellow), #A9DEF9 (blue) */
 
+:root {
+  --bg-primary: #ffbcd9;
+  --card-bg: aliceblue;
+  --text-primary: #333;
+  --text-secondary: #ff69b4;
+  --border-color: #F694C1;
+  --accent-color: #F694C1;
+  --button-bg: #A9DEF9;
+  --button-text: #0688c9;
+  --input-border: #F47D2F;
+  --input-text: #F47D2F;
+  --input-bg: #ffc8695a;
+  --shadow-color: rgba(255, 105, 180, 0.5);
+}
+
+body.dark-mode {
+  --bg-primary: #1a1a2e;
+  --card-bg: #16213e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #ff69b4;
+  --border-color: #2a3f5f;
+  --accent-color: #F694C1;
+  --button-bg: #0f4c75;
+  --button-text: #A9DEF9;
+  --input-border: #3a5f8f;
+  --input-text: #e0e0e0;
+  --input-bg: #0f3460;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
 body {
   font-family: 'Barlow', sans-serif;
-  background: #ffbcd9;
+  background: var(--bg-primary);
   margin: 0;
 }
 
@@ -14,20 +44,20 @@ body {
 
 h1 {
   font-family: 'Barriecito', 'Barlow', sans-serif;
-  color: #F694C1;
+  color: var(--accent-color);
 }
 
 h2 {
   font-family: 'Barriecito', 'Barlow', sans-serif;
-  color: #ff69b46d;
+  color: var(--text-secondary);
 }
 
 .title-box {
-  background-color: aliceblue;
+  background-color: var(--card-bg);
   text-align: center;
   color: white;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  box-shadow: 0 0 20px var(--shadow-color);
   border-radius: 10px;
 }
 
@@ -46,23 +76,23 @@ h2 {
 }
 
 .form-container {
-  background: aliceblue;
+  background: var(--card-bg);
   padding: 26px 20px 20px 20px;
   width: 100%;
   max-width: 550px;
   margin-top: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  box-shadow: 0 0 20px var(--shadow-color);
 }
 
 .fridge-container {
-  background: aliceblue;
+  background: var(--card-bg);
   padding: 20px;
   width: 100%;
   max-width: 550px;
   margin-top: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  box-shadow: 0 0 20px var(--shadow-color);
 }
 
 input {
@@ -70,20 +100,20 @@ input {
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
-  border-color: #F47D2F;
-  color: #F47D2F;
-  background-color: #ffc8695a;
+  border-color: var(--input-border);
+  color: var(--input-text);
+  background-color: var(--input-bg);
   font-family: 'Barlow', sans-serif;
 }
 
 input::placeholder {
-  color: #F47D2F;
+  color: var(--input-text);
 }
 
 button {
   padding: 10px 15px;
-  background: #A9DEF9;
-  color: #0688c9;
+  background: var(--button-bg);
+  color: var(--button-text);
   border: none;
   border-radius: 10px;
 }
@@ -108,7 +138,7 @@ button {
 
 .alert {
   margin-top: 20px;
-  background: #F694C1;
+  background: var(--accent-color);
   padding: 10px;
   border-radius: 4px;
   color: #bc1361;
@@ -119,7 +149,7 @@ button {
   flex-wrap: wrap;
   gap: 20px;
   padding: 20px;
-  background-color: aliceblue;
+  background-color: var(--card-bg);
   border-radius: 10px;
   font-family: 'Barlow', sans-serif;
   min-width: 240px;
@@ -131,14 +161,14 @@ button {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   padding: 15px 20px;
-  box-shadow: 0 0px 4px rgba(255, 105, 180, 0.5);
+  box-shadow: 0 0px 4px var(--shadow-color);
 }
 
 .single-fridge-container > div:first-child {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .single-fridge-container > div:nth-child(2),
@@ -194,8 +224,8 @@ meter#thermometer2 {
   padding: 20px;
   border-radius: 10px;
   text-align: center;
-  background-color: aliceblue;
-  box-shadow: 0 0px 4px rgba(255, 105, 180, 0.5);
+  background-color: var(--card-bg);
+  box-shadow: 0 0px 4px var(--shadow-color);
 }
 
 .switch {
@@ -244,17 +274,17 @@ input:checked + .slider:before {
 /*!  Product Management Table Styles */
 /*!--------------------------------- */
 .productManagement-container {
-  background: aliceblue;
+  background: var(--card-bg);
   padding: 20px;
   max-width: 1200px; 
   margin-top: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+  box-shadow: 0 0 20px var(--shadow-color); 
   font-family: 'Barlow', sans-serif;
 }
 
 .productManagement-container h2 {
-  color: #ff69b4; 
+  color: var(--text-secondary); 
   text-align: center;
   margin-bottom: 20px;
   padding-bottom: 10px; 
@@ -270,18 +300,18 @@ input:checked + .slider:before {
 }
 
 .productManagement-container th {
-  background-color: #A9DEF9; 
-  color: #0688c9; 
+  background-color: var(--button-bg); 
+  color: var(--button-text); 
   padding: 12px 8px;
   text-align: left;
   font-weight: bold;
-  border: 1px solid #F694C1; 
+  border: 1px solid var(--border-color); 
 }
 
 .productManagement-container td {
   padding: 10px 8px;
-  color: #333;
-  border: 1px solid #F694C1; 
+  color: var(--text-primary);
+  border: 1px solid var(--border-color); 
   align-items: center;
 }
 
@@ -314,14 +344,14 @@ input:checked + .slider:before {
 }
 
 .open-delete-modal{
-  background: #F694C1; 
+  background: var(--accent-color); 
   color: #bc1361;
 }
 
 .open-update-modal{
   padding: 10px 15px;
-  background: #A9DEF9; 
-  color: #0688c9; 
+  background: var(--button-bg); 
+  color: var(--button-text); 
   border: none;
   border-radius: 10px;
   font-weight: 500;
@@ -405,7 +435,7 @@ input:checked + .slider:before {
 }
 
 .update-modal input:focus {
-  border-color: #f47d2f;
+  border-color: var(--input-border);
   background-color: #fff7f0;
 }
 
@@ -423,7 +453,7 @@ input:checked + .slider:before {
 }
 
 .update-confirm-btn:hover {
-  background-color: #A9DEF9;
+  background-color: var(--button-bg);
   transform: translateY(-1px);
 }
 
@@ -511,7 +541,7 @@ input:checked + .slider:before {
 }
 
 .add-modal input:focus {
-  border-color: #f47d2f;
+  border-color: var(--input-border);
   background-color: #fff7f0;
 }
 
@@ -635,17 +665,17 @@ input:checked + .slider:before {
 /*!  Inventory Management Table Styles */
 /*!--------------------------------- */
 .inventoryManagement-container {
-  background: aliceblue;
+  background: var(--card-bg);
   padding: 20px;
   max-width: 1200px; 
   margin-top: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5); 
+  box-shadow: 0 0 20px var(--shadow-color); 
   font-family: 'Barlow', sans-serif;   
 }
 
 .inventoryManagement-container h2 {
-  color: #ff69b4; 
+  color: var(--text-secondary); 
   text-align: center;
   margin-bottom: 20px;
   padding-bottom: 10px; 
@@ -661,18 +691,18 @@ input:checked + .slider:before {
 }
 
 .inventoryManagement-container th {
-  background-color: #A9DEF9; 
-  color: #0688c9; 
+  background-color: var(--button-bg); 
+  color: var(--button-text); 
   padding: 12px 8px;
   text-align: left;
   font-weight: bold;
-  border: 1px solid #F694C1; 
+  border: 1px solid var(--border-color); 
 }
 
 .inventoryManagement-container td {
   padding: 10px 8px;
-  color: #333;
-  border: 1px solid #F694C1; 
+  color: var(--text-primary);
+  border: 1px solid var(--border-color); 
   align-items: center;
 }
 
@@ -705,14 +735,14 @@ input:checked + .slider:before {
 }
 
 .open-delete-modal {
-  background: #F694C1; 
+  background: var(--accent-color); 
   color: #bc1361;
 }
 
 .open-update-modal {
   padding: 10px 15px;
-  background: #A9DEF9; 
-  color: #0688c9; 
+  background: var(--button-bg); 
+  color: var(--button-text); 
   border: none;
   border-radius: 10px;
   font-weight: 500;
@@ -733,14 +763,32 @@ input:checked + .slider:before {
   padding: 20px;
   max-width: 50%;
   text-align: center;
-  background-color: aliceblue;
-  box-shadow: 0 0px 4px rgba(255, 105, 180, 0.5);
+  background-color: var(--card-bg);
+  box-shadow: 0 0px 4px var(--shadow-color);
 }
 
 .report-card h3 {
-  color: #ff69b4;
+  color: var(--text-secondary);
 }
 
 #generate-report {
   margin-top: 1em;
+}
+
+.mode-toggle-container {
+  position: fixed;
+  padding: 20px;
+}
+
+.mode-toggle-btn {
+  padding: 10px 20px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px var(--shadow-color);
 }

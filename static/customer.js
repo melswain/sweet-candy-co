@@ -52,7 +52,6 @@ function loadMyCarts() {
     });
 }
 
-// Auto-load when this script is included
 document.addEventListener('DOMContentLoaded', () => {
     loadMyCarts();
 });
@@ -71,6 +70,29 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     });
 });
 
+const modeToggle = document.getElementById('modeToggle');
+const htmlElement = document.documentElement;
+const body = document.body;
+
+// Check if user has a saved theme preference
+const savedMode = localStorage.getItem('darkMode');
+if (savedMode === 'true') {
+    body.classList.add('dark-mode');
+    updateToggleButton();
+}
+
+// Toggle dark mode on button click
+modeToggle.addEventListener('click', () => {
+    body.classList.toggle('dark-mode');
+    const isDarkMode = body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+    updateToggleButton();
+});
+
+function updateToggleButton() {
+    const isDarkMode = body.classList.contains('dark-mode');
+    modeToggle.textContent = isDarkMode ? 'Light Mode' : 'Dark Mode';
+}
 
 //when date had been inputted
 const date_form = document.getElementById('date-filters');

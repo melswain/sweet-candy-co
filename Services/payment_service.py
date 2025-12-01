@@ -9,6 +9,7 @@ from Controllers.cart_controller import addCart
 from Controllers.cart_item_controller import addPayment as addCartItem
 from Controllers.payment_controller import addPayment
 from Controllers.inventory_controller import removeInventory
+from Controllers.product_instance_controller import delete_product_instance
 
 from Services.email_service import send_receipt_email
 
@@ -44,6 +45,21 @@ def process_payment(items, membership_number, card_number, expiry, use_points):
             print("REMOVE INVENTORY: ", removeInventory)
         except Exception as e:
             print("Warning: failed to remove inventory", e)
+
+    # Delete any pending product instances that were scanned (EPCs)
+    try:
+        # local import to avoid circular imports
+        from Services import scan_service
+        pending = scan_service.pop_pending_instances()
+        # pending is { product_id: [instance_id, ...], ... }
+        for product_id, instance_list in pending.items():
+            for instance_id in instance_list:
+                try:
+                    delete_product_instance(instance_id)
+                except Exception as e:
+                    print(f"Warning: failed to delete product_instance {instance_id}: {e}")
+    except Exception as e:
+        print("Warning: failed to process pending product instances:", e)
 
     # Reward points update
     customer_success, customer_result = addRewardPoints(membership_number, reward_points)

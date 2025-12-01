@@ -1,11 +1,14 @@
 # services/scan_service.py
 
 from Controllers.product_controller import getProductWithUpc, getProductWithId
-from Controllers.product_instance_controller import get_product_instance_with_epc, delete_product_instance
-from Controllers.inventory_controller import removeInventory
+from Controllers.product_instance_controller import get_product_instance_with_epc
 
 # Track scanned EPCs to prevent duplicate processing
 scanned_epcs = set()
+
+# Pending product instance IDs (not deleted yet) recorded at scan time
+# Structure: { product_id: [product_instance_id, ...], ... }
+pending_product_instances = {}
 
 def is_epc(code):
     code_str = str(code).strip()
@@ -16,13 +19,10 @@ def is_epc(code):
 def process_scan(code, items, location_id=1):
     if is_epc(code):
         return handle_rfid_epc_scan(code, items, location_id)
-    
+
     product = getProductWithUpc(code)
     if not product or not hasattr(product, 'productId'):
-        return {
-            "status": 404,
-            "body": {"status": "error", "message": "Item not found"}
-        }
+        return {"status": "error", "message": "Item not found"}
 
     unit_price = float(product.price)
     product_id = product.productId
@@ -32,10 +32,7 @@ def process_scan(code, items, location_id=1):
         if item['id'] == product_id:
             item['quantity'] += 1
             item['total'] = item['quantity'] * unit_price
-            return {
-                "status": 200,
-                "body": {"status": "success", "item": item, "items": items}
-            }
+            return {"status": "success", "item": item, "items": items}
 
     # Add new item
     new_item = {
@@ -47,30 +44,30 @@ def process_scan(code, items, location_id=1):
     }
     items.append(new_item)
 
-    return {
-        "status": 200,
-        "body": {"status": "success", "item": new_item, "items": items}
-    }
+    return {"status": "success", "item": new_item, "items": items}
 
 def handle_rfid_epc_scan(epc_code, items, location_id):
+    """
+    When an EPC is scanned we: 
+    - Deduplicate by EPC
+    - Look up the product_instance and record its ID in `pending_product_instances`
+    - Add the product to the in-memory `items` list (so the UI shows it)
+    We DO NOT remove inventory or delete the product_instance here; that happens after payment.
+    """
     # Check if this EPC was already scanned to prevent duplicates
     if epc_code in scanned_epcs:
-        return 200, {"status": "duplicate", "message": "Tag already scanned"}
-    
+        return {"status": "duplicate", "message": "Tag already scanned"}
+
     result, product_instance = get_product_instance_with_epc(epc_code)
 
-    if (result):
+    if result:
         product_instance_id = product_instance[0]
         product_id = product_instance[1]
-
-        delete_result = delete_product_instance(product_instance_id)
-
-        inventory_result = removeInventory(product_id, location_id, 1)
 
         product = getProductWithId(product_id)
 
         if not product:
-            return 500, {"status": "error", "message": "Product missing for ProductInstance"}
+            return {"status": "error", "message": "Product missing for ProductInstance"}
 
         unit_price = float(product.price)
         product_id = product.productId
@@ -78,12 +75,15 @@ def handle_rfid_epc_scan(epc_code, items, location_id):
         # Mark this EPC as scanned
         scanned_epcs.add(epc_code)
 
+        # Record the pending product_instance id so deletion happens after payment
+        pending_product_instances.setdefault(product_id, []).append(product_instance_id)
+
         # Check if item already exists
         for item in items:
             if item['id'] == product_id:
                 item['quantity'] += 1
                 item['total'] = item['quantity'] * unit_price
-                return 200, {"status": "success", "item": item, "items": items}
+                return {"status": "success", "item": item, "items": items}
 
         # Add new item
         new_item = {
@@ -95,9 +95,16 @@ def handle_rfid_epc_scan(epc_code, items, location_id):
         }
         items.append(new_item)
 
-        return 200, {"status": "success", "item": new_item, "items": items}
-    
-    return 500, {"status": "error", "message": "Could not find product with provided EPC"}
+        return {"status": "success", "item": new_item, "items": items}
+
+    return {"status": "error", "message": "Could not find product with provided EPC"}
+
+def pop_pending_instances():
+    """Return pending product-instance mapping and clear the internal store."""
+    global pending_product_instances
+    copy = {k: list(v) for k, v in pending_product_instances.items()}
+    pending_product_instances.clear()
+    return copy
 
 def clear_scanned_epcs():
     """Clear the scanned EPCs list (call this when starting a new cart/checkout)"""
