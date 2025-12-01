@@ -107,6 +107,40 @@ const date_after_input = document.getElementById("date-after");
 
     });
 
+    date_form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        const formData = new FormData(date_form);
+        const download_format = document.getElementById("cart-history-format").value;
+        console.log("downloading");
+        try{
+            const response = await fetch('/download_cart_history',{
+                method: "POST",
+                body: formData
+            });
+
+            if(!response.ok){
+                const errorMessage = await response.json();
+                document.getElementById('cart-results').innerHTML = `<p class="error">Error: ${errorMessage}</p>`;
+                console.error(errorMessage.a);
+            }
+            else{
+                 const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download =  `cart_history.${download_format}`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+            }
+        }
+        catch(err)
+        {
+            document.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
+            console.error("Cart History download failed:", err);
+        }
+    })
+
     // //* After Input
     date_after_input.addEventListener("change",async function(e){
         const formData = new FormData(date_form);
@@ -174,16 +208,55 @@ const date_after_input = document.getElementById("date-after");
 
 
 const searchForm = document.getElementById('product-search-form');
+const search_product_download = document.getElementById("search-product-download").value;
+
     searchForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const productName = document.getElementById('product-name-input').value.trim();
         const outputEl = document.getElementById('search-results-output');
-
+        const clickedButton = e.submitter.value;
+        
         if (!productName) {
             outputEl.innerHTML = `<p class="error">Please enter a product name.</p>`;
             return;
         }
+        if(clickedButton === "download"){
+            try{
+                const download_format = document.getElementById("search-product-download").value;
+                const response = await fetch('/download_purchase_search',{
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:JSON.stringify({
+                        product_name: productName,
+                        format: download_format
+                    })
+                });
 
+                if(!response.ok){
+                    const error = await response.json();
+                    outputEl.innerHTML = `<p class="error">${error.message}</p>`;
+                    return;                
+                }
+                else{
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download =  `purchase_search.${download_format}`;
+                    a.click();
+
+                    window.URL.revokeObjectURL(url);
+                }
+            }
+            catch(err)
+            {
+            outputEl.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
+            console.error("Product search download failed:", err);
+            }
+        }   
+        else{
+        
         outputEl.innerHTML = `<p style="text-align: center; padding: 20px;">Searching for "${productName}"...</p>`;
 
         try {
@@ -200,10 +273,13 @@ const searchForm = document.getElementById('product-search-form');
             } else {
                 outputEl.innerHTML = `<p class="error">Error: ${result.message || 'Failed to search purchase history.'}</p>`;
             }
-        } catch (err) {
+        } 
+        catch (err) {
             outputEl.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
             console.error("Product search failed:", err);
+        }            
         }
+
     });
 
 // -----------------------------------------------------Total Spending-----------------------------------------------------
@@ -275,4 +351,35 @@ const spending_date_after_input = document.getElementById("spending-date-after")
             console.error("Filters request failed: ",err);
         }
 
+    });
+    spending_date_form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        const formData = new FormData(spending_date_form);
+        const download_format = document.getElementById('spending-report-download').value;
+        try{
+            const response = await fetch('/download_spending_report',{
+                method:"POST",
+                body:formData
+            })
+            if(!response.ok)
+            {
+                const errorMessage = await response.json();
+                document.getElementById('total-spending-amount').innerHTML = `<p class="error">Error: ${errorMessage}</p>`;
+                console.error(errorMessage.a);
+            }
+            else{
+                const blob = await response.blob();
+                 const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download =  `spending_report.${download_format}`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            }
+        }
+        catch(err){
+             document.innerHTML = `<p class="error">Request failed: ${err.message}</p>`;
+            console.error("Spending Report download failed:", err);
+        }
     });

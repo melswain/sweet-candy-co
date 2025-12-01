@@ -24,6 +24,8 @@ from Services.temperature_readings_service import handle_temperature, update_sen
 from Services.inventory_report_service import export_inventory_report
 
 from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
+# from Services.cart_report_service import purchase_search_csv, purchase_search_pdf
+import Services.cart_report_service as Cart_Report
 from flask import send_file, request
 
 # from Services.fan_service import turnOnFan
@@ -264,35 +266,6 @@ def customerPage(before_date=None,after_date=None):
     
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
-    
-                # # * Checks if page send data via POST
-                # if request.method == "POST":
-                    
-                #     before_date = request.form.get('date-before')
-                #     after_date = request.form.get('date-after')
-                #     if before_date == "":
-                #         before_date = None
-                    
-                #     if after_date == "":
-                #         after_date = None
-                #     # print("before date:"+before_date)
-                #     # print("after date:"+after_date)
-                #     # print(" is before_date: "+ before_date != None)
-                #     # print(" is after_date: "+ after_date == "")
-
-                #     success_cart, cart_history_data = getCustomerCartHistory(
-                #                                         customerId=membership_number,
-                #                                         before_date=before_date,
-                #                                         after_date=after_date
-                #                                     )
-                #     success, customer_data = getCustomerData(membership_number)
-
-                #     if success_cart:
-                #         return jsonify({"status": "success", "cart_history_data": cart_history_data})
-                #     else:
-                #         error_message = cart_history_data #if isinstance(cart_history_data, str) else "Failed to retrieve cart history."
-                #         return jsonify({"status": "error", "message": error_message}), 500  
-                # else: #* The case where it didn't
 
     success, customer_data = getCustomerData(membership_number)
     success1, cart_history_data = getCustomerCartHistory(membership_number)
@@ -374,8 +347,8 @@ def total_spending_filters(before_date=None,after_date=None):
 @app.route('/search_purchases', methods=['POST'])
 def search_purchases():
     """Route for 3.2: Search in Purchase History"""
-    # if 'customer_id' not in session:
-    #     return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
 
     membership_number = session.get('membership_number')
     data = request.get_json() or {}
@@ -390,6 +363,153 @@ def search_purchases():
         return jsonify({"status": "success", "report": result})
     else:
         return jsonify({"status": "error", "message": result}), 404
+    
+@app.route('/download_purchase_search',methods =['POST'])
+def download_purchase_search():
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    data = request.get_json() or {};
+    format_type = data.get('format')
+    product_name = data.get('product_name')
+
+    if not product_name:
+        return jsonify({"status": "error", "message": "Product name required"}), 400
+    
+    success, result = getItemPurchaseHistory(customer_id=membership_number,
+                                            product_name=product_name)
+    # print(result)
+    if not success:
+        return jsonify({"status": "error", "message": result}), 404
+    
+    if format_type == "csv":
+        csv_data = Cart_Report.purchase_search_csv(report_data=result,
+                                       product_name=product_name,
+                                       customerId=membership_number
+                                       )
+        
+        return send_file(
+                        io.BytesIO(csv_data),
+                        mimetype='text/csv',
+                        as_attachment=True,
+                        download_name=f'purchase_search_{product_name.replace(" ","_")}_{membership_number}_csv')
+    
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.purchase_search_pdf(report_data=result,
+                                       product_name=product_name,
+                                       customerId=membership_number)
+        return send_file(
+            io.BytesIO(pdf_data),
+            mimetype='text/pdf',
+            as_attachment=True,
+             download_name=f'purchase_search_{product_name.replace(" ","_")}_{membership_number}_pdf')
+    
+@app.route('/download_cart_history',methods =['POST'])
+def download_cart_history(before_date=None,after_date=None):
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    before_date = request.form.get('date-before')
+    after_date = request.form.get('date-after')
+    format_type = request.form.get("format")
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print(after_date)
+
+    success_cart, cart_history_data = getCustomerCartHistory(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    if not success_cart:
+        error_message = cart_history_data
+        return jsonify({"status": "error", "message": error_message}), 500 
+    
+    # print(cart_history_data)
+    if format_type == "csv":
+        csv_data = Cart_Report.cart_history_csv(report_data=cart_history_data,
+                                                customerId=membership_number,
+                                                before_date=before_date,
+                                                after_date=after_date
+                                       )
+        # print(csv_data)
+        
+        return send_file(
+                        io.BytesIO(csv_data),
+                        mimetype='text/csv',
+                        as_attachment=True,
+                        download_name=f'cart_history_{membership_number}_csv')
+    
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.cart_history_pdf(report_data=cart_history_data,
+                                                customerId=membership_number,
+                                                before_date=before_date,
+                                                after_date=after_date)
+        return send_file(
+            io.BytesIO(pdf_data),
+            mimetype='text/pdf',
+            as_attachment=True,
+             download_name=f'cart_history_{membership_number}_pdf')
+
+@app.route('/download_spending_report',methods=['POST'])
+def download_spending_report(before_date=None,after_date=None):
+
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    before_date = request.form.get('spending-date-before')
+    after_date = request.form.get('spending-date-after')
+    format_type = request.form.get("format")
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print(after_date)
+
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    if  not total_spending_success:
+        error_message = total_spending
+        return jsonify({"status": "error", "message": error_message}), 500  
+    if format_type == "csv":
+            csv_data = Cart_Report.spending_report_csv( report_data=total_spending,
+                                                        customerId=membership_number,
+                                                        before_date=before_date,
+                                                        after_date=after_date)
+            return send_file(
+                io.BytesIO(csv_data),
+                mimetype='text/csv',
+                as_attachment=True,
+                download_name=f'spending_report_{membership_number}.csv'
+            )
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.spending_report_pdf( report_data=total_spending,
+                                                        customerId=membership_number,
+                                                        before_date=before_date,
+                                                        after_date=after_date)
+        return send_file(
+                io.BytesIO(pdf_data),
+                mimetype='text/pdf',
+                as_attachment=True,
+                download_name=f'spending_report_{membership_number}.pdf'
+            )
+        
+
+
+
+
 # -----------------------------------------------------------------------------------
 
 @app.route('/login', methods=['GET', 'POST'])

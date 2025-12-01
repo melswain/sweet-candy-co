@@ -55,7 +55,6 @@
                     <input type="text" id="created-at" value="{{customer.created_at}}" disabled>
                 </div>
                 
-                <!-- Action buttons commented out as per original file -->
             </form>
             {% else %}
                 <p>No Customer data found</p>
@@ -67,7 +66,7 @@
             <h2>Total Spending Report (3.1)</h2>
             <p style="margin-bottom: 10px;">Calculated for the date range selected below.</p>
             <form action="POST" id="spending-date-filters">
-                    <div class="field-row date-filters">
+                <div class="field-row date-filters">
                         <div class="date-input-group">
                             <label for="date-before">Before Date</label>
                             <input type="date" id="spending-date-before" name="spending-date-before">
@@ -76,7 +75,13 @@
                             <label for="date-after">After Date</label>
                             <input type="date" id="spending-date-after" name="spending-date-after" >
                         </div>
-                    </div>
+                    <select name="format" id="spending-report-download">
+                        <option value="csv">CSV</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                    <button type="submit" id="spending-report-download-btn">Download</button>
+                </div>
+                
             </form>
             <div class="total-spending-box">
                 <label>Total Spent in Period:</label>
@@ -93,8 +98,13 @@
             <form id="product-search-form">
                 <div id="search-form">
                     <input type="text" id="product-name-input" name="product_name" placeholder="Enter product name (e.g., Chocolate Dream Bar)" required>
-                    <button type="submit" id="search-product-btn" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Search Item</button>
+                    <button type="submit" id="search-product-btn" value= "search" class="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Search Item</button>
                 </div>
+                <select name="format" id="search-product-download">
+                    <option value="csv">CSV</option>
+                    <option value="pdf">PDF</option>
+                </select>
+                <button type="submit" id="search-product-download-btn" value= "download">Download</button>
             </form>
             
             <div id="search-results-output">
@@ -118,6 +128,11 @@
                             <input type="date" id="date-after" name="date-after" >
                         </div>
                     </div>
+                        <select name="format" id="cart-history-format">
+                            <option value="csv">CSV</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                        <button type="submit" id="cart-history-download-btn">Download</button>
                 </form>
 
                 <div id="cart-results">

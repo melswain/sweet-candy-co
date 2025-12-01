@@ -167,3 +167,6 @@ def generate_pdf_bytes(sales_rows, title="Sales Report"):
     doc.build(elements)
     buffer.seek(0)
     return buffer
+
+
+    
