@@ -187,10 +187,10 @@ def finalize_payment():
     use_points = session.get('usePoints')
     membership_number = session.get('membership_number')
 
-    if not membership_number:
-        return jsonify({"status": "error", "message": "No membership number in session"}), 400
+    # if not membership_number:
+    #     return jsonify({"status": "error", "message": "No membership number in session"}), 400
 
-    result = process_payment(items, membership_number, card_number, expiry, use_points)
+    result = process_payment(items, card_number, expiry, use_points, membership_number)
 
     return jsonify(result["body"]), result["status"]
 

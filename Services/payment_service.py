@@ -16,19 +16,21 @@ from Services.email_service import send_receipt_email
 GST_RATE = Decimal("0.05")
 QST_RATE = Decimal("0.09975")
 
-def process_payment(items, membership_number, card_number, expiry, use_points):
+def process_payment(items, card_number, expiry, use_points, membership_number = null):
     # Calculate totals
     subtotal = sum(to_decimal(item.get('total', 0)) for item in items)
     gst = (subtotal * GST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     qst = (subtotal * QST_RATE).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     total = (subtotal + gst + qst).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
     reward_points = int(subtotal // Decimal('10') * 100)
+    email = ""
 
-    success, customer = getCustomerById(membership_number)
-    if not success:
-        return {"status": 404, "body": {"status": "error", "message": "Customer not found"}}
-    email = customer[1][2]
-
+    if (membership_number):
+        success, customer = getCustomerById(membership_number)
+        if not success:
+            return {"status": 404, "body": {"status": "error", "message": "Customer not found"}}
+        email = customer[1][2]
+    
     # Apply reward points
     if use_points:
         points = customer[1][1]
@@ -62,9 +64,10 @@ def process_payment(items, membership_number, card_number, expiry, use_points):
         print("Warning: failed to process pending product instances:", e)
 
     # Reward points update
-    customer_success, customer_result = addRewardPoints(membership_number, reward_points)
-    if not customer_success:
-        return {"status": 400, "body": {"status": "error", "message": customer_result}}
+    if (customer):
+        customer_success, customer_result = addRewardPoints(membership_number, reward_points)
+        if not customer_success:
+            return {"status": 400, "body": {"status": "error", "message": customer_result}}
 
     # Cart creation
     cart_success, cart_result = addCart(membership_number, float(total), reward_points)

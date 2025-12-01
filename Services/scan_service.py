@@ -47,13 +47,6 @@ def process_scan(code, items, location_id=1):
     return {"status": "success", "item": new_item, "items": items}
 
 def handle_rfid_epc_scan(epc_code, items, location_id):
-    """
-    When an EPC is scanned we: 
-    - Deduplicate by EPC
-    - Look up the product_instance and record its ID in `pending_product_instances`
-    - Add the product to the in-memory `items` list (so the UI shows it)
-    We DO NOT remove inventory or delete the product_instance here; that happens after payment.
-    """
     # Check if this EPC was already scanned to prevent duplicates
     if epc_code in scanned_epcs:
         return {"status": "duplicate", "message": "Tag already scanned"}
