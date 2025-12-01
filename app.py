@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 
 
 from Controllers.customer_controller import addCustomer, customer_login, getCustomerData, register_customer
-from Controllers.cart_controller import getCustomerCartHistory
+from Controllers.cart_controller import getCustomerCartHistory,getItemPurchaseHistory,getTotalSpending
 from Controllers.product_controller import getAllProducts
 from Controllers.inventory_controller import getInventory
 
@@ -24,6 +24,8 @@ from Services.temperature_readings_service import handle_temperature, update_sen
 from Services.inventory_report_service import export_inventory_report
 
 from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
+# from Services.cart_report_service import purchase_search_csv, purchase_search_pdf
+import Services.cart_report_service as Cart_Report
 from flask import send_file, request
 
 # from Services.fan_service import turnOnFan
@@ -252,9 +254,35 @@ def search():
         return jsonify({"status": "success", "item": item, "items": items})
     else:
         return jsonify({"status": "error", "message": "Item not found"}), 404
+# -----------------------------------------------------------------------------------
+#                          Customer Page Route and Methods
+# -----------------------------------------------------------------------------------
+    
+@app.route('/customer_page',methods=['GET','POST'])
+def customerPage(before_date=None,after_date=None):
+    if 'customer_id' not in session:
+        return redirect('/login')
+    
+    membership_number = session.get('membership_number')
+    
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
 
-@app.route('/customer_page')
-def customerPage():
+    success, customer_data = getCustomerData(membership_number)
+    success1, cart_history_data = getCustomerCartHistory(membership_number)
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number
+                                        )
+    print(total_spending)
+    
+    if success:
+        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data,total_spending=total_spending)
+    else:
+        return print(customer_data), 404
+        
+# Experiment
+@app.route('/cart_history_filter',methods=["POST"])
+def cart_history_filter(before_date=None,after_date=None):
     if 'customer_id' not in session:
         return redirect('/login')
     
@@ -263,13 +291,227 @@ def customerPage():
     if not membership_number:
         return jsonify({"status": "error", "message": "No membership number in session"}), 401
     
-    success, customer_data = getCustomerData(membership_number)
-    success1, cart_history_data = getCustomerCartHistory(membership_number)
+    before_date = request.form.get('date-before')
+    after_date = request.form.get('date-after')
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+
+    success_cart, cart_history_data = getCustomerCartHistory(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
     
-    if success:
-        return render_template('customerPage.html', customer_data = customer_data, cart_history_data=cart_history_data)
+    if success_cart:
+        return jsonify({"status": "success", "cart_history_data": cart_history_data})
     else:
-        return print(customer_data), 404
+        error_message = cart_history_data
+        return jsonify({"status": "error", "message": error_message}), 500 
+
+@app.route('/total_spending_filters',methods=["POST"])
+def total_spending_filters(before_date=None,after_date=None):
+    if 'customer_id' not in session:
+        return redirect('/login')
+    
+    membership_number = session.get('membership_number')
+    
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+    
+    before_date = request.form.get('spending-date-before')
+    after_date = request.form.get('spending-date-after')
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print (after_date)
+
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    print(total_spending)
+    
+    if total_spending_success:
+        return jsonify({"status": "success", "spending_report": total_spending})
+    else:
+        error_message = total_spending
+        return jsonify({"status": "error", "message": error_message}), 500  
+
+
+@app.route('/search_purchases', methods=['POST'])
+def search_purchases():
+    """Route for 3.2: Search in Purchase History"""
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    membership_number = session.get('membership_number')
+    data = request.get_json() or {}
+    product_name = data.get('product_name')
+
+    if not product_name:
+        return jsonify({"status": "error", "message": "Please enter a product name to search."}), 400
+
+    success, result = getItemPurchaseHistory(membership_number, product_name)
+
+    if success:
+        return jsonify({"status": "success", "report": result})
+    else:
+        return jsonify({"status": "error", "message": result}), 404
+    
+@app.route('/download_purchase_search',methods =['POST'])
+def download_purchase_search():
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    data = request.get_json() or {};
+    format_type = data.get('format')
+    product_name = data.get('product_name')
+
+    if not product_name:
+        return jsonify({"status": "error", "message": "Product name required"}), 400
+    
+    success, result = getItemPurchaseHistory(customer_id=membership_number,
+                                            product_name=product_name)
+    # print(result)
+    if not success:
+        return jsonify({"status": "error", "message": result}), 404
+    
+    if format_type == "csv":
+        csv_data = Cart_Report.purchase_search_csv(report_data=result,
+                                       product_name=product_name,
+                                       customerId=membership_number
+                                       )
+        
+        return send_file(
+                        io.BytesIO(csv_data),
+                        mimetype='text/csv',
+                        as_attachment=True,
+                        download_name=f'purchase_search_{product_name.replace(" ","_")}_{membership_number}_csv')
+    
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.purchase_search_pdf(report_data=result,
+                                       product_name=product_name,
+                                       customerId=membership_number)
+        return send_file(
+            io.BytesIO(pdf_data),
+            mimetype='text/pdf',
+            as_attachment=True,
+             download_name=f'purchase_search_{product_name.replace(" ","_")}_{membership_number}_pdf')
+    
+@app.route('/download_cart_history',methods =['POST'])
+def download_cart_history(before_date=None,after_date=None):
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    before_date = request.form.get('date-before')
+    after_date = request.form.get('date-after')
+    format_type = request.form.get("format")
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print(after_date)
+
+    success_cart, cart_history_data = getCustomerCartHistory(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    if not success_cart:
+        error_message = cart_history_data
+        return jsonify({"status": "error", "message": error_message}), 500 
+    
+    # print(cart_history_data)
+    if format_type == "csv":
+        csv_data = Cart_Report.cart_history_csv(report_data=cart_history_data,
+                                                customerId=membership_number,
+                                                before_date=before_date,
+                                                after_date=after_date
+                                       )
+        # print(csv_data)
+        
+        return send_file(
+                        io.BytesIO(csv_data),
+                        mimetype='text/csv',
+                        as_attachment=True,
+                        download_name=f'cart_history_{membership_number}_csv')
+    
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.cart_history_pdf(report_data=cart_history_data,
+                                                customerId=membership_number,
+                                                before_date=before_date,
+                                                after_date=after_date)
+        return send_file(
+            io.BytesIO(pdf_data),
+            mimetype='text/pdf',
+            as_attachment=True,
+             download_name=f'cart_history_{membership_number}_pdf')
+
+@app.route('/download_spending_report',methods=['POST'])
+def download_spending_report(before_date=None,after_date=None):
+
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+    
+    membership_number = session.get('membership_number')
+    before_date = request.form.get('spending-date-before')
+    after_date = request.form.get('spending-date-after')
+    format_type = request.form.get("format")
+    if before_date == "":
+        before_date = None
+        
+    if after_date == "":
+        after_date = None
+    print(before_date)
+    print(after_date)
+
+    total_spending_success, total_spending = getTotalSpending(
+                                            customerId=membership_number,
+                                            before_date=before_date,
+                                            after_date=after_date
+                                        )
+    if  not total_spending_success:
+        error_message = total_spending
+        return jsonify({"status": "error", "message": error_message}), 500  
+    if format_type == "csv":
+            csv_data = Cart_Report.spending_report_csv( report_data=total_spending,
+                                                        customerId=membership_number,
+                                                        before_date=before_date,
+                                                        after_date=after_date)
+            return send_file(
+                io.BytesIO(csv_data),
+                mimetype='text/csv',
+                as_attachment=True,
+                download_name=f'spending_report_{membership_number}.csv'
+            )
+    elif format_type == "pdf":
+        pdf_data = Cart_Report.spending_report_pdf( report_data=total_spending,
+                                                        customerId=membership_number,
+                                                        before_date=before_date,
+                                                        after_date=after_date)
+        return send_file(
+                io.BytesIO(pdf_data),
+                mimetype='text/pdf',
+                as_attachment=True,
+                download_name=f'spending_report_{membership_number}.pdf'
+            )
+        
+
+
+
+
+# -----------------------------------------------------------------------------------
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
