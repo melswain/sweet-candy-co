@@ -179,7 +179,6 @@ const date_after_input = document.getElementById("date-after");
         return;
     }
 
-    // 3.2: Render the search results
     const header = `
         <h3 style="font-weight: 700; margin-bottom: 10px; color: #d81b60;">Product: ${report.product_name}</h3>
         <p style="font-size: 1.1rem; margin-bottom: 15px;">

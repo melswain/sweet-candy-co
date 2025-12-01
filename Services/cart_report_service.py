@@ -118,7 +118,6 @@ def cart_history_csv(report_data,customerId,before_date=None,after_date=None):
                     ''
                 ])
     wrapper.flush()
-    # wrapper.close()
     output.seek(0)
     csv_bytes = output.getvalue()
     return csv_bytes
