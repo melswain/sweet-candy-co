@@ -1,0 +1,647 @@
+================================================================================
+                    SWEET CANDY CO - UML CLASS DIAGRAM
+================================================================================
+
+DATABASE MODELS (Models/)
+================================================================================
+
+┌─────────────────────────────────────┐
+│          CUSTOMER                   │
+├─────────────────────────────────────┤
+│ - customer_id: String (PK)          │
+│ - name: String                      │
+│ - email: String (UNIQUE)            │
+│ - phone: String (UNIQUE)            │
+│ - total_reward_points: Integer      │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + addRewardPoints()                 │
+│ + subtractRewardPoints()            │
+│ + get_by_id()                       │
+│ + getAllCustomers()                 │
+└─────────────────────────────────────┘
+          △
+          │ 1..* (has many)
+          │
+          ├──────────────────┐
+          │                  │
+          │                  │
+    ┌─────┴──────────┐  ┌─────┴──────────┐
+    │     CART       │  │ ENVIRONMENT    │
+    │ (one-to-many)  │  │   READING      │
+    └────────────────┘  └────────────────┘
+
+
+┌─────────────────────────────────────┐
+│         PRODUCT                     │
+├─────────────────────────────────────┤
+│ - productId: Integer (PK)           │
+│ - name: String                      │
+│ - type: String                      │
+│ - price: Decimal                    │
+│ - expirationDate: Date              │
+│ - discountPercentage: Decimal       │
+│ - manufacturerName: String          │
+│ - upc: String (UNIQUE)              │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_id()                       │
+│ + get_by_upc()                      │
+│ + getAllProducts()                  │
+│ + update()                          │
+└─────────────────────────────────────┘
+          △           △
+    1..* │           │ 1..*
+        │           │
+        ├──────┬────┤
+        │      │    │
+   ┌────┴──┐  │  ┌──┴──────────────┐
+   │PRODUCT│  │  │ PRODUCT         │
+   │INSTANCE   │  │ INSTANCE        │
+   └────────┘  │  │ (RFID/EPC)      │
+              │  └─────────────────┘
+              │        1
+              │
+         1..* │
+              │
+        ┌─────┴──────────┐
+        │   INVENTORY    │
+        └────────────────┘
+              △
+              │ 1..* (tracks quantities)
+              │
+        ┌─────┴──────────┐
+        │ STORE LOCATION │
+        └────────────────┘
+
+
+┌─────────────────────────────────────┐
+│          CART                       │
+├─────────────────────────────────────┤
+│ - cartId: Integer (PK)              │
+│ - customerId: Integer (FK)          │
+│ - totalCartPrice: Decimal           │
+│ - totalRewardPoints: Integer        │
+│ - checkoutDate: DateTime            │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_customer()                 │
+│ + get_cart_items()                  │
+│ + delete_by_id()                    │
+└─────────────────────────────────────┘
+          △
+          │ 1..*
+          │
+        ┌─┴─────────────┐
+        │  CART ITEM    │
+        └───────────────┘
+              △
+              │ 1..*
+              │
+          ┌───┴────────┐
+          │  PRODUCT   │
+          └────────────┘
+
+
+┌─────────────────────────────────────┐
+│         PAYMENT                     │
+├─────────────────────────────────────┤
+│ - paymentId: Integer (PK)           │
+│ - cartId: Integer (FK)              │
+│ - cardNumber: String (encrypted)    │
+│ - expiryDate: DateTime              │
+│ - timestamp: DateTime               │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_id()                       │
+│ + get_by_cart()                     │
+└─────────────────────────────────────┘
+          △
+          │ 1 (processes)
+          │
+        ┌─┴─────────────┐
+        │    CART       │
+        └───────────────┘
+
+
+┌─────────────────────────────────────┐
+│      INVENTORY                      │
+├─────────────────────────────────────┤
+│ - inventoryId: Integer (PK)         │
+│ - productId: Integer (FK)           │
+│ - locationId: Integer (FK)          │
+│ - quantity: Integer                 │
+│ - lastUpdated: DateTime             │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_id()                       │
+│ + remove_inventory_item()           │
+│ + add_to_inventory()                │
+│ + update_quantity()                 │
+└─────────────────────────────────────┘
+
+
+┌─────────────────────────────────────┐
+│      PRODUCT INSTANCE               │
+├─────────────────────────────────────┤
+│ - productInstanceId: Integer (PK)   │
+│ - productId: Integer                │
+│ - epcCode: String (UNIQUE)          │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_epc()                      │
+│ + get_by_id()                       │
+│ + delete()                          │
+└─────────────────────────────────────┘
+
+
+┌─────────────────────────────────────┐
+│     STORE LOCATION                  │
+├─────────────────────────────────────┤
+│ - locationId: Integer (PK)          │
+│ - locationName: String              │
+├─────────────────────────────────────┤
+│ + create()                          │
+│ + get_by_id()                       │
+└─────────────────────────────────────┘
+
+
+================================================================================
+CONTROLLERS (Controllers/)
+================================================================================
+
+  CUSTOMER CONTROLLER          CART CONTROLLER        PRODUCT CONTROLLER
+  ├─ addCustomer()            ├─ addCart()           ├─ getAllProducts()
+  ├─ customer_login()         ├─ getCart()           ├─ getProductWithId()
+  ├─ register_customer()       ├─ updateCart()        ├─ getProductWithUpc()
+  ├─ getCustomerData()        ├─ deleteCart()        ├─ create_product()
+  ├─ getCustomerById()        ├─ getCartItems()      └─ update_product()
+  ├─ addRewardPoints()        └─ getCustomerCarts()
+  ├─ subtractRewardPoints()
+  └─ getAllCustomers()
+
+  INVENTORY CONTROLLER        PRODUCT INSTANCE       PAYMENT CONTROLLER
+  ├─ getInventory()          CONTROLLER             ├─ addPayment()
+  ├─ removeInventory()        ├─ get_product_        ├─ getPaymentById()
+  ├─ addInventory()          │  instance_with_epc() └─ getPaymentByCart()
+  ├─ searchInventory()        ├─ delete_product_
+  └─ updateInventory()       │  instance()
+                             └─ create_product_
+  CART ITEM CONTROLLER           instance()
+  ├─ addPayment()
+  ├─ getCartItems()
+  ├─ updateCartItem()
+  └─ deleteCartItem()
+
+
+================================================================================
+SERVICES (Services/)
+================================================================================
+
+┌──────────────────────────────────────┐
+│      SCAN SERVICE                    │
+├──────────────────────────────────────┤
+│ - scanned_epcs: Set (deduplication) │
+│ - pending_product_instances: Dict    │
+├──────────────────────────────────────┤
+│ + process_scan(code, items)          │
+│ + is_epc(code)                       │
+│ + handle_rfid_epc_scan()             │
+│ + pop_pending_instances()            │
+│ + clear_scanned_epcs()               │
+└──────────────────────────────────────┘
+       │ Uses
+       ├─> product_instance_controller
+       └─> product_controller
+
+
+┌──────────────────────────────────────┐
+│      PAYMENT SERVICE                 │
+├──────────────────────────────────────┤
+│ + process_payment(items, card_num,   │
+│                   expiry, use_points,│
+│                   membership_number, │
+│                   receipt_email)     │
+├──────────────────────────────────────┤
+│ • Supports guest checkout            │
+│ • Handles reward points              │
+│ • Sends receipt emails               │
+│ • Deletes pending product instances  │
+│ • Manages cart/payment records       │
+└──────────────────────────────────────┘
+       │ Uses
+       ├─> customer_controller
+       ├─> cart_controller
+       ├─> payment_controller
+       ├─> inventory_controller
+       ├─> product_instance_controller
+       ├─> scan_service
+       └─> email_service
+
+
+┌──────────────────────────────────────┐
+│    INVENTORY REPORT SERVICE          │
+├──────────────────────────────────────┤
+│ + export_inventory_report(format)    │
+│ + export_inventory_csv()             │
+│ + export_inventory_pdf()             │
+├──────────────────────────────────────┤
+│ • Generates CSV reports              │
+│ • Generates PDF with color-coded     │
+│   quantity levels (green > 15,       │
+│   yellow 5-15, red < 5)              │
+│ • Returns file path to Downloads     │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│       CHECKOUT SERVICE               │
+├──────────────────────────────────────┤
+│ + calculate_checkout(items)          │
+└──────────────────────────────────────┘
+       │ Calculates
+       ├─> Subtotal
+       ├─> GST (5%)
+       ├─> QST (9.975%)
+       └─> Total
+
+
+┌──────────────────────────────────────┐
+│       EMAIL SERVICE                  │
+├──────────────────────────────────────┤
+│ + send_receipt_email(email, subject, │
+│                      html_content)   │
+├──────────────────────────────────────┤
+│ • Sends HTML-formatted receipts      │
+│ • Optional receipt delivery          │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│     REWARD SERVICE                   │
+├──────────────────────────────────────┤
+│ + get_points(membership_number)      │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│      FAN SERVICE                     │
+├──────────────────────────────────────┤
+│ + toggle_fan(enabled)                │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│   TEMPERATURE READINGS SERVICE       │
+├──────────────────────────────────────┤
+│ + handle_temperature(temp, fridge)   │
+│ + update_sensor_data()               │
+├──────────────────────────────────────┤
+│ • Monitors fridge temperatures       │
+│ • Triggers alerts if too warm        │
+│ • Controls fan activation            │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│    SEARCH SERVICE                    │
+├──────────────────────────────────────┤
+│ + search_item(code, items)           │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│    EPC READER SERVICE                │
+├──────────────────────────────────────┤
+│ + auto_detect_reader()               │
+│ + read_epc_loop()                    │
+├──────────────────────────────────────┤
+│ • Detects RFID/EPC reader on serial  │
+│ • Continuously reads EPC codes       │
+│ • Sends reads via MQTT to app        │
+└──────────────────────────────────────┘
+
+
+┌──────────────────────────────────────┐
+│   PRODUCT SERVICE                    │
+├──────────────────────────────────────┤
+│ + update_product()                   │
+│ + add_product()                      │
+│ + get_all_products()                 │
+└──────────────────────────────────────┘
+
+
+================================================================================
+FLASK APP (app.py) - REST API ROUTES
+================================================================================
+
+MEMBERSHIP & AUTHENTICATION
+  POST   /login                  → customer_login (username, password)
+  POST   /register               → register_customer (customerId, password)
+  POST   /logout                 → clear session
+  GET    /customer_page          → display customer dashboard
+  POST   /submit-membership      → store membership in session
+  GET    /get-membership         → retrieve session membership
+
+SHOPPING & CART
+  POST   /scan                   → process_scan (epc/upc code)
+  GET    /cart-items             → get_cart_items()
+  POST   /remove-item            → remove_item (from in-memory cart)
+  GET    /checkout               → display checkout page
+  GET    /clear-cart             → clear session and items
+
+PAYMENT & CHECKOUT
+  POST   /finalize-payment       → process_payment (card_number, expiry,
+                                   use_points, membership_number, email)
+  GET    /get-reward-points      → get_points(membership_number)
+  POST   /set-use-points         → enable reward point redemption
+
+SEARCH & PRODUCTS
+  POST   /search-item            → search_item(code)
+  GET    /products               → get_all_products()
+  POST   /add_product            → add_product(form data)
+  POST   /update_product         → update_product(form data)
+
+REPORTS & INVENTORY
+  GET    /inventory-report       → export_inventory_report(?format=csv|pdf)
+  GET    /reports/sales.csv      → generate_csv_bytes(sales data)
+  GET    /reports/sales.pdf      → generate_pdf_bytes(sales data)
+
+DASHBOARD & MONITORING
+  GET    /dashboard              → display dashboard with fridge data
+  GET    /sensor_data            → get MQTT sensor_data (temperature, humidity)
+  POST   /fan                    → toggle_fan(enabled)
+
+CUSTOMER DATA
+  GET    /add                    → addCustomer (name, email, phone)
+
+
+================================================================================
+DATA FLOW DIAGRAMS
+================================================================================
+
+MEMBER CHECKOUT FLOW:
+┌─────────────┐
+│ Customer    │
+│ Scans Items │
+└─────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /scan (EPC/UPC)             │
+│ → process_scan()                 │
+│ → handle_rfid_epc_scan() or      │
+│   search_inventory()              │
+│ → add to in-memory items[]       │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /submit-membership          │
+│ → store membership_number        │
+│ → display reward points          │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ GET /checkout                    │
+│ → calculate_checkout()           │
+│ → show cart summary with points  │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /finalize-payment           │
+│ → process_payment()              │
+│   ├─ Fetch customer data         │
+│   ├─ Apply reward point discount │
+│   ├─ Remove inventory            │
+│   ├─ Delete pending product      │
+│   │  instances (from scan_service)│
+│   ├─ Create cart record          │
+│   ├─ Send receipt email          │
+│   └─ Clear session & items       │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ Payment Complete                 │
+│ Receipt Emailed                  │
+│ Items cleared from inventory     │
+└──────────────────────────────────┘
+
+
+GUEST CHECKOUT FLOW (No Membership):
+┌─────────────┐
+│ Guest       │
+│ Scans Items │
+└─────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /scan (EPC/UPC)             │
+│ → add to in-memory items[]       │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ GET /checkout                    │
+│ (without membership)             │
+│ → show cart summary              │
+│ (no reward points)               │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /finalize-payment           │
+│ (membership_number = 0)          │
+│ → process_payment() skips:       │
+│   ├─ Customer lookup             │
+│   ├─ Reward point operations     │
+│   │ But includes:                │
+│   ├─ Remove inventory            │
+│   ├─ Delete pending instances    │
+│   ├─ Send receipt to email param │
+│   └─ Clear items                 │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ Payment Complete                 │
+│ Receipt Emailed (if provided)    │
+│ Items cleared from inventory     │
+└──────────────────────────────────┘
+
+
+RFID/EPC SCAN FLOW:
+┌──────────────────────────────────┐
+│ EPC Reader (Serial/MQTT)         │
+│ Detects tag                      │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ POST /scan (epc_code)            │
+│ → process_scan(code, items)      │
+│ → is_epc() returns True          │
+│ → handle_rfid_epc_scan()         │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ Check scanned_epcs set           │
+│ (deduplication)                  │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ get_product_instance_with_epc()  │
+│ → Look up product in DB via EPC  │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ Record product_instance_id in    │
+│ pending_product_instances[]      │
+│ (NOT deleted yet)                │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ Add product to in-memory items[] │
+│ Return status: "success"         │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ (Later) POST /finalize-payment   │
+│ → pop_pending_instances()        │
+│ → delete_product_instance() for  │
+│   each pending ID                │
+│ → inventory removed in one step  │
+└──────────────────────────────────┘
+
+
+INVENTORY REPORT FLOW:
+┌──────────────────────────────────┐
+│ GET /inventory-report?format=csv │
+│    (or format=pdf)               │
+└──────────────────────────────────┘
+      │
+      ▼
+┌──────────────────────────────────┐
+│ export_inventory_report(format)  │
+│ → InventoryReport.get_report()   │
+│ → Database query for all items   │
+└──────────────────────────────────┘
+      │
+      ├─ CSV ────────────────────┐
+      │                          │
+      ▼                          ▼
+┌──────────────────────┐  ┌──────────────────────┐
+│ export_inventory_csv │  │ export_inventory_pdf │
+│ → Write to CSV file  │  │ → Build table        │
+│   in Downloads/      │  │ → Color-code qty:    │
+│ → Return filepath    │  │   Green (>15)        │
+└──────────────────────┘  │   Yellow (5-15)      │
+                          │   Red (<5)           │
+                          │ → Return filepath    │
+                          └──────────────────────┘
+      │                          │
+      └──────────────┬───────────┘
+                     │
+                     ▼
+            ┌─────────────────────┐
+            │ app.py sends_file() │
+            │ with MIME type &    │
+            │ download_name       │
+            └─────────────────────┘
+                     │
+                     ▼
+            ┌─────────────────────┐
+            │ Browser downloads   │
+            │ CSV or PDF          │
+            └─────────────────────┘
+
+
+================================================================================
+MQTT SENSOR INTEGRATION
+================================================================================
+
+SENSOR DATA STRUCTURE (in-memory):
+┌─────────────────────────────────────┐
+│  sensor_data = {                    │
+│    "Frig1": {                       │
+│      "temperature": float,          │
+│      "humidity": float              │
+│    },                               │
+│    "Frig2": {                       │
+│      "temperature": float,          │
+│      "humidity": float              │
+│    }                                │
+│  }                                  │
+└─────────────────────────────────────┘
+
+MQTT TOPICS SUBSCRIBED:
+  • Frig1/temperature
+  • Frig1/humidity
+  • Frig2/temperature
+  • Frig2/humidity
+
+FLOW:
+  MQTT Broker sends temperature/humidity
+         ▼
+  on_message() callback parses topic & payload
+         ▼
+  Updates sensor_data dict
+         ▼
+  GET /sensor_data returns current readings
+         ▼
+  GET /dashboard displays in UI (with fridge data)
+         ▼
+  Temperature Alerts (if > 40°C)
+         ▼
+  toggle_fan() called to activate cooling
+
+
+================================================================================
+KEY DESIGN PATTERNS & FEATURES
+================================================================================
+
+✓ RFID/EPC Scanning:
+  - Deduplication via scanned_epcs set
+  - Pending product instance tracking (reservation pattern)
+  - Deletion deferred until payment confirmation
+
+✓ Guest Checkout:
+  - Allows payment without membership
+  - Optional receipt email
+  - Skips reward points operations
+
+✓ Reward Points:
+  - Earned: 100 points per $10 spent
+  - Redeemable: $1 per 100 points
+  - Member-only feature
+
+✓ Inventory Management:
+  - Product instances tracked by EPC code
+  - Quantity alerts (color-coded: green/yellow/red)
+  - Removal deferred until payment complete
+
+✓ Temperature Monitoring:
+  - MQTT-based sensor integration
+  - Real-time fridge data display
+  - Alert triggers above 40°C
+  - Automatic fan control
+
+✓ Report Generation:
+  - CSV export for spreadsheets
+  - PDF export with styled tables & color coding
+  - File downloads via send_file()
+
+✓ Email Integration:
+  - HTML receipt delivery
+  - Optional for guest checkouts
+  - SMTP-based using standard library
+
+================================================================================
