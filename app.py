@@ -31,8 +31,8 @@ from flask import send_file, request
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
 
-# from Services.email_service import sendEmail
-# from Services.email_service import readEmail
+from Services.email_service import sendEmail
+from Services.email_service import readEmail
 
 # import fanControl
 
@@ -49,7 +49,7 @@ sensor_data = {
 }
 
 items = []
-
+temperatureThreshold = 23;
 MQTT_BROKER = "localhost"  
 MQTT_PORT = 1883
 
@@ -64,11 +64,17 @@ def on_message(client, userdata, msg):
     if topic.startswith("Frig1"):
         if "temperature" in topic:
             sensor_data["Frig1"]["temperature"] = payload
+            if payload >= temperatureThreshold:
+                sendEmail(1)
+                readEmail()
         elif "humidity" in topic:
             sensor_data["Frig1"]["humidity"] = payload
     elif topic.startswith("Frig2"):
         if "temperature" in topic:
             sensor_data["Frig2"]["temperature"] = payload
+            if payload >= temperatureThreshold:
+                sendEmail(2)
+                readEmail()
         elif "humidity" in topic:
             sensor_data["Frig2"]["humidity"] = payload
 
@@ -126,7 +132,7 @@ def get_sensor_data():
     return jsonify(sensor_data)
 
 @app.route('/fan', methods=['POST'])
-def toggle():
+def toggle(enable=False):
     data = request.get_json()
     enabled = data.get('enabled')
 
@@ -624,5 +630,5 @@ def download_sales_pdf():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True, use_reloader=False)
-    app.run(debug=True, use_reloader=False,host='0.0.0.0')
+    app.run(debug=True, use_reloader=False)
+    # app.run(debug=True, use_reloader=False,host='0.0.0.0')
