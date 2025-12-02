@@ -112,5 +112,6 @@ def process_payment(items, card_number, expiry, use_points, membership_number = 
     items.clear()
     session.pop('membership_number', None)
     session.pop('usePoints', None)
+    session.clear()
 
     return {"status": 200, "body": {"status": "success", "message": "Payment processed (simulated)"}}

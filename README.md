@@ -14,7 +14,7 @@ This project is a Raspberry Pi-based IoT system for managing customer data in a 
 Install all required packages using pip:
 
 ```bash
-pip install sqlalchemy pymysql python-dotenv RPi.GPIO pyserial requests
+pip install flask sqlalchemy pymysql python-dotenv RPi.GPIO pyseria paho-mqtt reportlab werkzeug
 ```
 
 ## Configuration
