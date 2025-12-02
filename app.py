@@ -14,19 +14,24 @@ from Controllers.product_controller import getAllProducts
 from Controllers.inventory_controller import getInventory
 
 from Services.checkout_service import calculate_checkout
-from Services.fan_service import toggle_fan
+# from Services.fan_service import toggle_fan
 from Services.reward_service import get_points
 from Services.payment_service import process_payment
 from Services.scan_service import process_scan
 from Services.product_service import update_product, add_product, get_all_products
 from Services.search_service import search_item
-from Services.temperature_readings_service import handle_temperature, update_sensor_data
+# from Services.temperature_readings_service import handle_temperature, update_sensor_data
 from Services.inventory_report_service import export_inventory_report
 
 from Services.report_service import fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes, parse_date_param
 # from Services.cart_report_service import purchase_search_csv, purchase_search_pdf
 import Services.cart_report_service as Cart_Report
 from flask import send_file, request
+
+from Services.report_service import (
+    fetch_sales_rows, generate_csv_bytes, generate_pdf_bytes,
+    parse_date_param, fetch_receipts, generate_receipt_csv_bytes, generate_receipt_pdf_bytes
+)
 
 # from Services.fan_service import turnOnFan
 # from Services.fan_service import turnOffFan
@@ -623,6 +628,98 @@ def download_sales_pdf():
                      as_attachment=True,
                      download_name=name)
 
+                     
+@app.route('/reports/cart_history.pdf')
+def download_cart_history_pdf():
+    """
+    Download cart history as a PDF file, similar to sales report.
+    Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+    Example: /reports/cart_history.pdf?start=2025-11-01&end=2025-11-30
+    """
+    # Example: if you want to use session-based customer
+    if 'customer_id' not in session:
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    membership_number = session.get('membership_number')
+    if not membership_number:
+        return jsonify({"status": "error", "message": "No membership number in session"}), 401
+
+    start = parse_date_param(request.args.get('start'))
+    end = parse_date_param(request.args.get('end'))
+
+    success, cart_history_data = getCustomerCartHistory(
+        customerId=membership_number,
+        before_date=start,
+        after_date=end
+    )
+
+    if not success:
+        return jsonify({"status": "error", "message": cart_history_data}), 500
+
+    pdf_io = Cart_Report.cart_history_pdf(
+        report_data=cart_history_data,
+        customerId=membership_number,
+        before_date=start,
+        after_date=end
+    )
+
+    filename = "cart_history"
+    if start:
+        filename += f"_{start.strftime('%Y%m%d')}"
+    if end:
+        filename += f"_{end.strftime('%Y%m%d')}"
+    filename += ".pdf"
+
+    return send_file(
+        pdf_io,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename
+    )
+
+
+# @app.route('/reports/receipts.csv')
+# def download_receipts_csv():
+#     """
+#     Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+#     Example: /reports/receipts.csv?start=2025-09-01&end=2025-09-30
+#     """
+#     start = parse_date_param(request.args.get('start'))
+#     end = parse_date_param(request.args.get('end'))
+#     receipts = fetch_receipts(start_date=start, end_date=end)
+#     csv_io = generate_receipt_csv_bytes(receipts)
+#     name = "receipt_history"
+#     if start:
+#         name += f"_{start.strftime('%Y%m%d')}"
+#     if end:
+#         name += f"_{end.strftime('%Y%m%d')}"
+#     name += ".csv"
+#     return send_file(csv_io,
+#                      mimetype='text/csv',
+#                      as_attachment=True,
+#                      download_name=name)
+
+
+# @app.route('/reports/receipts.pdf')
+# def download_receipts_pdf():
+#     """
+#     Optional query params: start=YYYY-MM-DD, end=YYYY-MM-DD
+#     Example: /reports/receipts.pdf?start=2025-09-01&end=2025-09-30
+#     """
+#     start = parse_date_param(request.args.get('start'))
+#     end = parse_date_param(request.args.get('end'))
+#     receipts = fetch_receipts(start_date=start, end_date=end)
+#     pdf_io = generate_receipt_pdf_bytes(receipts, title="Receipt History")
+#     name = "receipt_history"
+#     if start:
+#         name += f"_{start.strftime('%Y%m%d')}"
+#     if end:
+#         name += f"_{end.strftime('%Y%m%d')}"
+#     name += ".pdf"
+#     return send_file(pdf_io,
+#                      mimetype='application/pdf',
+#                      as_attachment=True,
+#                      download_name=name)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

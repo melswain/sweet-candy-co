@@ -107,6 +107,40 @@
       updateLinks();
     </script>
 
+   <!-- ----------------------- RECEIPT HISTORY --------------------------- -->
+<h2>Receipt History</h2>
+
+<div class="report-downloads">
+    <form id="receiptForm">
+        <label>Start date: <input type="date" id="receiptStart" name="start"></label>
+        <label>End date: <input type="date" id="receiptEnd" name="end"></label>
+    </form>
+    <a id="receiptPdfLink" class="btn" href="/reports/cart_history.pdf" download>Download PDF</a>
+</div>
+
+<script>
+    const receiptStartInput = document.getElementById('receiptStart');
+    const receiptEndInput = document.getElementById('receiptEnd');
+    const receiptCsvLink = document.getElementById('receiptCsvLink');
+    const receiptPdfLink = document.getElementById('receiptPdfLink');
+
+    function updateReceiptLinks() {
+        const start = receiptStartInput.value;
+        const end = receiptEndInput.value;
+        const params = new URLSearchParams();
+        if (start) params.set('start', start);
+        if (end) params.set('end', end);
+        receiptPdfLink.href = '/reports/cart_history.pdf' + (params.toString() ? '?' + params.toString() : '');
+    }
+
+    receiptStartInput.addEventListener('input', updateReceiptLinks);
+    receiptEndInput.addEventListener('input', updateReceiptLinks);
+
+    // initialize links on page load
+    updateReceiptLinks();
+</script>
+
+
   </div>
 
   

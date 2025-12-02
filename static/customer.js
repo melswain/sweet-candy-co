@@ -191,6 +191,46 @@ const date_after_input = document.getElementById("date-after");
             }
     });
 
+    // ------------------------ RENDER RECEIPTS ------------------------------
+function renderReceipts(receipts) {
+    const container = document.getElementById("receipt-results");
+    container.innerHTML = "";
+
+    receipts.forEach(receipt => {
+        const card = `
+            <div class="cart-card">
+                <div class="cart-header">
+                    <strong>Receipt #${receipt.receiptId}</strong>
+                    — Total: $${parseFloat(receipt.totalAmount).toFixed(2)}
+                    — ${receipt.purchaseDate}
+                </div>
+
+                <table class="cart-items">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${receipt.items.map(item => `
+                            <tr>
+                                <td>${item.productName}</td>
+                                <td>${item.quantity}</td>
+                                <td>$${parseFloat(item.totalPrice).toFixed(2)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.insertAdjacentHTML("beforeend", card);
+    });
+}
+
+
     // ------------------------------------------------------Product Search History-------------------------------------------------
     function renderPurchaseSearchResults(report, productName) {
     const outputEl = document.getElementById('search-results-output');
@@ -404,3 +444,70 @@ const spending_date_after_input = document.getElementById("spending-date-after")
             console.error("Spending Report download failed:", err);
         }
     });
+
+    // ---------------------- RECEIPT FILTERING ------------------------------
+const receipt_form = document.getElementById("receipt-filters");
+const receipt_before = document.getElementById("receipt-before");
+const receipt_after = document.getElementById("receipt-after");
+
+async function applyReceiptFilters() {
+    const formData = new FormData(receipt_form);
+
+    try {
+        const response = await fetch("/receipt_history_filter", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === "success") {
+            renderReceipts(result.receipt_history_data);
+        } else {
+            document.getElementById("receipt-results").innerHTML =
+                `<p class="error">${result.message || "Error loading receipts."}</p>`;
+        }
+    }
+    catch (err) {
+        document.getElementById("receipt-results").innerHTML =
+            `<p class="error">Request Failed: ${err.message}</p>`;
+    }
+}
+
+receipt_before.addEventListener("change", applyReceiptFilters);
+receipt_after.addEventListener("change", applyReceiptFilters);
+
+// ---------------------- RECEIPT DOWNLOAD -------------------------------
+receipt_form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const formData = new FormData(receipt_form);
+    const download_format = document.getElementById("receipt-format").value;
+
+    try {
+        const response = await fetch("/download_receipt_history", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            document.getElementById("receipt-results").innerHTML =
+                `<p class="error">${error.message}</p>`;
+            return;
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `receipt_history.${download_format}`;
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    }
+    catch (err) {
+        document.getElementById("receipt-results").innerHTML =
+            `<p class="error">Download failed: ${err.message}</p>`;
+    }
+});
