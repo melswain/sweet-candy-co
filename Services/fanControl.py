@@ -28,3 +28,6 @@ def turnOffFan():
     finally:
         print('Cleaing up...')
         # GPIO.cleanup()
+turnOnFan()
+sleep(5)
+turnOffFan()
