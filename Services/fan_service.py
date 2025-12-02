@@ -32,7 +32,7 @@ def turnOffFan():
         print('Cleaning up...')
         #GPIO.cleanup()
 
-turnOffFan()
+# turnOffFan()
 
 def toggle_fan(enabled: bool):
     if enabled:
@@ -42,3 +42,4 @@ def toggle_fan(enabled: bool):
 
     print(f"Switch is now {'ON' if enabled else 'OFF'}")
     return success, message
+
