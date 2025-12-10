@@ -8,14 +8,15 @@ from time import sleep
 import fanControl
 
 # Gmail Info
-# sender_email = "yakin726@gmail.com"
-# sending_app_password = "phwskofgaeasirge"
-# receiver_email = "dummyjeff14@gmail.com"
-# receiving_app_password = "zlpqxbhrwvkdzoxd"
-sender_email = "kishaan2006@gmail.com"
-sending_app_password = "imntfpdfsbgxacrp"
-receiver_email = "uselessmayl@gmail.com"
-receiving_app_password = "iagqjihgfsfiwgdo"
+# sender_email = ""
+# sending_app_password = ""
+# receiver_email = ""
+# receiving_app_password = ""
+
+# sender_email = ""
+# sending_app_password = ""
+# receiver_email = ""
+# receiving_app_password = ""
 
 def send_receipt_email(receiver_email, subject, html_content):
     msg = MIMEMultipart("alternative")
